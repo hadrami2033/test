@@ -27,6 +27,7 @@ const CategorieForm = (props) => {
   const {conventionId, Categorie, push, update, showSuccessToast, showFailedToast, availableAmount} = props;
 
   const defaultValues = Categorie === null ? {
+    reference:"",
     type_id: null,
     amount: 0,
     convention: conventionId
@@ -69,8 +70,10 @@ const CategorieForm = (props) => {
 
   const validate = (fieldValues = values) => {
     let temp = { ...errors };
+    if ("reference" in fieldValues)
+      temp.reference = fieldValues.reference ? "" : "La reférence est requise";
     if ("amount" in fieldValues)
-      temp.amount = fieldValues.amount ? "" : "Le montant est requise";
+      temp.amount = fieldValues.amount ? "" : "Le montant est requis";
     if ("type_id" in fieldValues)
       temp.type_id = fieldValues.type_id ? "" : "Le type requis";
    
@@ -177,7 +180,16 @@ const CategorieForm = (props) => {
           <br/>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
-              style={{width:'460px'}}
+              style={{width:'300px'}}
+              id="reference-input"
+              name="reference"
+              label="Reférence"
+              value={values.reference}
+              onChange={handleInputChange}
+              error={errors.reference}
+            />
+            <Controls.Input
+              style={{width:'300px'}}
               id="amount-input"
               name="amount"
               label="Montant"
@@ -187,7 +199,7 @@ const CategorieForm = (props) => {
               error={errors.amount}
             />
             <Controls.Select
-              style={{width:'460px'}}
+              style={{width:'300px'}}
               name="type_id"
               label="Type"
               value={values.type_id}
