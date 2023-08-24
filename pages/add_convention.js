@@ -38,7 +38,6 @@ const ConventionForm = (props) => {
     end_date_grace_period: "",
     interest_rate: "",
     costs: null,
-    echance: "",
     description: "",
     object: "",
     funder_id: null,
@@ -71,7 +70,7 @@ const ConventionForm = (props) => {
     if ("amount" in fieldValues)
       temp.amount = fieldValues.amount ? "" : "Le montant requis";
     if ("costs" in fieldValues)
-      temp.costs = !(fieldValues.retrocede === true && ( fieldValues.costs === null || fieldValues.costs === '' || fieldValues.costs === '0' )) ? "" : "Les frais sont requis d'une conevntion retrocedée";
+      temp.costs = !(fieldValues.retrocede === true && ( fieldValues.costs === null || fieldValues.costs === '' || fieldValues.costs === '0' )) ? "" : "La commission est requise d'une convention retrocedée";
     if ("start_date" in fieldValues)
       temp.start_date = fieldValues.start_date ? "" : "Date début requise";
     if ("end_date" in fieldValues)
@@ -86,10 +85,13 @@ const ConventionForm = (props) => {
       temp.interest_rate = fieldValues.interest_rate ? "" : "Taux d'intéret est requis";
     if ("object" in fieldValues)
       temp.object = fieldValues.object ? "" : "L'objet est requis";
-    if ("funder" in fieldValues)
-      temp.funder = fieldValues.funder ? "" : "Un bailleur est requis";   
-    if ("borrower" in fieldValues)
-      temp.borrower = fieldValues.borrower ? "" : "L'emprunteur est requis";   
+    if ("funder_id" in fieldValues)
+      temp.funder_id = fieldValues.funder_id ? "" : "Un bailleur est requis";   
+    if ("borrower_id" in fieldValues)
+      temp.borrower_id = fieldValues.borrower_id ? "" : "L'emprunteur est requis";   
+    if ("currency_id" in fieldValues)
+      temp.currency_id = fieldValues.currency_id ? "" : "La dévise est requise";   
+    
     setErrors({
       ...temp,
     });
@@ -241,7 +243,7 @@ const ConventionForm = (props) => {
           </Stack>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
-              style= {  values.retrocede === true ? { width:'300px'} :  { width:'460px'}}
+              style= {  values.retrocede === true ? { width:'460px'} :  { width:'935px'}}
               id="object-input"
               name="object"
               label="Objet"
@@ -251,41 +253,21 @@ const ConventionForm = (props) => {
             />
             {values.retrocede === true &&
               <Controls.Input
-              style={{width:'300px'}}
+              style={{width:'460px'}}
               id="costs-input"
               name="costs"
-              label="Frais"
+              label="Commission"
               type="number"
               value={values.costs}
               onChange={handleInputChange}
               error={errors.costs}
             />
             }
-            <Controls.Input
-              style= {values.retrocede === true ? { width:'300px'} :  { width:'460px'}}
-              id="echance-input"
-              name="echance"
-              label="Echance"
-              value={values.echance}
-              onChange={handleInputChange}
-              error={errors.echance}
-            />
           </Stack>
+
           <Stack style={styles.stack} spacing={2} direction="row">
-            <Controls.Input
-              style={{width:'935px'}}
-              id="description-input"
-              name="description"
-              label="Description"
-              value={values.description}
-              onChange={handleInputChange}
-              error={errors.description}
-            />
-          </Stack>
-          <Stack style={styles.stack} spacing={2} direction="row">
-            
-          <Controls.DatePiccker
-              style={{width:'300px'}}
+            <Controls.DatePiccker
+              style={{width:'460px'}}
               id="start_date"
               name="start_date"
               label="Date début"
@@ -294,7 +276,7 @@ const ConventionForm = (props) => {
               error={errors.start_date}
             />
             <Controls.DatePiccker
-              style={{width:'300px'}}
+              style={{width:'460px'}}
               id="end_date"
               name="end_date"
               label="Date fin"
@@ -302,8 +284,10 @@ const ConventionForm = (props) => {
               onChange={handleInputChange}
               error={errors.end_date}
             />
+          </Stack>
+          <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.DatePiccker
-              style={{width:'300px'}}
+              style={{width:'460px'}}
               id="start_date_refund-input"
               name="start_date_refund"
               label="Date début de remboursement"
@@ -311,10 +295,8 @@ const ConventionForm = (props) => {
               onChange={handleInputChange}
               error={errors.start_date_refund}
             />
-          </Stack>
-          <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.DatePiccker
-              style={{width:'300px'}}
+              style={{width:'460px'}}
               id="end_date_refund-input"
               name="end_date_refund"
               label="Date fin de remboursement"
@@ -322,8 +304,11 @@ const ConventionForm = (props) => {
               onChange={handleInputChange}
               error={errors.end_date_refund}
             />
+          </Stack>
+
+          <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.DatePiccker
-              style={{width:'300px'}}
+              style={{width:'460px'}}
               id="end_date_grace_period-input"
               name="end_date_grace_period"
               label="Date fin de grace periode"
@@ -332,7 +317,7 @@ const ConventionForm = (props) => {
               error={errors.end_date_grace_period}
             />
             <Controls.Input
-              style={{width:'300px'}}
+              style={{width:'460px'}}
               id="interest_rate-input"
               name="interest_rate"
               label="Taux d'intéret"
@@ -350,7 +335,7 @@ const ConventionForm = (props) => {
               value={values.funder}
               onChange={handleInputChange}
               options={funders}
-              error={errors.funder}
+              error={errors.funder_id}
             />
             <Controls.Select
               style={{width:'300px'}}
@@ -359,7 +344,7 @@ const ConventionForm = (props) => {
               value={values.borrower}
               onChange={handleInputChange}
               options={borrowers}
-              error={errors.borrower}
+              error={errors.borrower_id}
             />
             <Controls.Select
               style={{width:'300px'}}
@@ -368,7 +353,19 @@ const ConventionForm = (props) => {
               value={values.currency}
               onChange={handleInputChange}
               options={currencies}
-              error={errors.currency}
+              error={errors.currency_id}
+            />
+          </Stack>
+
+          <Stack style={styles.stack} spacing={2} direction="row">
+            <Controls.Input
+              style={{width:'935px'}}
+              id="description-input"
+              name="description"
+              label="Description"
+              value={values.description}
+              onChange={handleInputChange}
+              error={errors.description}
             />
           </Stack>
 

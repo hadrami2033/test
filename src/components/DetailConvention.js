@@ -15,10 +15,12 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Draggable from 'react-draggable';
-import { Close } from '@mui/icons-material';
+import { Close, CreateOutlined, InfoOutlined } from '@mui/icons-material';
 import IconButton from '@mui/material/IconButton';
-import DibursementForm from "../../pages/add_disbursement";
+import DisbursementForm from "../../pages/add_disbursement";
 import CategorieForm from "../../pages/add_categorie";
+import states from "../helper/states";
+import DetailDisbursement from "../../pages/disbursement_detail";
 
 
 const headCellsDecaissements = [
@@ -44,13 +46,13 @@ const headCellsDecaissements = [
       id: 'date',
       numeric: false,
       disablePadding: true,
-      label: 'Date décaissement',
+      label: 'Date création',
     },
     {
-      id: 'status',
+      id: 'action',
       numeric: false,
       disablePadding: true,
-      label: 'Etat',
+      label: 'Action',
     }
 ]
 
@@ -142,10 +144,17 @@ const DetailConvention = (props) => {
   const [openFailedToast, setOpenFailedToast] = React.useState(false);
   const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
   const [open, setOpen] = React.useState(false);
+  const [openDetailDisbursement, setOpenDetailDisbursement] = React.useState(false);
   const [openCategorieForm, setOpenCategorieForm] = React.useState(false);
   const [disburssementSelected, setDisburssementSelected] = React.useState(null);
   const [categorieSelected, setCategorieSelected] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
+  const [currenteState, setCurrenteState] = React.useState({});
+  const [disbursementStatus, setDisbursementStatus] = React.useState([]);
+  const [availabeState, setAvailabeState] = React.useState({});
+  const [commitments, setCommitments] = React.useState([]);
+  const [invoices, setInvoices] = React.useState([]);
+  const [disbursementTypes, setDisbursementTypes] = React.useState([]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -155,7 +164,7 @@ const DetailConvention = (props) => {
     setLoading(true)
     apiService.getConvention(id).then(res => {
         setConvention(res.data)
-        console.log(res.data); 
+        //console.log("disbursements ", res.data.disbursements); 
         setBorrower(res.data.borrower)
         setFunder(res.data.funder)
         setCurrency(res.data.currency)
@@ -164,6 +173,26 @@ const DetailConvention = (props) => {
         setCategories(res.data.categories)
         setLoading(false)
       } )
+      .then( () => {
+        apiService.getStatusType().then(
+        res => {
+          console.log(res.data);
+          setDisbursementStatus(res.data)
+        },
+        error => console.log(error)
+      )
+    }
+    )
+    .then( () => {
+        apiService.getDisbursementsTypes().then(
+        res => {
+          console.log(res.data);
+          setDisbursementTypes(res.data)
+        },  
+        error => console.log(error)
+      )
+    }
+    )
   }, [])
 
   const formatDate = (date) => {
@@ -216,7 +245,17 @@ const DetailConvention = (props) => {
     if (reason === "backdropClick") {
       console.log(reason);
     } else {
+      setDisburssementSelected(null)
       setOpen(false);
+    }
+  };
+
+  const handleCloseDetailDisbursement = (event, reason) => {
+    if (reason === "backdropClick") {
+      console.log(reason);
+    } else {
+      setOpenDetailDisbursement(false);
+      setDisburssementSelected(null)
     }
   };
 
@@ -248,8 +287,15 @@ const DetailConvention = (props) => {
   }
 
   const update = (e) =>{
-    /* var objIndex = Conventions.findIndex((obj => obj.id == e.id));
-    Conventions[objIndex] = e */
+    setDisburssementSelected(null)
+    apiService.getConvention(id).then(res => {
+        console.log(res.data); 
+        setConvention(res.data)
+        setCurrency(res.data.currency)
+        setDisbursements(res.data.disbursements)
+        setDeadlines(res.data.deadlines)
+        setCategories(res.data.categories)
+      } )
   }
 
   const openAddDisbursement = () => {
@@ -261,6 +307,49 @@ const DetailConvention = (props) => {
     setOpenCategorieForm(true);
   };
   
+
+  const edit = (d) =>{
+    setDisburssementSelected(d)
+    console.log(d);
+
+    let currente_state = d.status.length > 0 ? 
+    getStatusByCode(Math.max(...d.status.map(s => s.type.code)))
+    : getStatusByCode(1);
+    let available_state = disbursementStatus.filter(e => ( e.code === (currente_state.code+1) || e.code === currente_state.code ));
+
+    console.log("available_state  ",available_state);
+    console.log("currente_state  ",currente_state)
+    setAvailabeState(available_state)
+    setCurrenteState(currente_state);
+
+    let Commitments = d.categorie ?
+     convention.categories.filter(e => e.id === d.categorie.id)[0].commitments
+     : [];
+
+    let Invoices = d.commitment && Commitments.length > 0 ?
+     Commitments.filter(e => e.id === d.commitment.id )[0].invoices
+     : [];
+
+    setCommitments(Commitments)
+    console.log(Commitments);
+    setInvoices(Invoices)
+
+    setOpen(true)
+  }
+
+  const detail = (d) =>{
+    setDisburssementSelected(d)
+    console.log(d.status);
+    setOpenDetailDisbursement(true)
+  }
+
+  const getStatusByCode = (code) =>{
+    if(code){
+      let e = disbursementStatus.filter(e => e.code === code );
+      return e[0]
+    }
+    return null;
+  }
 
   return (
     <BaseCard titleColor={"secondary"} title={ convention ? convention.reference : ""}>
@@ -281,13 +370,13 @@ const DetailConvention = (props) => {
 
             <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'center'}} open={openSuccessToast} autoHideDuration={6000} onClose={closeSuccessToast}>
                 <Alert onClose={closeSuccessToast} severity="success" sx={{ width: '100%' }} style={{fontSize:"24px",fontWeight:"bold"}}>
-                L'oppération réussie
+                    L'oppération réussie
                 </Alert>
             </Snackbar>
 
             <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'center'}} open={openFailedToast} autoHideDuration={6000} onClose={closeFailedToast}>
                 <Alert onClose={closeFailedToast} severity="error" sx={{ width: '100%' }} style={{fontSize:"24px",fontWeight:"bold"}}>
-                L'oppération a échoué !
+                    L'oppération a échoué !
                 </Alert>
             </Snackbar>
             {convention &&
@@ -296,14 +385,19 @@ const DetailConvention = (props) => {
                 <DialogContent>
                 <div style={{display:"flex", justifyContent:"end"}}>
                     <IconButton onClick={handleClose}>
-                    <Close fontSize='large'/>
+                    <Close fontSize='medium'/>
                     </IconButton>
                 </div>
-                <DibursementForm
+                <DisbursementForm
                     conventionId = {convention.id}
                     currency = {currency.label}
-                    dibursement={disburssementSelected} 
-                    push={push} 
+                    disbursement={disburssementSelected} 
+                    currenteState={currenteState}
+                    availabeState={availabeState}
+                    categories={convention.categories}
+                    Commitments={commitments}
+                    Invoices={invoices}
+                    push={push}
                     update={update}
                     showSuccessToast={showSuccessToast}
                     showFailedToast={showFailedToast}
@@ -317,10 +411,10 @@ const DetailConvention = (props) => {
             {convention &&
 
             <Dialog fullWidth={true} maxWidth={'lg'} open={openCategorieForm} onClose={handleCloseCategorie}>
-                <DialogContent>
+                <DialogContent >
                 <div style={{display:"flex", justifyContent:"end"}}>
                     <IconButton onClick={handleCloseCategorie}>
-                    <Close fontSize='large'/>
+                    <Close fontSize='medium'/>
                     </IconButton>
                 </div>
                 <CategorieForm
@@ -331,6 +425,32 @@ const DetailConvention = (props) => {
                     showSuccessToast={showSuccessToast}
                     showFailedToast={showFailedToast}
                     availableAmount={(convention.amount-getDisbursementsAmount(convention.disbursements))}
+                /> 
+                </DialogContent>
+            </Dialog>
+            }
+
+
+            {convention &&
+
+            <Dialog 
+                fullWidth={true} 
+                maxWidth={'lg'} 
+                open={openDetailDisbursement} 
+                onClose={handleCloseDetailDisbursement}
+                
+                >
+                <DialogContent>
+                <Typography style={{display:"flex", justifyContent:"end"}}>
+                    <IconButton onClick={handleCloseDetailDisbursement}>
+                    <Close fontSize='medium'/>
+                    </IconButton>
+                </Typography>
+                <DetailDisbursement
+                    disbursement = {disburssementSelected}
+                    disbursementStatus={disbursementStatus} 
+                    disbursementtypes={disbursementTypes} 
+                    currency={currency.label}
                 /> 
                 </DialogContent>
             </Dialog>
@@ -693,7 +813,7 @@ const DetailConvention = (props) => {
                                         marginTop:1,
                                         width:'100%'
                                         }}
-                                        color={'secondary'}
+                                        color={'success'}
                                     >
                                         + Echéance
                                     </Button> 
@@ -793,10 +913,21 @@ const DetailConvention = (props) => {
                                     <TableCell align="left"></TableCell>
                                 
                                     <TableCell align="left">{row.reference}</TableCell>
-                                    <TableCell align="left">{row.type}</TableCell>
+                                    <TableCell align="left">{row.type.label}</TableCell>
                                     <TableCell align="left">{row.orderamount}</TableCell>
                                     <TableCell align="left">{formatDate(row.date)} </TableCell>
-                                    <TableCell align="left">{row.status}</TableCell>
+                                     <TableCell align="left">
+                                        <Tooltip onClick={() => edit(row)} title="Modifier">
+                                            <IconButton>
+                                                <CreateOutlined fontSize='medium' />
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip onClick={() => detail(row)} title="Detail">
+                                            <IconButton>
+                                                <InfoOutlined color='primary' fontSize='medium' />
+                                            </IconButton>
+                                        </Tooltip>
+                                     </TableCell>
 
                                 </TableRow>
                                 );

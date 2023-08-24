@@ -9,6 +9,7 @@ import BaseCard from "../src/components/baseCard/BaseCard";
 import apiService from "../src/services/apiService";
 import { Form } from "../src/components/Form";
 import Controls from "../src/components/controls/Controls";
+//import disbursementtypes from "../src/helper/disbursementtype"
 /*import dayjs from 'dayjs';
  import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -24,62 +25,30 @@ const todayStartOfTheDay = today.startOf('day'); */
 
 
 const DibursementForm = (props) => {
-  const {conventionId, dibursement, push, update, showSuccessToast, showFailedToast, availableAmount, currency} = props;
+  const { conventionId, disbursement, push, update, showSuccessToast, showFailedToast, 
+          availableAmount, currency, currenteState, availabeState, categories,
+          Invoices, Commitments} = props;
 
-  const defaultValues = dibursement === null ? {
+  const defaultValues = disbursement === null ? {
     reference: "",
-    type: "",
-    status: "",
+    type_id: null,
+    status_id: null,
     date: "",
     orderamount: 0,
-    billamount: null,
     disbursementamount: null,
     convention: conventionId,
-    currency: null,
-    commitment: null
-  } : dibursement
-
-  const disbursementType = [
-    {
-        id:null,
-        label:"" 
-    },
-    {
-        id:"Paiement direct",
-        label:"Paiement direct" 
-    },
-    {
-        id:"DRF",
-        label:"DRF" 
-    },
-    {
-        id:"Avance",
-        label:"Avance" 
-    }
-  ]
-
-  const disbursementStatus = [
-    {
-        id:null,
-        label:"" 
-    },
-    {
-        id:"Encour de traitement ",
-        label:"Encour de traitement " 
-    },
-    {
-        id:"Traité",
-        label:"Traité" 
-    },
-    {
-        id:"Envoyé",
-        label:"Envoyé" 
-    },
-    {
-        id:"Reçu",
-        label:"Reçu" 
-    }
-  ]
+    currency_id: null,
+    commitment_id: null,
+    categorie_id: null,
+    invoice_id: null
+  } : { ...disbursement, 
+        currency_id : disbursement.currency.id, 
+        type_id : disbursement.type.id,
+        status_id: currenteState ? currenteState.id : getStatusByCode(1).id,
+        categorie_id: disbursement.categorie && disbursement.categorie.id,
+        commitment_id: disbursement.commitment && disbursement.commitment.id,
+        invoice_id: disbursement.invoice && disbursement.invoice.id
+      }
 
   const [formValues, setFormValues] = useState(defaultValues);
   const [loading, setLoading] = React.useState(false);
@@ -87,6 +56,9 @@ const DibursementForm = (props) => {
   const [borrowers, setBorrowers] = React.useState([]);
   const [currencies, setCurrencies] = React.useState([]);
   const [commitments, setCommitments] = React.useState([]);
+  const [invoices, setInvoices] = React.useState([]);
+  const [disbursementTypes, setDisbursementTypes] = React.useState([]);
+  const [disbursementStatus, setDisbursementStatus] = React.useState([]);
 
   let pounds = Intl.NumberFormat( {
     style: 'currency',
@@ -98,22 +70,24 @@ const DibursementForm = (props) => {
     let temp = { ...errors };
     if ("reference" in fieldValues)
       temp.reference = fieldValues.reference ? "" : "La référence est requise";
-    if ("type" in fieldValues)
-      temp.type = fieldValues.type ? "" : "Le type requis";
-    if ("status" in fieldValues)
-      temp.status = fieldValues.status ? "" : "Le statut requis";
+    if ("type_id" in fieldValues)
+      temp.type_id = fieldValues.type_id ? "" : "Le type requis";
+    /* if ("status_id" in fieldValues)
+      temp.status_id = fieldValues.status_id ? "" : "Le statut requis"; */
     if ("date" in fieldValues)
       temp.date = fieldValues.date ? "" : "Date requise";
     if ("orderamount" in fieldValues)
       temp.orderamount = ( fieldValues.orderamount && parseFloat(availableAmount) >= parseFloat(fieldValues.orderamount) ) ? "" : `Le montant requis et ne déppase pas ${pounds.format(availableAmount)} ${currency}`;
-    if ("commitment" in fieldValues)
-      temp.commitment = !( fieldValues.commitment == null && fieldValues.type === "Paiement direct" )   ? "" : "Un engagement requis pour un paiement direct";
-    if ("billamount" in fieldValues)
-      temp.billamount = !( fieldValues.billamount == null && fieldValues.status === "Reçu" ) ? "" : "Le montant requis d'un décaissement reçu";
-    if ("currency" in fieldValues)
-      temp.currency = !( fieldValues.currency == null && fieldValues.status === "Reçu" ) ? "" : "Dévise requis d'un décaissement reçu";
+    if ("commitment_id" in fieldValues)
+      temp.commitment_id = !(fieldValues.commitment_id == null && getType(fieldValues.type_id) === getTypeByCode(1))   ? "" : "Un engagement requis pour un paiement direct";
+    if ("categorie_id" in fieldValues)
+      temp.categorie_id = !(fieldValues.categorie_id == null && getType(fieldValues.type_id) === getTypeByCode(1))   ? "" : "Une catégorie requise pour un paiement direct";
+    if ("invoice_id" in fieldValues)
+      temp.invoice_id = !(fieldValues.invoice_id == null && getType(fieldValues.type_id) === getTypeByCode(1))   ? "" : "Une facture requise pour un paiement direct";
+   if ("currency_id" in fieldValues)
+      temp.currency_id = !(fieldValues.currency_id == null) ? "" : "Dévise de décaissement requis";
     if ("disbursementamount" in fieldValues)
-      temp.disbursementamount = !( fieldValues.disbursementamount == null && fieldValues.status === "Reçu" ) ? "" : "Le montant dévise requis d'un décaissement reçu";
+      temp.disbursementamount = !( fieldValues.disbursementamount == null && getStatus(fieldValues.status_id) === getStatusByCode(3) && disbursement ) ? "" : "Le montant dévise requis d'un décaissement reçu";
         
       setErrors({
       ...temp,
@@ -126,19 +100,23 @@ const DibursementForm = (props) => {
 
   React.useEffect(() => {
     console.log( "availableAmount ", availableAmount);
-    apiService.getFunders().then(
+    if(Commitments.length > 0)
+    setCommitments(Commitments)
+    if(Invoices.length > 0)
+    setInvoices(Invoices)
+    apiService.getDisbursementsTypes().then(
       res => {
         console.log(res.data);
-        setFunders(res.data);
+        setDisbursementTypes(res.data);
       },  
       error => console.log(error)
     ) 
     .then( () => {
-            apiService.getBorrowers().then(
+            apiService.getStatusType().then(
             res => {
               console.log(res.data);
-              setBorrowers(res.data)
-            },  
+              setDisbursementStatus(res.data)
+            },
             error => console.log(error)
           )
     }
@@ -153,16 +131,26 @@ const DibursementForm = (props) => {
         )
     }
     )
-    .then( () => {
-        apiService.getCommitments().then(
+  /*   .then( () => {
+        apiService.getDisbursementsTypes().then(
         res => {
           console.log(res.data);
-          setCommitments(res.data)
+          setDisbursementTypes(res.data)
         },  
         error => console.log(error)
       )
+    }
+    )
+    .then( () => {
+      apiService.getCommitment().then(
+      res => {
+        console.log(res.data);
+        setCommitments(res.data)
+      },  
+      error => console.log(error)
+    )
   }
-  )
+  ) */
 
   }, [])
 
@@ -175,13 +163,28 @@ const DibursementForm = (props) => {
     if (validate()) {
       setLoading(true)
       console.log(values);
-      if(dibursement === null){
-        apiService.addDibursement(values).then(
+      if(disbursement === null){
+        apiService.addDisbursement(values).then(
           (res) => {
             console.log("added => " ,res);
             if(res.data){
               push(res.data)
               resetForm();
+              const state = 
+              {
+                type_id: getStatusId(1),
+                disbursement: res.data.id,
+                date: formatDate(new Date()),
+                comment: null
+              }
+              apiService.addStatus(state).then(
+                (res) =>{
+                  console.log("res  ", res);
+                },
+                (err) =>{
+                  console.log(err);
+                }
+              )
               showSuccessToast()
             }else{
               showFailedToast()
@@ -195,13 +198,32 @@ const DibursementForm = (props) => {
           setLoading(false)
         });
       }else{
-        apiService.updateDibursement(values).then(
+        apiService.updateDisbursement(values).then(
           (res) => {
             console.log("updated => ", res);
             if(!res.data){
               showFailedToast()
             }else{
               update(values)
+              const state = 
+              {
+                type_id: values.status_id,
+                disbursement: disbursement.id,
+                date: formatDate(new Date()),
+                comment: "test 2"
+              }
+              console.log(" state ", state);
+              if( getStatusCode(values.status_id) > currenteState.code ){
+
+                apiService.addStatus(state).then(
+                  (res) =>{
+                    console.log("res  ", res);
+                  },
+                  (err) =>{
+                    console.log(err);
+                  }
+                )
+              }
               showSuccessToast()
             }
           },
@@ -235,21 +257,86 @@ const DibursementForm = (props) => {
   }
 
   const titleName = () => {
-    if(dibursement == null) 
+    if(disbursement == null) 
       return "Ajouter un décaissement" 
     else
       return "Modifier un décaissement"
   }
 
+  const getType = (id) => {
+    if(id){
+    let e = disbursementTypes.filter(e => e.id === id );
+    return e[0].label
+    }
+    return null
+  }
+
+  const getStatus = (id) => {
+    if(id && disbursementStatus.length > 0){
+      let e = disbursementStatus.filter(e => e.id === id );
+      return e[0].label
+    }
+    return null;
+  }
+  
+  const getStatusId = (code) =>{
+    if(code && disbursementStatus.length > 0){
+      let e = disbursementStatus.filter(e => e.code === code );
+      return e[0].id
+    }
+    return null;
+  }
+
+  const getStatusByCode = (code) =>{
+    if(code){
+      let e = disbursementStatus.filter(e => e.code === code );
+      return e[0].label
+    }
+    return null;
+  }
+
+  const getStatusCode = (id) =>{
+    if(id){
+      let e = disbursementStatus.filter(e => e.id === id );
+      return e[0].code
+    }
+    return null;
+  }
+
+  const getTypeByCode = (code) =>{
+    if(code){
+      let e = disbursementTypes.filter(e => e.code === code );
+      return e[0].label
+    }
+    return null;
+  }
+
+
+  const categorieChange = e =>{
+    let v = e.target.value;
+    let selected = categories.filter(e => e.id === v );
+    console.log(selected[0]);
+    selected[0].commitments && setCommitments(selected[0].commitments)
+    handleInputChange(e)
+  }
+
+  const commitmentChange = e =>{
+    let v = e.target.value;
+    let selected = commitments.filter(e => e.id === v );
+    console.log(selected[0]);
+    selected[0].invoices && setInvoices(selected[0].invoices)
+    handleInputChange(e)
+  }
+
   return (
     
         <BaseCard titleColor={"secondary"} title={titleName()}>
-          {values &&
+        {values && disbursementStatus.length > 0 && disbursementTypes.length > 0 &&
           <form onSubmit={handleSubmit}>
           <br/>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
-              style={{width:'300px'}}
+              style={{ width:'460px'}}
               id="reference-input"
               name="reference"
               label="Reférence"
@@ -257,28 +344,34 @@ const DibursementForm = (props) => {
               onChange={handleInputChange}
               error={errors.reference}
             />
-            <Controls.Select
-              style={{width:'300px'}}
-              name="type"
-              label="Type de décaissement"
-              value={values.type}
-              onChange={handleInputChange}
-              options={disbursementType}
-              error={errors.type}
-            />
-            <Controls.Select
-              style={{width:'300px'}}
-              name="status"
-              label="Statut de décaissement"
-              value={values.status}
-              onChange={handleInputChange}
-              options={disbursementStatus}
-              error={errors.status}
-            />
+            {!disbursement ?
+              <Controls.Select
+                style={{ width:'460px'} }
+                name="type_id"
+                label="Type de décaissement"
+                value={values.type_id}
+                onChange={handleInputChange}
+                options={disbursementTypes}
+                error={errors.type_id}
+              />
+            :
+              <Controls.Select
+                style={{width:'460px'}}
+                name="status_id"
+                label="Statut de décaissement"
+                value={values.status_id}
+                onChange={handleInputChange}
+                options={availabeState}
+                //error={errors.status_id}
+              />
+            }
           </Stack>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
-              style= {values.type === "Paiement direct" ? { width:'300px'} :  { width:'460px'}}
+              style= {
+                (!disbursement || (getStatus(values.status_id) === getStatusByCode(3) && disbursement))
+                ? { width:'300px'} :  { width:'460px'}
+              }
               id="orderamount-input"
               name="orderamount"
               label="Montant demandé"
@@ -287,19 +380,22 @@ const DibursementForm = (props) => {
               onChange={handleInputChange}
               error={errors.orderamount}
             />
-            {values.type === "Paiement direct" &&
             <Controls.Select
-              style={{width:'300px'}}
-              name="commitment"
-              label="Engagement"
-              value={values.commitment}
+              style={
+                (!disbursement || (getStatus(values.status_id) === getStatusByCode(3) && disbursement))
+                ? { width:'300px'} :  { width:'460px'}
+              }
+              name="currency_id"
+              label="Devise de décaissement"
+              value={values.currency_id}
               onChange={handleInputChange}
-              options={commitments}
-              error={errors.commitment}
+              options={currencies}
+              error={errors.currency_id}
             />
-            }
+
+            {!disbursement &&            
             <Controls.DatePiccker
-              style={ values.type === "Paiement direct" ? { width:'300px'} :  { width:'460px'}}
+              style={{ width:'300px'}}
               id="date"
               name="date"
               label="Date"
@@ -307,40 +403,57 @@ const DibursementForm = (props) => {
               onChange={handleInputChange}
               error={errors.date}
             />
-          </Stack>
-          {values.status === "Reçu" &&
-          <Stack style={styles.stack} spacing={2} direction="row">
+            }
+            {getStatus(values.status_id) === getStatusByCode(3) && disbursement &&
             <Controls.Input
-              style={{width:'300px'}}
-              id="billamount-input"
-              name="billamount"
-              label="Montant locale"
-              type = "number"
-              value={values.billamount}
-              onChange={handleInputChange}
-              error={errors.billamount}
-            />
-            <Controls.Select
-              style={{width:'300px'}}
-              name="currency"
-              label="Devise de décaissement"
-              value={values.currency}
-              onChange={handleInputChange}
-              options={currencies}
-              error={errors.currency}
-            />
-            <Controls.Input
-              style={{width:'300px'}}
+              style={{ width:'300px'}}
               id="disbursementamount-input"
               name="disbursementamount"
               type = "number"
-              label="Montant en devise"
+              label="Montant décaissé"
               value={values.disbursementamount}
               onChange={handleInputChange}
               error={errors.disbursementamount}
             />
+            }
+
+
           </Stack>
-         }
+          {getType(values.type_id) === getTypeByCode(1) &&
+            <Stack style={styles.stack} spacing={2} direction="row">
+
+                <Controls.Select
+                  style={{width:'300px'}}
+                  name="categorie_id"
+                  label="Catégorie"
+                  value={values.categorie_id}
+                  onChange={categorieChange}
+                  options={categories}
+                  error={errors.categorie_id}
+                />
+                <Controls.Select
+                  style={{width:'300px'}}
+                  name="commitment_id"
+                  label="Engagement"
+                  value={values.commitment_id}
+                  onChange={commitmentChange}
+                  options={commitments}
+                  error={errors.commitment_id}
+                />
+                <Controls.Select
+                  style={{width:'300px'}}
+                  name="invoice_id"
+                  label="Facture"
+                  value={values.invoice_id}
+                  onChange={handleInputChange}
+                  options={invoices}
+                  error={errors.invoice_id}
+                />
+
+
+            </Stack>
+          }
+
 
 {/*           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input

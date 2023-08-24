@@ -96,8 +96,23 @@ class JeffiService {
   getDisbursements(){
     return http.get(`/disbursements`);
   }
-  addDibursement(data){
+  addDisbursement(data){
     return http.post(`/disbursements`, data);
+  }
+  getDisbursementsTypes(){
+    return http.get(`/disbursementtypes`);
+  }
+  updateDisbursement(data){
+    return http.put(`/disbursements/${data.id}`, data);
+  }
+
+
+  getStatusType(){
+    return http.get(`/statustype`);
+  }
+
+  addStatus(data){
+    return http.post(`/states`, data);
   }
 
   /// Funders
