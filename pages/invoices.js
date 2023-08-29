@@ -9,7 +9,6 @@ import TableContainer from '@mui/material/TableContainer';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Checkbox from '@mui/material/Checkbox';
-import IconButton from '@mui/material/IconButton';
 import EnhancedTableHead from "../src/components/Table/TableHeader";
 import apiService from "../src/services/apiService";
 import Dialog from '@mui/material/Dialog';
@@ -17,14 +16,12 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import { Close } from '@mui/icons-material';
 import Draggable from 'react-draggable';
 import { useRouter } from "next/router";
 import {ArrowBack, ArrowForward } from "@material-ui/icons";
 import Select from '@mui/material/Select';
 import { Box } from "@material-ui/core";
 import EnhancedTableToolbar from "../src/components/Table/TableConventionToolbar";
-import InvoiceForm from "./add_invoice";
 
 
 function descendingComparator(a, b, orderBy) {
@@ -257,7 +254,14 @@ export default function EnhancedTable() {
 
   const editClick = () => {
     console.log("edit => ", selected);
-    handleClickOpen();
+    router.push({
+      pathname: '/add_invoice',
+      query: { id: selected.id }
+    })
+  }
+
+  const addInvoice = () => {
+    router.push({ pathname: '/add_invoice' })
   }
 
   const deleteClick = () => {
@@ -333,8 +337,7 @@ export default function EnhancedTable() {
     //setDetail(true);
     router.push({
       pathname: '/invoice_detail',
-      query: { id: selected.id, 
-        commitmentId: selected.commitment}
+      query: {id: selected.id}
     })
   }
 
@@ -354,24 +357,6 @@ export default function EnhancedTable() {
           L'oppération a échoué !
         </Alert>
       </Snackbar>
-
-
-      <Dialog fullWidth={true} maxWidth={'lg'} open={open} onClose={handleClose}>
-        <DialogContent>
-          <div style={{display:"flex", justifyContent:"end"}}>
-            <IconButton onClick={handleClose}>
-              <Close fontSize='large'/>
-            </IconButton>
-          </div>
-          <InvoiceForm
-            Invoice={selected} 
-            push={push} 
-            update={update}
-            showSuccessToast={showSuccessToast}
-            showFailedToast={showFailedToast}
-          />
-        </DialogContent>
-      </Dialog>
 
       <Dialog 
         open={openDelete}
@@ -403,7 +388,7 @@ export default function EnhancedTable() {
         editClick = {editClick}
         onSearch = {onSearch}
         search = {search}
-        openModal = {handleClickOpen}
+        openModal = {addInvoice}
         goSearch = {goSearch}
       />
        <TableContainer>
@@ -436,15 +421,13 @@ export default function EnhancedTable() {
                 onRequestSort={handleRequestSort}
                 rowCount={Invoices.length}
                 headCells={headCells}
-                headerBG="#ecf0f2"
+                headerBG="#c8d789"
                 txtColor="#000000"
               />
               <TableBody>
                 {/* if you don't need to support IE11, you can replace the `stableSort` call with:
                   rows.slice().sort(getComparator(order, orderBy)) */}
-                {stableSort(Invoices, getComparator(order, orderBy))
-                  //.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row, index) => {
+                {Invoices.map((row, index) => {
                     const isItemSelected = isSelected(row.id);
                     const labelId = `enhanced-table-checkbox-${index}`;
                     //const bc = row.Deleted ? 'red' : "";
@@ -469,8 +452,8 @@ export default function EnhancedTable() {
                             }}
                           />
                         </TableCell>
-                        <TableCell style={{fontSize:'22px', fontWeight:"normal" }} align="left">{row.reference}</TableCell>
-                        <TableCell style={{fontSize:'22px', fontWeight:"normal" }} align="left">{row.paymentmethod}</TableCell>
+                        <TableCell align="left">{row.reference}</TableCell>
+                        <TableCell align="left">{row.paymentmethod}</TableCell>
                         <TableCell align="left">{row.paymentreference}</TableCell>
                         <TableCell align="left">{formatDate(row.date)} </TableCell>
                         <TableCell align="left">{row.comment}</TableCell>

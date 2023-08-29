@@ -21,6 +21,9 @@ import DisbursementForm from "../../pages/add_disbursement";
 import CategorieForm from "../../pages/add_categorie";
 import states from "../helper/states";
 import DetailDisbursement from "../../pages/disbursement_detail";
+import DetailCategorie from "../../pages/categorie_detail";
+import DeadlineForm from "../../pages/add_deadline";
+import DetailDeadline from "../../pages/deadline_detail";
 
 
 const headCellsDecaissements = [
@@ -68,7 +71,13 @@ const headCellsCategories = [
      numeric: false,
      disablePadding: true,
      label: 'Montant de la catégorie',
-   }
+   },
+    {
+        id: 'action',
+        numeric: false,
+        disablePadding: true,
+        label: 'Action',
+    }
 ]
 
 const headCellsDeadlines = [
@@ -90,6 +99,12 @@ const headCellsDeadlines = [
       numeric: false,
       disablePadding: true,
       label: 'Order',
+    },
+    {
+        id: 'action',
+        numeric: false,
+        disablePadding: true,
+        label: 'Action',
     }
  ]
 
@@ -145,9 +160,13 @@ const DetailConvention = (props) => {
   const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
   const [open, setOpen] = React.useState(false);
   const [openDetailDisbursement, setOpenDetailDisbursement] = React.useState(false);
+  const [openDetailCategorie, setOpenDetailCategorie] = React.useState(false);
+  const [openDetailDeadline, setOpenDetailDeadline] = React.useState(false);
   const [openCategorieForm, setOpenCategorieForm] = React.useState(false);
+  const [openDeadlineForm, setOpenDeadlineForm] = React.useState(false);
   const [disburssementSelected, setDisburssementSelected] = React.useState(null);
   const [categorieSelected, setCategorieSelected] = React.useState(null);
+  const [deadlineSelected, setDeadlineSelected] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
   const [currenteState, setCurrenteState] = React.useState({});
   const [disbursementStatus, setDisbursementStatus] = React.useState([]);
@@ -172,7 +191,7 @@ const DetailConvention = (props) => {
         setDeadlines(res.data.deadlines)
         setCategories(res.data.categories)
         setLoading(false)
-      } )
+    })
       .then( () => {
         apiService.getStatusType().then(
         res => {
@@ -227,6 +246,40 @@ const DetailConvention = (props) => {
     return sum;
   }
 
+  const getCategorieCommitmentsAmounts = (commitments) => {
+    let commitmentsAmountArray = []
+    //l.reduce
+    var ammounts =  commitments ? commitments.reduce((commitmentsAmountConcatinate, c) => {
+        var  amountObject =  c.commitmentamounts ? c.commitmentamounts.reduce((accumulator, e) => {
+            commitmentsAmountArray.push({...e, commitment: c.reference});
+            
+            return e; //{...e, commitment: c.reference}
+        },{}) : {};
+    },[]) : [];
+
+    //console.log(commitmentsAmountArray);       
+    return commitmentsAmountArray;
+  }
+
+  const getCategorieCommitmentsInvoices = (commitments) => {
+    let invoices = []
+    var res =  commitments ? commitments.reduce((commitmentsAmountConcatinate, c) => {
+        var  invoice =  c.invoices ? c.invoices.reduce((accumulator, e) => {
+            var  invoiceline =  e.invoicelines ? e.invoicelines.reduce((accumulator, el) => {
+                invoices.push({...el, reference: e.reference, date: e.date, paymentmethod: e.paymentmethod});
+                return el; 
+            },{}) : {};
+        },[]) : [];
+    },[]) : []; 
+    //console.log(invoices);
+    return invoices;
+  }
+
+  const getCommitmentsInvoicesAmount = (commitments) => {
+
+  }
+
+
   const closeFailedToast = (event, reason) => {
     if (reason === 'clickaway') {
       return;
@@ -259,11 +312,39 @@ const DetailConvention = (props) => {
     }
   };
 
+  const handleCloseDetailCategorie = (event, reason) => {
+    if (reason === "backdropClick") {
+      console.log(reason);
+    } else {
+      setOpenDetailCategorie(false);
+      setCategorieSelected(null)
+    }
+  };
+
+  const handleCloseDetailDeadline = (event, reason) => {
+    if (reason === "backdropClick") {
+      console.log(reason);
+    } else {
+      setOpenDetailDeadline(false);
+      setDeadlineSelected(null)
+    }
+  };
+
   const handleCloseCategorie = (event, reason) => {
     if (reason === "backdropClick") {
       console.log(reason);
     } else {
       setOpenCategorieForm(false);
+      setCategorieSelected(null)
+    }
+  };
+
+  const handleCloseDeadline = (event, reason) => {
+    if (reason === "backdropClick") {
+      console.log(reason);
+    } else {
+      setOpenDeadlineForm(false);
+      setDeadlineSelected(null)
     }
   };
 
@@ -301,10 +382,11 @@ const DetailConvention = (props) => {
   const openAddDisbursement = () => {
     setOpen(true);
   };
-
-
   const openAddCategorie = () => {
     setOpenCategorieForm(true);
+  };
+  const openAddDeadline = () => {
+    setOpenDeadlineForm(true);
   };
   
 
@@ -343,6 +425,28 @@ const DetailConvention = (props) => {
     setOpenDetailDisbursement(true)
   }
 
+  const editCategorie = async (c) =>{
+    setCategorieSelected(c)
+    setOpenCategorieForm(true)
+  }
+
+  const detailCategorie = (c) =>{
+    setCategorieSelected(c)
+    console.log(getCategorieCommitmentsAmounts(c.commitments));
+    console.log(getCategorieCommitmentsInvoices(c.commitments));
+    setOpenDetailCategorie(true)
+  }
+
+    const editDeadline = async (d) =>{
+        setDeadlineSelected(d)
+        setOpenDeadlineForm(true)
+    }
+
+    const detailDeadline = (d) =>{
+        setDeadlineSelected(d)
+        setOpenDetailDeadline(true)
+    }
+
   const getStatusByCode = (code) =>{
     if(code){
       let e = disbursementStatus.filter(e => e.code === code );
@@ -380,7 +484,6 @@ const DetailConvention = (props) => {
                 </Alert>
             </Snackbar>
             {convention &&
-
             <Dialog fullWidth={true} maxWidth={'lg'} open={open} onClose={handleClose}>
                 <DialogContent>
                 <div style={{display:"flex", justifyContent:"end"}}>
@@ -409,7 +512,6 @@ const DetailConvention = (props) => {
 
 
             {convention &&
-
             <Dialog fullWidth={true} maxWidth={'lg'} open={openCategorieForm} onClose={handleCloseCategorie}>
                 <DialogContent >
                 <div style={{display:"flex", justifyContent:"end"}}>
@@ -430,9 +532,31 @@ const DetailConvention = (props) => {
             </Dialog>
             }
 
+            {convention &&
+            <Dialog fullWidth={true} maxWidth={'lg'} open={openDeadlineForm} onClose={handleCloseDeadline}>
+                <DialogContent >
+                <div style={{display:"flex", justifyContent:"end"}}>
+                    <IconButton onClick={handleCloseDeadline}>
+                    <Close fontSize='medium'/>
+                    </IconButton>
+                </div>
+                <DeadlineForm
+                    conventionId = {convention.id}
+                    deadline={deadlineSelected} 
+                    push={push} 
+                    update={update}
+                    showSuccessToast={showSuccessToast}
+                    showFailedToast={showFailedToast}
+                    availableAmount={(convention.amount-getDisbursementsAmount(convention.disbursements))}
+                /> 
+                </DialogContent>
+            </Dialog>
+            }
+
+            
+
 
             {convention &&
-
             <Dialog 
                 fullWidth={true} 
                 maxWidth={'lg'} 
@@ -457,7 +581,55 @@ const DetailConvention = (props) => {
             }
 
             {convention &&
-                <Grid container spacing={2} marginLeft={'15px'}>
+            <Dialog 
+                fullWidth={true} 
+                maxWidth={'lg'} 
+                open={openDetailCategorie} 
+                onClose={handleCloseDetailCategorie}
+                
+                >
+                <DialogContent>
+                <Typography style={{display:"flex", justifyContent:"end"}}>
+                    <IconButton onClick={handleCloseDetailCategorie}>
+                    <Close fontSize='medium'/>
+                    </IconButton>
+                </Typography>
+                <DetailCategorie
+                    categorie = {categorieSelected}
+                    categoriecommitmentsamounts={categorieSelected ? getCategorieCommitmentsAmounts(categorieSelected.commitments) : []} 
+                    categoriecommitmentsinvoices={categorieSelected ? getCategorieCommitmentsInvoices(categorieSelected.commitments) : []} 
+                    currency={currency.label}
+
+                /> 
+                </DialogContent>
+            </Dialog>
+            }
+
+
+            {convention &&
+            <Dialog 
+                fullWidth={true} 
+                maxWidth={'lg'} 
+                open={openDetailDeadline} 
+                onClose={handleCloseDetailDeadline}
+                
+                >
+                <DialogContent>
+                <Typography style={{display:"flex", justifyContent:"end"}}>
+                    <IconButton onClick={handleCloseDetailDeadline}>
+                    <Close fontSize='medium'/>
+                    </IconButton>
+                </Typography>
+                <DetailDeadline
+                    deadline = {deadlineSelected}
+                    currency={currency.label}
+                /> 
+                </DialogContent>
+            </Dialog>
+            }
+
+            {convention &&
+            <Grid container spacing={2} marginLeft={'15px'}>
 
                         <Grid item xs={4} sx={{color:"#837B7B", fontWeight: "bold"}} >
                             <Typography
@@ -627,167 +799,10 @@ const DetailConvention = (props) => {
                         </Grid>
 
                         
-
-
-                    {/*    <Grid item xs={6}>
-                            <h3 style={{color:'#837B7B'}}>
-                            Montant : {convention.amount}
-                            </h3>        
-                        </Grid>
-                        <Grid item xs={6}>
-                            <h3 style={{color:'#837B7B'}}>
-                            Frais : {convention.costs}
-                            </h3>
-                        </Grid>
-                        <Grid item xs={6}>
-                            <h3 style={{color:'#837B7B'}}>
-                            Date fin de grace periode : {formatDate(convention.end_date_grace_period)}
-                            </h3>
-                        </Grid>
-                        <Grid item xs={6}>
-                            <h3 style={{color:'#837B7B'}}>
-                            Date début : {formatDate(convention.start_date)}
-                            </h3>
-                        </Grid>
-                        <Grid item xs={6}>
-                            <h3 style={{color:'#837B7B'}}>
-                            Date fin : {formatDate(convention.end_date)}
-                            </h3>
-                        </Grid>
-                        <Grid item xs={6}>
-                            <h3 style={{color:'#837B7B'}}>
-                            Description : {convention.description} 
-                            </h3>
-                        </Grid>
-                        <Grid item xs={6}>
-                            <h3 style={{color:'#837B7B'}}>
-                            Taux d'intéret : {convention.interest_rate}
-                            </h3>
-                        </Grid>
-                        <Grid item xs={6}>
-                        <h3 style={{color:'#837B7B'}}>
-                        Date début de remboursement : {formatDate(convention.start_date_refund)}
-                        </h3>
-                        </Grid>
-                        <Grid item xs={6}>
-                        <h3 style={{color:'#837B7B'}}>
-                        Date fin de remboursement : {formatDate(convention.end_date_refund)}
-                        </h3>
-                        </Grid> */}
-                </Grid>
+            </Grid>
             }
-        {/*          <Grid container>
-
-
-                    <Grid
-                    item
-                    xs={12}
-                    lg={12}
-                    sx={{
-                        display: "flex",
-                        alignItems: "stretch",
-                    }}
-                    >
-
-                        <Card
-                        item
-                        sx={{
-                        p: 0,
-                        width: "100%",
-                        display:'flex',
-                        justifyContent:'space-evenly',
-                        flexDirection: 'row'
-                        }} 
-                    >
-                        <CardContent
-                        sx={{
-                            paddingLeft: "30px",
-                            paddingRight: "30px",
-                        }}
-                        >
-                        <Typography
-                            color="#837B7B"
-                            sx={{
-                            fontSize: "h4.fontSize",
-                            fontWeight: "550",
-                            fontStyle:'initial',
-                            display:'flex', 
-                            justifyContent: 'center'
-                            }}
-                        >
-                            Emprunteur : {borrower.label}
-                        </Typography>
-                        </CardContent>
-                    </Card>
-
-                    <Card
-                        item
-                        sx={{
-                        p: 0,
-                        width: "100%",
-                        display:'flex',
-                        justifyContent:'space-evenly',
-                        flexDirection: 'row'
-                        }} 
-                    >
-                        <CardContent
-                        sx={{
-                            paddingLeft: "30px",
-                            paddingRight: "30px",
-                        }}
-                        >
-                        <Typography
-                            color="#837B7B"
-                            sx={{
-                            fontSize: "h4.fontSize",
-                            fontWeight: "550",
-                            fontStyle:'initial',
-                            display:'flex', 
-                            justifyContent: 'center'
-                            }}
-                        >
-                            Emprunteur : {borrower.label}
-                        </Typography>
-                        </CardContent>
-                    </Card>
-
-                    <Card
-                        item
-                        sx={{
-                        p: 0,
-                        width: "100%",
-                        display:'flex',
-                        justifyContent:'space-evenly',
-                        flexDirection: 'row'
-                        }} 
-                    >
-                        <CardContent
-                        sx={{
-                            paddingLeft: "30px",
-                            paddingRight: "30px",
-                        }}
-                        >
-                        <Typography
-                            color="#837B7B"
-                            sx={{
-                            fontSize: "h4.fontSize",
-                            fontWeight: "550",
-                            fontStyle:'initial',
-                            display:'flex', 
-                            justifyContent: 'center'
-                            }}
-                        >
-                            Emprunteur : {borrower.label}
-                        </Typography>
-                        </CardContent>
-                    </Card>
-
-                    </Grid>
-
-                </Grid> */}
-
-                {convention &&
-                        <Grid container 
+            {convention &&
+            <Grid container 
                             sx={{
                                 mt:"20px",
                                 mb:"30px"
@@ -800,6 +815,8 @@ const DetailConvention = (props) => {
                                 sx={{
                                     display: "flex",
                                     alignItems: "center",
+                                    justifyContent: "center"
+
                                 }}
                                 >
                                         
@@ -809,11 +826,12 @@ const DetailConvention = (props) => {
                                         fontSize: "h3.fontSize",
                                         fontWeight: "600",
                                         mt: "15px",
-                                        marginInline:"32px",
+                                        marginInline:"40px",
                                         marginTop:1,
-                                        width:'100%'
+                                        width:'80%'
                                         }}
                                         color={'success'}
+                                        onClick={openAddDeadline}
                                     >
                                         + Echéance
                                     </Button> 
@@ -826,6 +844,7 @@ const DetailConvention = (props) => {
                                 sx={{
                                     display: "flex",
                                     alignItems: "center",
+                                    justifyContent: "center"
                                 }}
                                 >
                                         
@@ -837,7 +856,7 @@ const DetailConvention = (props) => {
                                         mt: "15px",
                                         marginInline:"40px",
                                         marginTop:1,
-                                        width:'100%'
+                                        width:'80%'
                                         }}
                                         color={'primary'}
                                         onClick={openAddCategorie}
@@ -853,6 +872,8 @@ const DetailConvention = (props) => {
                                 sx={{
                                     display: "flex",
                                     alignItems: "center",
+                                    justifyContent: "center"
+
                                 }}
                                 >
                                         
@@ -864,7 +885,7 @@ const DetailConvention = (props) => {
                                         marginInline:"40px",
                                         mt: "15px",
                                         marginTop:1,
-                                        width:'100%'
+                                        width:'80%'
                                         }}
                                         color={'secondary'}
                                         onClick={openAddDisbursement}
@@ -873,13 +894,10 @@ const DetailConvention = (props) => {
                                     </Button> 
                             </Grid>
 
-                        </Grid>
-
-                }
-
-
+            </Grid>
+            }
             {convention &&
-                <Box sx={{ width: '100%', marginTop:'15px', marginLeft: '15px' }}>
+            <Box sx={{ width: '100%', marginTop:'15px', marginLeft: '15px' }}>
                     <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                         <Tabs value={value} onChange={handleChange} aria-label="tabs">
                             <Tab style={{fontWeight:'bold', fontSize:'20px'}} label="Décaissements" {...a11yProps(0)} />
@@ -889,53 +907,61 @@ const DetailConvention = (props) => {
                     </Box>  
 
                     <CustomTabPanel value={value} index={0}>
+                    {disbursements.length > 0 ?
                         <Table
                         sx={{ minWidth: 750 }}
                         aria-labelledby="tableTitle"
                         size={'medium'}
                         >
-                        <EnhancedTableHead
-                            rowCount={disbursements.length}
-                            headCells={headCellsDecaissements}
-                            headerBG="#c8d789"
-                            txtColor="#000000"
-                        />
-                        <TableBody>
-                            {disbursements
-                            .map((row, index) => {
-                                return (
-                                <TableRow
-                                    hover
-                                    tabIndex={-1}
-                                    key={row.id}
-                                    style={{backgroundColor: row.deleted ? '#e67e5f' : ""}}
-                                >
-                                    <TableCell align="left"></TableCell>
-                                
-                                    <TableCell align="left">{row.reference}</TableCell>
-                                    <TableCell align="left">{row.type.label}</TableCell>
-                                    <TableCell align="left">{row.orderamount}</TableCell>
-                                    <TableCell align="left">{formatDate(row.date)} </TableCell>
-                                     <TableCell align="left">
-                                        <Tooltip onClick={() => edit(row)} title="Modifier">
-                                            <IconButton>
-                                                <CreateOutlined fontSize='medium' />
-                                            </IconButton>
-                                        </Tooltip>
-                                        <Tooltip onClick={() => detail(row)} title="Detail">
-                                            <IconButton>
-                                                <InfoOutlined color='primary' fontSize='medium' />
-                                            </IconButton>
-                                        </Tooltip>
-                                     </TableCell>
+                            <EnhancedTableHead
+                                rowCount={disbursements.length}
+                                headCells={headCellsDecaissements}
+                                headerBG="#c8d789"
+                                txtColor="#000000"
+                            />
+                            <TableBody>
+                                {disbursements
+                                .map((row, index) => {
+                                    return (
+                                    <TableRow
+                                        hover
+                                        tabIndex={-1}
+                                        key={row.id}
+                                    >
+                                        <TableCell align="left"></TableCell>
+                                    
+                                        <TableCell align="left">{row.reference}</TableCell>
+                                        <TableCell align="left">{row.type.label}</TableCell>
+                                        <TableCell align="left">{pounds.format(row.orderamount)} {row.currency.label}</TableCell>
+                                        <TableCell align="left">{formatDate(row.date)} </TableCell>
+                                        <TableCell align="left">
+                                            <Tooltip onClick={() => edit(row)} title="Modifier">
+                                                <IconButton>
+                                                    <CreateOutlined fontSize='medium' />
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip onClick={() => detail(row)} title="Detail">
+                                                <IconButton>
+                                                    <InfoOutlined color='primary' fontSize='medium' />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </TableCell>
 
-                                </TableRow>
-                                );
-                            })}
-                        </TableBody>
-                    </Table>
+                                    </TableRow>
+                                    );
+                                })}
+                            </TableBody>
+                        </Table>
+                    :
+                    <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "center"}}>
+                        <Box style={{fontSize: '16px'}}>
+                        Liste vide
+                        </Box>
+                    </div>
+                    }
                     </CustomTabPanel>
                     <CustomTabPanel value={value} index={1}>
+                    {categories.length > 0 ?
                     <Table
                         sx={{ minWidth: 750 }}
                         aria-labelledby="tableTitle"
@@ -955,20 +981,40 @@ const DetailConvention = (props) => {
                                     hover
                                     tabIndex={-1}
                                     key={row.id}
-                                    style={{backgroundColor: row.deleted ? '#e67e5f' : ""}}
                                 >
                                     <TableCell align="left"></TableCell>
 
                                     <TableCell align="left">{row.type.label} </TableCell>
-                                    <TableCell align="left">{row.amount}</TableCell>
+                                    <TableCell align="left">{pounds.format(row.amount)} {currency.label}</TableCell>
+                                    <TableCell align="left">
+                                        <Tooltip onClick={() => editCategorie(row)} title="Modifier">
+                                            <IconButton>
+                                                <CreateOutlined fontSize='medium' />
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip onClick={() => detailCategorie(row)} title="Detail">
+                                            <IconButton>
+                                                <InfoOutlined color='primary' fontSize='medium' />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </TableCell>
+
 
                                 </TableRow>
                                 );
                             })}
                         </TableBody>
                     </Table>
+                    :
+                    <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "center"}}>
+                        <Box style={{fontSize: '16px'}}>
+                        Liste vide
+                        </Box>
+                    </div>
+                    }
                     </CustomTabPanel>
                     <CustomTabPanel value={value} index={2}>
+                    {deadlines.length > 0 ?
                     <Table
                         sx={{ minWidth: 750 }}
                         aria-labelledby="tableTitle"
@@ -988,21 +1034,38 @@ const DetailConvention = (props) => {
                                     hover
                                     tabIndex={-1}
                                     key={row.id}
-                                    style={{backgroundColor: row.deleted ? '#e67e5f' : ""}}
                                 >
                                     <TableCell align="left"></TableCell>
 
                                     <TableCell align="left">{row.label}</TableCell>
-                                    <TableCell align="left">{row.amount}</TableCell>
+                                    <TableCell align="left">{pounds.format(row.amount)} {currency.label}</TableCell>
                                     <TableCell align="left">{row.order} </TableCell>
-
+                                    <TableCell align="left">
+                                        <Tooltip onClick={() => editDeadline(row)} title="Modifier">
+                                            <IconButton>
+                                                <CreateOutlined fontSize='medium' />
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip onClick={() => detailDeadline(row)} title="Detail">
+                                            <IconButton>
+                                                <InfoOutlined color='primary' fontSize='medium' />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </TableCell>
                                 </TableRow>
                                 );
                             })}
                         </TableBody>
                     </Table>
+                    :
+                    <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "center"}}>
+                    <Box style={{fontSize: '16px'}}>
+                        Liste vide
+                    </Box>
+                    </div>
+                    }
                     </CustomTabPanel>
-                </Box>
+            </Box>
             }
 
           </Box>

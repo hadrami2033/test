@@ -6,8 +6,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { Fab, IconButton, InputBase, Paper, Stack, Tooltip, CircularProgress,  MenuItem, Select, Button, } from '@mui/material';
 import { CreateOutlined, FileDownloadOutlined, Menu, PersonAdd, Save, InfoOutlined, Add } from '@mui/icons-material';
 import SearchIcon from '@mui/icons-material/Search';
-import { SheetJSFT } from '../../lib/types';
-import { Box } from '@material-ui/core';
 
 const EnhancedTableToolbar = (props) => {
     const { detail, selected, field, editClick, deleteClick, onSearch, search, openModal, goSearch } = props;

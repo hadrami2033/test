@@ -11,32 +11,32 @@ import { Form } from "../src/components/Form";
 import Controls from "../src/components/controls/Controls";
 
 
-const CategorieForm = (props) => {
-  const {conventionId, Categorie, push, update, showSuccessToast, showFailedToast, availableAmount} = props;
+const DeadlineForm = (props) => {
+  const {conventionId, deadline, push, update, showSuccessToast, showFailedToast, availableAmount} = props;
 
-  const defaultValues = Categorie === null ? {
-    reference:"",
-    type_id: null,
+  const defaultValues = deadline === null ? {
+    label:"",
+    order: 0,
     amount: 0,
     convention: conventionId
   } : 
   {
-    ...Categorie,
-    type_id:Categorie.type.id
+    ...deadline
   }
+
 
   const [formValues, setFormValues] = useState(defaultValues);
   const [loading, setLoading] = React.useState(false);
-  const [categoriesType, setCategoriesType] = React.useState([]);
+
 
   const validate = (fieldValues = values) => {
     let temp = { ...errors };
-    if ("reference" in fieldValues)
-      temp.reference = fieldValues.reference ? "" : "La reférence est requise";
+    if ("label" in fieldValues)
+      temp.label = fieldValues.label ? "" : "Label est requis";
     if ("amount" in fieldValues)
       temp.amount = fieldValues.amount ? "" : "Le montant est requis";
-    if ("type_id" in fieldValues)
-      temp.type_id = fieldValues.type_id ? "" : "Le type requis";
+    if ("order" in fieldValues)
+      temp.order = fieldValues.order ? "" : "L'order est requis";
    
       setErrors({
       ...temp,
@@ -49,13 +49,6 @@ const CategorieForm = (props) => {
 
   React.useEffect(() => {
     console.log( "availableAmount ", availableAmount);
-    apiService.getCategoriesType().then(
-      res => {
-        console.log(res.data);
-        setCategoriesType(res.data);
-      },  
-      error => console.log(error)
-    ) 
   }, [])
 
   const { values, setValues, errors, setErrors, handleInputChange, resetForm } = Form(formValues, true, validate);
@@ -67,8 +60,8 @@ const CategorieForm = (props) => {
     if (validate()) {
       setLoading(true)
       console.log(values);
-      if(Categorie === null){
-        apiService.addCategorie(values).then(
+      if(deadline === null){
+        apiService.addDeadline(values).then(
           (res) => {
             console.log("added => " ,res);
             if(res.data){
@@ -87,7 +80,7 @@ const CategorieForm = (props) => {
           setLoading(false)
         });
       }else{
-        apiService.updateCategorie(values).then(
+        apiService.updateDeadline(values).then(
           (res) => {
             console.log("updated => ", res);
             if(!res.data){
@@ -111,16 +104,14 @@ const CategorieForm = (props) => {
     //console.log(formValues);
   };
 
-
   const titleName = () => {
-    if(Categorie == null) 
-      return "Ajouter une catégorie" 
+    if(deadline == null) 
+      return "Ajouter une écheance" 
     else
-      return "Modifier une catégorie"
+      return "Modifier une écheance"
   }
 
   return (
-    
         <BaseCard titleColor={"secondary"} title={titleName()}>
           {values &&
           <form onSubmit={handleSubmit}>
@@ -128,12 +119,12 @@ const CategorieForm = (props) => {
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
               style={{width:'300px'}}
-              id="reference-input"
-              name="reference"
-              label="Reférence"
-              value={values.reference}
+              id="label-input"
+              name="label"
+              label="Libelé"
+              value={values.label}
               onChange={handleInputChange}
-              error={errors.reference}
+              error={errors.label}
             />
             <Controls.Input
               style={{width:'300px'}}
@@ -145,14 +136,15 @@ const CategorieForm = (props) => {
               onChange={handleInputChange}
               error={errors.amount}
             />
-            <Controls.Select
+            <Controls.Input
               style={{width:'300px'}}
-              name="type_id"
-              label="Type"
-              value={values.type_id}
+              id="order-input"
+              name="order"
+              label="Order"
+              type="number"
+              value={values.order}
               onChange={handleInputChange}
-              options={categoriesType}
-              error={errors.type_id}
+              error={errors.order}
             />
           </Stack>
 
@@ -195,4 +187,4 @@ const styles = {
     marginBottom: 10,
   },
 };
-export default CategorieForm;
+export default DeadlineForm;

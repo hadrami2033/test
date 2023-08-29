@@ -11,34 +11,31 @@ import { Form } from "../src/components/Form";
 import Controls from "../src/components/controls/Controls";
 
 
-const CategorieForm = (props) => {
-  const {conventionId, Categorie, push, update, showSuccessToast, showFailedToast, availableAmount} = props;
 
-  const defaultValues = Categorie === null ? {
-    reference:"",
-    type_id: null,
+const InvoiceLineForm = (props) => {
+  const {push, update, showSuccessToast, showFailedToast, invoiceId} = props;
+
+  const defaultValues = {
+    currency_id: null,
     amount: 0,
-    convention: conventionId
-  } : 
-  {
-    ...Categorie,
-    type_id:Categorie.type.id
+    invoice: invoiceId ? invoiceId : null
   }
 
   const [formValues, setFormValues] = useState(defaultValues);
   const [loading, setLoading] = React.useState(false);
-  const [categoriesType, setCategoriesType] = React.useState([]);
+  const [invoices, setInvoices] = React.useState([]);
+  const [currencies, setCurrencies] = React.useState([]);
+
 
   const validate = (fieldValues = values) => {
     let temp = { ...errors };
-    if ("reference" in fieldValues)
-      temp.reference = fieldValues.reference ? "" : "La reférence est requise";
+    if ("currency_id" in fieldValues)
+      temp.currency_id = fieldValues.currency_id ? "" : "Devise est requis";
+    if ("invoice" in fieldValues)
+      temp.invoice = fieldValues.invoice ? "" : "Une facture requise";
     if ("amount" in fieldValues)
-      temp.amount = fieldValues.amount ? "" : "Le montant est requis";
-    if ("type_id" in fieldValues)
-      temp.type_id = fieldValues.type_id ? "" : "Le type requis";
-   
-      setErrors({
+      temp.amount = fieldValues.amount ? "" : "Le montant requis";
+    setErrors({
       ...temp,
     });
 
@@ -48,14 +45,19 @@ const CategorieForm = (props) => {
 
 
   React.useEffect(() => {
-    console.log( "availableAmount ", availableAmount);
-    apiService.getCategoriesType().then(
+    apiService.getInvoices().then(
       res => {
-        console.log(res.data);
-        setCategoriesType(res.data);
+        setInvoices(res.data);
       },  
       error => console.log(error)
-    ) 
+    ) .then(() => {
+        apiService.getCurrencies().then(
+            res => {
+              setCurrencies(res.data);
+            },  
+            error => console.log(error)
+        ) 
+    })
   }, [])
 
   const { values, setValues, errors, setErrors, handleInputChange, resetForm } = Form(formValues, true, validate);
@@ -67,8 +69,7 @@ const CategorieForm = (props) => {
     if (validate()) {
       setLoading(true)
       console.log(values);
-      if(Categorie === null){
-        apiService.addCategorie(values).then(
+        apiService.addInvoiceLine(values).then(
           (res) => {
             console.log("added => " ,res);
             if(res.data){
@@ -86,57 +87,22 @@ const CategorieForm = (props) => {
         ).then(() => {
           setLoading(false)
         });
-      }else{
-        apiService.updateCategorie(values).then(
-          (res) => {
-            console.log("updated => ", res);
-            if(!res.data){
-              showFailedToast()
-            }else{
-              update(values)
-              showSuccessToast()
-            }
-          },
-          (error) => {
-            console.log(error);
-            showFailedToast()
-          } 
-        ).then(() => {
-          setLoading(false)
-        });
-      }
-    }else{
-        console.log(" invalid object ", values);
-    }
+    } 
     //console.log(formValues);
   };
 
-
   const titleName = () => {
-    if(Categorie == null) 
-      return "Ajouter une catégorie" 
-    else
-      return "Modifier une catégorie"
+      return "Ajouter une ligne de facture" 
   }
 
   return (
-    
-        <BaseCard titleColor={"secondary"} title={titleName()}>
+        <BaseCard titleColor={"secondary"} title= {titleName()}>
           {values &&
           <form onSubmit={handleSubmit}>
           <br/>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
-              style={{width:'300px'}}
-              id="reference-input"
-              name="reference"
-              label="Reférence"
-              value={values.reference}
-              onChange={handleInputChange}
-              error={errors.reference}
-            />
-            <Controls.Input
-              style={{width:'300px'}}
+              style={invoiceId ? {width:'460px'} : {width:'300px'}}
               id="amount-input"
               name="amount"
               label="Montant"
@@ -146,16 +112,26 @@ const CategorieForm = (props) => {
               error={errors.amount}
             />
             <Controls.Select
-              style={{width:'300px'}}
-              name="type_id"
-              label="Type"
-              value={values.type_id}
+              name="currency_id"
+              style={invoiceId ? {width:'460px'} : {width:'300px'}}
+              label="Devise"
+              value={values.currency_id}
               onChange={handleInputChange}
-              options={categoriesType}
-              error={errors.type_id}
+              options={currencies}
+              error={errors.currency_id}
             />
+            {!invoiceId &&
+             <Controls.Select
+               name="invoice"
+               style={{width:'300px'}}
+               label="Facture"
+               value={values.invoice}
+               onChange={handleInputChange}
+               options={invoices}
+               error={errors.invoice}
+             />
+            }
           </Stack>
-
 
           <br />
           <Button
@@ -195,4 +171,4 @@ const styles = {
     marginBottom: 10,
   },
 };
-export default CategorieForm;
+export default InvoiceLineForm;

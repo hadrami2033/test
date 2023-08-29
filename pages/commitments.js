@@ -9,7 +9,6 @@ import TableContainer from '@mui/material/TableContainer';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Checkbox from '@mui/material/Checkbox';
-import IconButton from '@mui/material/IconButton';
 import EnhancedTableHead from "../src/components/Table/TableHeader";
 import apiService from "../src/services/apiService";
 import Dialog from '@mui/material/Dialog';
@@ -17,14 +16,12 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import { Close } from '@mui/icons-material';
 import Draggable from 'react-draggable';
 import { useRouter } from "next/router";
 import {ArrowBack, ArrowForward } from "@material-ui/icons";
 import Select from '@mui/material/Select';
 import { Box } from "@material-ui/core";
 import EnhancedTableToolbar from "../src/components/Table/TableConventionToolbar";
-import CommitmentForm from "./add_commitment";
 
 
 function descendingComparator(a, b, orderBy) {
@@ -204,27 +201,6 @@ export default function EnhancedTable() {
     setOrderBy(property);
   };
 
-  const push = (e) =>{
-    //Commitments.push(e)
-    apiService.getCommitments( //pageNumber, pageSize, getBy, currentMonth.monthId
-      ).then(
-        res => {
-          console.log(res.data);
-          setCommitments(res.data);
-          //setHasNext(res.data.nextPage);
-          //setHasPrevious(res.data.previousPage);
-          //setTotalPages(res.data.TotalPages);
-          //setAll(res.data.TotalCount);
-        }, 
-        error => console.log(error)
-    )
-  }
-
-  const update = (e) =>{
-    var objIndex = Commitments.findIndex((obj => obj.id == e.id));
-    Commitments[objIndex] = e
-  }
-
   const remove = () =>{
     if(selected !== null){
       apiService.deleteCommitment(selected.id).then(
@@ -263,7 +239,14 @@ export default function EnhancedTable() {
 
   const editClick = () => {
     console.log("edit => ", selected);
-    handleClickOpen();
+    router.push({
+      pathname: '/add_commitment',
+      query: { id: selected.id }
+    })
+  }
+
+  const addCommitment = () => {
+    router.push({ pathname: '/add_commitment' })
   }
 
   const deleteClick = () => {
@@ -339,8 +322,7 @@ export default function EnhancedTable() {
     //setDetail(true);
     router.push({
       pathname: '/commitment_detail',
-      query: { id: selected.id, 
-               contractorId: selected.contractor}
+      query: { id: selected.id}
     })
   }
 
@@ -360,24 +342,6 @@ export default function EnhancedTable() {
           L'oppération a échoué !
         </Alert>
       </Snackbar>
-
-
-      <Dialog fullWidth={true} maxWidth={'lg'} open={open} onClose={handleClose}>
-        <DialogContent>
-          <div style={{display:"flex", justifyContent:"end"}}>
-            <IconButton onClick={handleClose}>
-              <Close fontSize='large'/>
-            </IconButton>
-          </div>
-          <CommitmentForm
-            Commitment={selected} 
-            push={push} 
-            update={update}
-            showSuccessToast={showSuccessToast}
-            showFailedToast={showFailedToast}
-          />
-        </DialogContent>
-      </Dialog>
 
       <Dialog 
         open={openDelete}
@@ -409,7 +373,7 @@ export default function EnhancedTable() {
         editClick = {editClick}
         onSearch = {onSearch}
         search = {search}
-        openModal = {handleClickOpen}
+        openModal = {addCommitment}
         goSearch = {goSearch}
       />
        <TableContainer>
@@ -442,18 +406,16 @@ export default function EnhancedTable() {
                 onRequestSort={handleRequestSort}
                 rowCount={Commitments.length}
                 headCells={headCells}
-                headerBG="#ecf0f2"
+                headerBG="#c8d789"
                 txtColor="#000000"
               />
               <TableBody>
                 {/* if you don't need to support IE11, you can replace the `stableSort` call with:
                   rows.slice().sort(getComparator(order, orderBy)) */}
-                {stableSort(Commitments, getComparator(order, orderBy))
-                  //.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                {Commitments
                   .map((row, index) => {
                     const isItemSelected = isSelected(row.id);
                     const labelId = `enhanced-table-checkbox-${index}`;
-                    //const bc = row.Deleted ? 'red' : "";
                     return (
                       <TableRow
                         hover
@@ -463,7 +425,6 @@ export default function EnhancedTable() {
                         tabIndex={-1}
                         key={row.id}
                         //selected={isItemSelected}
-                        style={{backgroundColor: row.deleted ? '#e67e5f' : ""}}
                       >
                         
                         <TableCell padding="checkbox">
@@ -476,8 +437,8 @@ export default function EnhancedTable() {
                           />
                         </TableCell>
 
-                        <TableCell style={{fontSize:'22px', fontWeight:"normal" }} align="left">{row.reference}</TableCell>
-                        <TableCell style={{fontSize:'22px', fontWeight:"normal" }} align="left">{row.status}</TableCell>
+                        <TableCell align="left">{row.reference}</TableCell>
+                        <TableCell align="left">{row.status}</TableCell>
                         <TableCell align="left">{row.description}</TableCell>
                         <TableCell align="left">{formatDate(row.start_date)} </TableCell>
                         <TableCell align="left">{formatDate(row.end_date)} </TableCell>
@@ -492,7 +453,7 @@ export default function EnhancedTable() {
           :
           <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "center"}}>
             <Box style={{fontSize: '16px'}}>
-        Liste vide
+              Liste vide
             </Box>
           </div>
           }

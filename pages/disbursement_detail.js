@@ -1,87 +1,15 @@
 
 import React, { useEffect, useState } from "react";
-import { Alert, Card, CardContent, Typography, Button, Grid, Tooltip, Stack,Snackbar, Box, Tab ,Tabs, CircularProgress  } from "@mui/material";
+import { Typography, Grid, Box, CircularProgress  } from "@mui/material";
 import BaseCard from "../src/components/baseCard/BaseCard";
-import PropTypes from 'prop-types';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableRow from '@mui/material/TableRow';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import Draggable from 'react-draggable';
-import { Close, CreateOutlined, InfoOutlined } from '@mui/icons-material';
-import IconButton from '@mui/material/IconButton';
-
-
-
-
-
-function CustomTabPanel(props) {
-    const { children, value, index, ...other } = props;
-  
-    return (
-      <div
-        role="tabpanel"
-        hidden={value !== index}
-        id={`simple-tabpanel-${index}`}
-        aria-labelledby={`simple-tab-${index}`}
-        {...other}
-      >
-        {value === index && (
-          <Box sx={{ p: 3 }}>
-            {children}
-          </Box>
-        )}
-      </div>
-    );
-  }
-  
-CustomTabPanel.propTypes = {
-    children: PropTypes.node,
-    index: PropTypes.number.isRequired,
-    value: PropTypes.number.isRequired,
-  };
-  
-function a11yProps(index) {
-    return {
-      id: `simple-tab-${index}`,
-      'aria-controls': `simple-tabpanel-${index}`,
-    };
-  }
-
-
 
 
 const DetailDisbursement = (props) => {
   const {disbursement, disbursementStatus, disbursementtypes, currency} = props;
 
-  const [convention, setConvention] = React.useState(null);
-  const [borrower, setBorrower] = useState({})
-  const [funder, setFunder] = useState({})
-  const [value, setValue] = React.useState(0);
-  const [disbursements, setDisbursements] = React.useState([]);
-  const [categories, setCategories] = React.useState([]);
-  const [deadlines, setDeadlines] = React.useState([]);
-  const [openFailedToast, setOpenFailedToast] = React.useState(false);
-  const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
-  const [open, setOpen] = React.useState(false);
-  const [openCategorieForm, setOpenCategorieForm] = React.useState(false);
-  const [disburssementSelected, setDisburssementSelected] = React.useState(null);
-  const [categorieSelected, setCategorieSelected] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
-  const [currenteState, setCurrenteState] = React.useState({});
-  const [availabeState, setAvailabeState] = React.useState({});
-  const [commitments, setCommitments] = React.useState([]);
-  const [invoices, setInvoices] = React.useState([]);
 
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
-  };
+ 
 
   useEffect(() => {
     console.log(disbursement);
@@ -104,47 +32,11 @@ const DetailDisbursement = (props) => {
     return [year, month, day].join('-');
   }
 
-  const retrocede = (r) => {
-    var res = r ? "Oui" : "Non";
-    return res;
-  }
-
   let pounds = Intl.NumberFormat( {
     style: 'currency',
     maximumSignificantDigits: 3,
     minimumFractionDigits: 2
   });
-
-  const closeFailedToast = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setOpenFailedToast(false);
-  };
-
-  const closeSuccessToast = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setOpenSuccessToast(false);
-  };
-
-  const handleClose = (event, reason) => {
-    if (reason === "backdropClick") {
-      console.log(reason);
-    } else {
-      setDisburssementSelected(null)
-      setOpen(false);
-    }
-  };
-
-  const handleCloseCategorie = (event, reason) => {
-    if (reason === "backdropClick") {
-      console.log(reason);
-    } else {
-      setOpenCategorieForm(false);
-    }
-  };
 
   
 
