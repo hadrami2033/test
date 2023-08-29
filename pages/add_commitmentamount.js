@@ -11,34 +11,35 @@ import { Form } from "../src/components/Form";
 import Controls from "../src/components/controls/Controls";
 
 
-const CategorieForm = (props) => {
-  const {conventionId, Categorie, push, update, showSuccessToast, showFailedToast, availableAmount} = props;
 
-  const defaultValues = Categorie === null ? {
-    reference:"",
-    type_id: null,
+const AmountForm = (props) => {
+  const {push, update, showSuccessToast, showFailedToast, commitmentId} = props;
+
+  const defaultValues = {
+    currency_id: null,
+    spendingtype_id: null,
     amount: 0,
-    convention: conventionId
-  } : 
-  {
-    ...Categorie,
-    type_id:Categorie.type.id
+    commitment: commitmentId ? commitmentId : null
   }
 
   const [formValues, setFormValues] = useState(defaultValues);
   const [loading, setLoading] = React.useState(false);
-  const [categoriesType, setCategoriesType] = React.useState([]);
+  const [commitments, setCommitments] = React.useState([]);
+  const [currencies, setCurrencies] = React.useState([]);
+  const [spendingtypes, setSpendingsType] = React.useState([]);
+
 
   const validate = (fieldValues = values) => {
     let temp = { ...errors };
-    if ("reference" in fieldValues)
-      temp.reference = fieldValues.reference ? "" : "La reférence est requise";
+    if ("currency_id" in fieldValues)
+      temp.currency_id = fieldValues.currency_id ? "" : "Devise est requis";
+    if ("commitment" in fieldValues)
+      temp.commitment = fieldValues.commitment ? "" : "Un engagement requis";
+    if ("spendingtype_id" in fieldValues)
+      temp.spendingtype_id = fieldValues.spendingtype_id ? "" : "Type de dépense requis";
     if ("amount" in fieldValues)
-      temp.amount = fieldValues.amount ? "" : "Le montant est requis";
-    if ("type_id" in fieldValues)
-      temp.type_id = fieldValues.type_id ? "" : "Le type requis";
-   
-      setErrors({
+      temp.amount = fieldValues.amount ? "" : "Le montant requis";
+    setErrors({
       ...temp,
     });
 
@@ -48,14 +49,26 @@ const CategorieForm = (props) => {
 
 
   React.useEffect(() => {
-    console.log( "availableAmount ", availableAmount);
-    apiService.getCategoriesType().then(
+    apiService.getCommitments().then(
       res => {
-        console.log(res.data);
-        setCategoriesType(res.data);
+        setCommitments(res.data);
       },  
       error => console.log(error)
-    ) 
+    ) .then(() => {
+        apiService.getCurrencies().then(
+            res => {
+              setCurrencies(res.data);
+            },  
+            error => console.log(error)
+        ) 
+    }).then(() => {
+        apiService.getSpendingsTypes().then(
+            res => {
+              setSpendingsType(res.data);
+            },  
+            error => console.log(error)
+        ) 
+    })
   }, [])
 
   const { values, setValues, errors, setErrors, handleInputChange, resetForm } = Form(formValues, true, validate);
@@ -67,8 +80,7 @@ const CategorieForm = (props) => {
     if (validate()) {
       setLoading(true)
       console.log(values);
-      if(Categorie === null){
-        apiService.addCategorie(values).then(
+        apiService.addCommitmentAmount(values).then(
           (res) => {
             console.log("added => " ,res);
             if(res.data){
@@ -86,57 +98,22 @@ const CategorieForm = (props) => {
         ).then(() => {
           setLoading(false)
         });
-      }else{
-        apiService.updateCategorie(values).then(
-          (res) => {
-            console.log("updated => ", res);
-            if(!res.data){
-              showFailedToast()
-            }else{
-              update(values)
-              showSuccessToast()
-            }
-          },
-          (error) => {
-            console.log(error);
-            showFailedToast()
-          } 
-        ).then(() => {
-          setLoading(false)
-        });
-      }
-    }else{
-        console.log(" invalid object ", values);
-    }
+    } 
     //console.log(formValues);
   };
 
-
   const titleName = () => {
-    if(Categorie == null) 
-      return "Ajouter une catégorie" 
-    else
-      return "Modifier une catégorie"
+      return "Ajouter un montant" 
   }
 
   return (
-    
-        <BaseCard titleColor={"secondary"} title={titleName()}>
+        <BaseCard titleColor={"secondary"} title= {titleName()}>
           {values &&
           <form onSubmit={handleSubmit}>
           <br/>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
-              style={{width:'300px'}}
-              id="reference-input"
-              name="reference"
-              label="Reférence"
-              value={values.reference}
-              onChange={handleInputChange}
-              error={errors.reference}
-            />
-            <Controls.Input
-              style={{width:'300px'}}
+              style={{width:'460px'}}
               id="amount-input"
               name="amount"
               label="Montant"
@@ -146,16 +123,38 @@ const CategorieForm = (props) => {
               error={errors.amount}
             />
             <Controls.Select
-              style={{width:'300px'}}
-              name="type_id"
-              label="Type"
-              value={values.type_id}
+              name="currency_id"
+              style={{width:'460px'}}
+              label="Devise"
+              value={values.currency_id}
               onChange={handleInputChange}
-              options={categoriesType}
-              error={errors.type_id}
+              options={currencies}
+              error={errors.currency_id}
             />
           </Stack>
-
+          <Stack style={styles.stack} spacing={2} direction="row">
+            <Controls.Select
+              name="spendingtype_id"
+              style={commitmentId ? {width:'935px'} : {width:'460px'}}
+              label="Type de dépense"
+              value={values.spendingtype_id}
+              onChange={handleInputChange}
+              options={spendingtypes}
+              error={errors.spendingtype_id}
+            />
+            {!commitmentId &&
+             <Controls.Select
+               name="commitment"
+               style={{width:'460px'}}
+               label="Engagement"
+               value={values.commitment}
+               onChange={handleInputChange}
+               options={commitments}
+               error={errors.commitment}
+             />
+            }
+          </Stack>
+ 
 
           <br />
           <Button
@@ -195,4 +194,4 @@ const styles = {
     marginBottom: 10,
   },
 };
-export default CategorieForm;
+export default AmountForm;

@@ -17,7 +17,6 @@ import {
 import FeatherIcon from "feather-icons-react";
 import LogoIcon from "../logo/LogoIcon";
 import Menuitems from "./MenuItems";
-import Buynow from "./Buynow";
 import { useRouter } from "next/router";
 import Diversity2Icon from '@mui/icons-material/Diversity2';
 
@@ -90,8 +89,6 @@ const Sidebar = ({ isMobileSidebarOpen, onSidebarClose, isSidebarOpen }) => {
           ))}
         </List>
       </Box>
-
-      <Buynow />
     </Box>
   );
   if (lgUp) {

@@ -1,22 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { Card, CardContent, Typography, Button, Grid, Tooltip, Stack, Box, Tab ,Tabs  } from "@mui/material";
+import { Alert, Typography, Button, Grid, Box, Tab ,Tabs, Snackbar, Tooltip, IconButton, DialogTitle, DialogContentText, DialogActions, Paper  } from "@mui/material";
 import BaseCard from "./baseCard/BaseCard";
 import apiService from "../services/apiService";
 import PropTypes from 'prop-types';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
 import TableRow from '@mui/material/TableRow';
 import EnhancedTableHead from "./Table/TableHeader";
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import { Close } from '@mui/icons-material';
+import AmountForm from "../../pages/add_commitmentamount";
+import DeleteIcon from '@mui/icons-material/Delete';
+import Draggable from "react-draggable";
+import InvoiceForm from "./AddInvoice";
 
-const headCellsDecaissements = [
-     {
-      id: 'type',
-      numeric: false,
-      disablePadding: false,
-      label: 'Type',
-    },
+const headCellsAmounts = [
     {
       id: 'amount',
       numeric: false,
@@ -24,10 +24,16 @@ const headCellsDecaissements = [
       label: 'Montant',
     },
     {
-      id: 'date',
+      id: 'spendingtype',
       numeric: false,
       disablePadding: true,
-      label: 'Date décaissement',
+      label: 'Type de dépence',
+    },
+    {
+      id: 'action',
+      numeric: false,
+      disablePadding: true,
+      label: 'Action'
     }
 ]
 
@@ -98,29 +104,52 @@ function a11yProps(index) {
     };
   }
 
-
-
-
 const DetailCommitment = (props) => {
-  const {commitment, contractorId} = props;
+  const {id} = props;
 
+  const [commitment, setCommitment] = React.useState({});
   const [contractor, setContractor] = useState({})
   const [value, setValue] = React.useState(0);
   const [invoices, setInvoices] = React.useState([]);
+  const [commitmentamounts, setCommitmentamounts] = React.useState([]);
+  const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
+  const [openFailedToast, setOpenFailedToast] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
+  const [openAmount, setOpenAmount] = React.useState(false);
+  const [openDelete, setOpenDelete] = React.useState(false);
+  const [line, setLine] = React.useState(null);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
   useEffect(() => {
-    apiService.getContractor(contractorId)
-    .then(res => setContractor(res.data))
+      apiService.getCommitment(id).then(res => {
+        setCommitment(res.data)
+        setContractor(res.data.contractor)
+        setInvoices(res.data.invoices)
+        setCommitmentamounts(res.data.commitmentamounts)
+      } )
   }, [])
 
-   useEffect(() => {
-    apiService.getInvoices()
-    .then(res => setInvoices(res.data))   
-  }, [])
+
+  const push = (e) =>{
+    apiService.getCommitment(id).then(res => {
+      setCommitment(res.data)
+      setContractor(res.data.contractor)
+      setInvoices(res.data.invoices)
+      setCommitmentamounts(res.data.commitmentamounts)
+    } )
+  }
+
+  const update = (e) =>{
+    apiService.getCommitment(id).then(res => {
+      setCommitment(res.data)
+      setContractor(res.data.contractor)
+      setInvoices(res.data.invoices)
+      setCommitmentamounts(res.data.commitmentamounts)
+    } )
+  }
 
   const formatDate = (date) => {
     var d = new Date(date),
@@ -136,47 +165,366 @@ const DetailCommitment = (props) => {
     return [year, month, day].join('-');
   }
 
+  let pounds = Intl.NumberFormat( {
+    style: 'currency',
+    maximumSignificantDigits: 3,
+    minimumFractionDigits: 2
+  });
+
+  const closeFailedToast = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenFailedToast(false);
+  };
+
+  const closeSuccessToast = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSuccessToast(false);
+  };
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClickOpenAmount = () => {
+    setOpenAmount(true);
+  };
+
+  const handleClose = (event, reason) => {
+    if (reason === "backdropClick") {
+      console.log(reason);
+    } else {
+      setOpen(false);
+    }
+  };
+
+  const handleCloseAmount = (event, reason) => {
+    if (reason === "backdropClick") {
+      console.log(reason);
+    } else {
+      setOpenAmount(false);
+    }
+  };
+
+  const showFailedToast = () => {
+    setOpenFailedToast(true);
+  };
+
+  const showSuccessToast = () => {
+    setOpenSuccessToast(true);
+  };
+
+  
+  const PaperComponent = (props) => {
+    return (
+      <Draggable
+        handle="#draggable-dialog-title"
+        cancel={'[class*="MuiDialogContent-root"]'}
+      >
+        <Paper {...props} />
+      </Draggable>
+    );
+  }  
+
+  const handleCloseModalDelete = () =>{
+    setOpenDelete(false)
+  }
+
+  const handleOpenModalDelete = (e) =>{
+    setLine(e)
+    setOpenDelete(true)
+  }
+
+  const remove = () =>{
+    if(line){
+      apiService.deleteCommitmenAmount(line.id).then(
+        res => {
+          console.log(res);
+          const index = commitmentamounts.indexOf(line);
+          commitmentamounts.splice(index, 1);
+          handleCloseModalDelete()
+          setLine(null)
+          showSuccessToast()
+        },
+        error => {
+          console.log(error)
+          showFailedToast()
+        }
+      )
+    }      
+  }
+
   return (
     <BaseCard titleColor={"secondary"} title={commitment.reference}>
+      <Dialog 
+        open={openDelete}
+        onClose={handleCloseModalDelete}
+        PaperComponent={PaperComponent}
+        aria-labelledby="draggable-dialog-title"
+      >
+        <DialogTitle style={{ cursor: 'move', display:"flex" ,justifyContent:"end" , fontSize:"24px",fontWeight:"bold" }} id="draggable-dialog-title">
+          Suppression
+        </DialogTitle>
+        <DialogContent style={{width:300,display:"flex" ,justifyContent:"center" }}>
+          <DialogContentText>
+            Confirmer l'oppération
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button style={{fontSize:"24px",fontWeight:"bold"}} autoFocus onClick={handleCloseModalDelete}>
+            Annuler
+          </Button>
+          <Button style={{fontSize:"24px",fontWeight:"bold"}} onClick={remove}>Supprimer</Button>
+        </DialogActions>
+      </Dialog>
+    
+      <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'center'}} open={openSuccessToast} autoHideDuration={6000} onClose={closeSuccessToast}>
+        <Alert onClose={closeSuccessToast} severity="success" sx={{ width: '100%' }} style={{fontSize:"24px",fontWeight:"bold"}}>
+        L'oppération réussie
+        </Alert>
+      </Snackbar>
 
+      <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'center'}} open={openFailedToast} autoHideDuration={6000} onClose={closeFailedToast}>
+        <Alert onClose={closeFailedToast} severity="error" sx={{ width: '100%' }} style={{fontSize:"24px",fontWeight:"bold"}}>
+          L'oppération a échoué !
+        </Alert>
+      </Snackbar>
+      
+      <Dialog fullWidth={true} maxWidth={'lg'} open={open} onClose={handleClose}>
+        <DialogContent>
+          <div style={{display:"flex", justifyContent:"end"}}>
+            <IconButton onClick={handleClose}>
+              <Close fontSize='large'/>
+            </IconButton>
+          </div>
+          <InvoiceForm
+            Invoice={null} 
+            push={push} 
+            update={update}
+            showSuccessToast={showSuccessToast}
+            showFailedToast={showFailedToast}
+            commitmentId = {commitment.id}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog fullWidth={true} maxWidth={'lg'} open={openAmount} onClose={handleCloseAmount}>
+        <DialogContent>
+          <div style={{display:"flex", justifyContent:"end"}}>
+            <IconButton onClick={handleCloseAmount}>
+              <Close fontSize='large'/>
+            </IconButton>
+          </div>
+          <AmountForm
+            push={push} 
+            update={update}
+            showSuccessToast={showSuccessToast}
+            showFailedToast={showFailedToast}
+            commitmentId = {commitment.id}
+          />
+        </DialogContent>
+      </Dialog>
+
+
+      {commitment &&
         <Grid container spacing={2} marginLeft={'15px'}>
-                <Grid item xs={6}>
-                    <h3 style={{color:'#837B7B'}}>
+            <Grid item xs={4} sx={{color:"#837B7B", fontWeight: "bold"}} >
+                <Typography
+                    color="#837B7B"
+                    sx={{
+                    fontSize: "h4.fontSize",
+                    fontStyle:'initial'
+                    }}
+                >
                     Date début : {formatDate(commitment.start_date)}
-                    </h3>
-                </Grid>
-                <Grid item xs={6}>
-                    <h3 style={{color:'#837B7B'}}>
+                </Typography>
+            </Grid>
+            <Grid item xs={4} sx={{color:"#837B7B", fontWeight: "bold"}} >
+                <Typography
+                    color="#837B7B"
+                    sx={{
+                    fontSize: "h4.fontSize",
+                    fontStyle:'initial'
+                    }}
+                >
                     Date fin : {formatDate(commitment.end_date)}
-                    </h3>
-                </Grid>
-                <Grid item xs={6}>
-                    <h3 style={{color:'#837B7B'}}>
-                    Statut : {commitment.status}
-                    </h3>
-                </Grid>
-                <Grid item xs={6}>
-                    <h3 style={{color:'#837B7B'}}>
+                </Typography>
+            </Grid>
+            <Grid item xs={4} sx={{color:"#837B7B", fontWeight: "bold"}} >
+                <Typography
+                    color="#837B7B"
+                    sx={{
+                    fontSize: "h4.fontSize",
+                    fontStyle:'initial'
+                    }}
+                >
                     Date de clôture : {formatDate(commitment.close_date)}
-                    </h3>
-                </Grid>
-                <Grid item xs={6}>
-                    <h3 style={{color:'#837B7B'}}>
+                </Typography>
+            </Grid>
+            <Grid item xs={4} sx={{color:"#837B7B", fontWeight: "bold"}} >
+                <Typography
+                    color="#837B7B"
+                    sx={{
+                    fontSize: "h4.fontSize",
+                    fontStyle:'initial'
+                    }}
+                >
+                    Statut : {commitment.status}
+                </Typography>
+            </Grid>
+            <Grid item xs={8} sx={{color:"#837B7B", fontWeight: "bold"}} >
+                <Typography
+                    color="#837B7B"
+                    sx={{
+                    fontSize: "h4.fontSize",
+                    fontStyle:'initial'
+                    }}
+                >
                     Description : {commitment.description} 
-                    </h3>
-                </Grid>
+                </Typography>
+            </Grid>
+
+
+    {/*         <Grid item xs={12} sx={{color:"#837B7B", fontWeight: "bold"}} >
+                <Typography
+                    color="#837B7B"
+                    sx={{
+                    fontSize: "h3.fontSize",
+                    fontStyle:'initial',
+                    fontWeight:"bold"
+                    }}
+                >
+                    Prestateur : {contractor.label}
+                </Typography>
+            </Grid> */}
+            <Grid item xs={4} sx={{color:"#837B7B", fontWeight: "bold"}} >
+                <Typography
+                    color="#837B7B"
+                    sx={{
+                    fontSize: "h4.fontSize",
+                    fontStyle:'initial'
+                    }}
+                >
+                    Prestateur : {contractor.label}
+                </Typography>
+            </Grid>
+{/*             <Grid item xs={4} sx={{color:"#837B7B", fontWeight: "bold"}} >
+                <Typography
+                    color="#837B7B"
+                    sx={{
+                    fontSize: "h4.fontSize",
+                    fontStyle:'initial'
+                    }}
+                >
+                    Adrésse : {contractor.address}
+                </Typography>
+            </Grid> */}
+            <Grid item xs={4} sx={{color:"#837B7B", fontWeight: "bold"}} >
+                <Typography
+                    color="#837B7B"
+                    sx={{
+                    fontSize: "h4.fontSize",
+                    fontStyle:'initial'
+                    }}
+                >
+                    Teléphone : {contractor.telephone}
+                </Typography>
+            </Grid>
+            <Grid item xs={4} sx={{color:"#837B7B", fontWeight: "bold"}} >
+                <Typography
+                    color="#837B7B"
+                    sx={{
+                    fontSize: "h4.fontSize",
+                    fontStyle:'initial'
+                    }}
+                >
+                    Iban : {contractor.iban}
+                </Typography>
+            </Grid>
         </Grid>
+      }
 
 
-        <Box sx={{ width: '100%', marginTop:'15px' }}>
+      {commitment &&
+          <Grid container 
+            sx={{
+                mt:"20px",
+                mb:"30px"
+            }}
+          >
+            <Grid
+                item
+                xs={12}
+                lg={6}
+                sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent:"center"
+                }}
+            >
+                                        
+               <Button
+                   variant="contained"
+                   sx={{
+                   fontSize: "h3.fontSize",
+                   fontWeight: "600",
+                   mt: "15px",
+                   marginInline:"32px",
+                   marginTop:1,
+                   width:'60%'
+                   }}
+                   color={'primary'}
+                   onClick={handleClickOpen}
+               >
+                   + Facture
+               </Button> 
+       </Grid>
+
+       <Grid
+           item
+           xs={12}
+           lg={6}
+           sx={{
+               display: "flex",
+               alignItems: "center",
+               justifyContent:"center"
+
+           }}
+           >
+
+               <Button
+                   variant="contained"
+                   sx={{
+                   fontSize: "h3.fontSize",
+                   fontWeight: "600",
+                   marginInline:"40px",
+                   mt: "15px",
+                   marginTop:1,
+                   width:'60%'
+                   }}
+                   color={'secondary'}
+                   onClick={handleClickOpenAmount}
+               >
+                   + Montant
+               </Button> 
+       </Grid>
+
+      </Grid>
+      }
+      {commitment &&
+        <Box sx={{ width: '100%', marginTop:'20px' }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <Tabs value={value} onChange={handleChange} aria-label="tabs">
                     <Tab style={{fontWeight:'1000', fontSize:'20px'}} label="Les factures d'engagement" {...a11yProps(0)} />
-                    <Tab style={{fontWeight:'1000', fontSize:'20px'}} label="Prestateur d'engagement" {...a11yProps(1)} />
+                    <Tab style={{fontWeight:'1000', fontSize:'20px'}} label="Les montants d'engagement" {...a11yProps(1)} />
                 </Tabs>
             </Box>
 
             <CustomTabPanel value={value} index={0}>
+              {invoices.length > 0 ?
                 <Table
                 sx={{ minWidth: 750 }}
                 aria-labelledby="tableTitle"
@@ -185,7 +533,7 @@ const DetailCommitment = (props) => {
                 <EnhancedTableHead
                     rowCount={invoices.length}
                     headCells={headCells}
-                    headerBG="#ecf0f2"
+                    headerBG="#c8d789"
                     txtColor="#000000"
                 />
                 <TableBody>
@@ -196,7 +544,6 @@ const DetailCommitment = (props) => {
                             hover
                             tabIndex={-1}
                             key={row.id}
-                            style={{backgroundColor: row.deleted ? '#e67e5f' : ""}}
                         >
                            
                             <TableCell align="left"></TableCell>
@@ -211,32 +558,63 @@ const DetailCommitment = (props) => {
                     })}
                 </TableBody>
                </Table>
+              :
+              <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "center"}}>
+                <Box style={{fontSize: '16px'}}>
+                  Liste vide
+                </Box>
+              </div>
+            }
             </CustomTabPanel>
             <CustomTabPanel value={value} index={1}>
-                <Grid container spacing={2} marginLeft={'15px'}>
-                    <Grid item xs={6}>
-                        <h3 style={{color:'#837B7B'}}>
-                            Label : {contractor.label}
-                        </h3>
-                    </Grid>
-                    <Grid item xs={6}>
-                        <h3 style={{color:'#837B7B'}}>
-                           Addresse : {contractor.address}
-                        </h3>
-                    </Grid>
-                    <Grid item xs={6}>
-                        <h3 style={{color:'#837B7B'}}>
-                            Teléphone : {contractor.telephone}
-                        </h3>
-                    </Grid>
-                    <Grid item xs={6}>
-                        <h3 style={{color:'#837B7B'}}>
-                            Iban : {contractor.iban}
-                        </h3>
-                    </Grid>
-                </Grid>
+            {commitmentamounts.length > 0 ?
+                <Table
+                sx={{ minWidth: 750 }}
+                aria-labelledby="tableTitle"
+                size={'medium'}
+                >
+                <EnhancedTableHead
+                    rowCount={commitmentamounts.length}
+                    headCells={headCellsAmounts}
+                    headerBG="#c8d789"
+                    txtColor="#000000"
+                />
+                <TableBody>
+                    {commitmentamounts
+                    .map((row, index) => {
+                        return (
+                        <TableRow
+                            hover
+                            tabIndex={-1}
+                            key={row.id}
+                        >
+                           
+                            <TableCell align="left"></TableCell>
+                            <TableCell align="left">{pounds.format(parseFloat(row.amount).toFixed(2))} {row.currency.label} </TableCell>
+                            <TableCell align="left">{row.spendingtype.label}</TableCell>
+                            <TableCell align="left">
+                              <Tooltip onClick={() => handleOpenModalDelete(row)} 
+                                  title="supprimer">
+                                  <IconButton>
+                                      <DeleteIcon color='danger' fontSize='medium' />
+                                  </IconButton>
+                              </Tooltip>
+                            </TableCell>
+                        </TableRow>
+                        );
+                    })}
+                </TableBody>
+               </Table>
+              :
+              <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "center"}}>
+                <Box style={{fontSize: '16px'}}>
+                  Liste vide
+                </Box>
+              </div>
+            }
             </CustomTabPanel>
         </Box>
+      }
     </BaseCard>
 
   );

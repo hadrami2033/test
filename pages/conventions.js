@@ -9,7 +9,6 @@ import TableContainer from '@mui/material/TableContainer';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Checkbox from '@mui/material/Checkbox';
-import IconButton from '@mui/material/IconButton';
 import EnhancedTableHead from "../src/components/Table/TableHeader";
 import apiService from "../src/services/apiService";
 import Dialog from '@mui/material/Dialog';
@@ -17,14 +16,12 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import { Close } from '@mui/icons-material';
 import Draggable from 'react-draggable';
 import { useRouter } from "next/router";
 import {ArrowBack, ArrowForward } from "@material-ui/icons";
 import Select from '@mui/material/Select';
 import { Box } from "@material-ui/core";
 import EnhancedTableToolbar from "../src/components/Table/TableConventionToolbar";
-import ConventionForm from "./add_convention";
 
 
 function descendingComparator(a, b, orderBy) {
@@ -217,27 +214,6 @@ export default function EnhancedTable() {
     setOrderBy(property);
   };
 
-  const push = (e) =>{
-    //Conventions.push(e)
-    apiService.getConventions( //pageNumber, pageSize, getBy, currentMonth.monthId
-      ).then(
-        res => {
-          console.log(res.data);
-          setConventions(res.data);
-          //setHasNext(res.data.nextPage);
-          //setHasPrevious(res.data.previousPage);
-          //setTotalPages(res.data.TotalPages);
-          //setAll(res.data.TotalCount);
-        }, 
-        error => console.log(error)
-    )
-  }
-
-  const update = (e) =>{
-    var objIndex = Conventions.findIndex((obj => obj.id == e.id));
-    Conventions[objIndex] = e
-  }
-
   const remove = () =>{
     if(selected !== null){
       apiService.deleteConvention(selected.id).then(
@@ -276,7 +252,14 @@ export default function EnhancedTable() {
 
   const editClick = () => {
     console.log("edit => ", selected);
-    handleClickOpen();
+    router.push({
+      pathname: '/add_convention',
+      query: { id: selected.id }
+    })
+  }
+
+  const addConvention = () => {
+    router.push({ pathname: '/add_convention' })
   }
 
   const deleteClick = () => {
@@ -312,18 +295,6 @@ export default function EnhancedTable() {
     const dateFormat = new Date(date).getDate()+"/"+(new Date(date).getMonth()+1)+"/"+new Date(date).getFullYear();
     return dateFormat;
   }
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = (event, reason) => {
-    if (reason === "backdropClick") {
-      console.log(reason);
-    } else {
-      setOpen(false);
-    }
-  };
 
   const handleCloseModalDelete = () =>{
     setOpenDelete(false)
@@ -386,24 +357,6 @@ export default function EnhancedTable() {
         </Alert>
       </Snackbar>
 
-
-      <Dialog fullWidth={true} maxWidth={'lg'} open={open} onClose={handleClose}>
-        <DialogContent>
-          <div style={{display:"flex", justifyContent:"end"}}>
-            <IconButton onClick={handleClose}>
-              <Close fontSize='large'/>
-            </IconButton>
-          </div>
-          <ConventionForm
-            convention={selected} 
-            push={push} 
-            update={update}
-            showSuccessToast={showSuccessToast}
-            showFailedToast={showFailedToast}
-          />
-        </DialogContent>
-      </Dialog>
-
       <Dialog 
         open={openDelete}
         onClose={handleCloseModalDelete}
@@ -434,7 +387,7 @@ export default function EnhancedTable() {
         editClick = {editClick}
         onSearch = {onSearch}
         search = {search}
-        openModal = {handleClickOpen}
+        openModal = {addConvention}
         goSearch = {goSearch}
       />
        <TableContainer>
@@ -478,7 +431,6 @@ export default function EnhancedTable() {
                   .map((row, index) => {
                     const isItemSelected = isSelected(row.id);
                     const labelId = `enhanced-table-checkbox-${index}`;
-                    //const bc = row.Deleted ? 'red' : "";
                     return (
                       <TableRow
                         hover
@@ -488,7 +440,6 @@ export default function EnhancedTable() {
                         tabIndex={-1}
                         key={row.id}
                         //selected={isItemSelected}
-                        style={{backgroundColor: row.deleted ? '#e67e5f' : ""}}
                       >
                         
                         <TableCell padding="checkbox">

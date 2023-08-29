@@ -42,6 +42,15 @@ class JeffiService {
     return http.delete(`/commitments/${id}`);
   }
 
+  addCommitmentAmount(data){
+    return http.post(`/commitmentamounts`, data);
+  }
+
+  deleteCommitmenAmount(id){
+    return http.delete(`/commitmentamounts/${id}`);
+  }
+
+
   // Contractors
   getContractors(){
     return http.get(`/contractors`);
@@ -64,16 +73,31 @@ class JeffiService {
   }
 
   //catgories
-
   getCategoriesType(){
     return http.get(`/categoriestype`);
   }
   addCategorie(data){
     return http.post(`/categories`, data);
   }
+  updateCategorie(data){
+    return http.put(`/categories/${data.id}`, data);
+  }
 
+  //deadlines
+  addDeadline(data){
+    return http.post(`/deadlines`, data);
+  }
+  updateDeadline(data){
+    return http.put(`/deadlines/${data.id}`, data);
+  }
 
+  addInvoiceLine(data){
+    return http.post(`/invoicelines`, data);
+  }
 
+  deleteInvoiceLine(id){
+    return http.delete(`/invoicelines/${id}`);
+  }
 
   addInvoice(data){
     return http.post(`/invoices`, data);
@@ -136,6 +160,12 @@ class JeffiService {
   }
   getCurrency(id){
     return http.get(`/currencies/${id}`);
+  }
+  getSpendingsTypes(){
+    return http.get(`/spendingtypes`);
+  }
+  addSpendingsType(data){
+    return http.post(`/spendingtypes`, data);
   }
 
 

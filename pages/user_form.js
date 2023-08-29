@@ -97,7 +97,7 @@ const UserForm = (props) => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <Grid item xs={12} lg={12} alignItems="center" justify="center">
+      {/* <Grid item xs={12} lg={12} alignItems="center" justify="center">
         <BaseCard title=" إنشاء حساب">
           <Stack style={styles.stack} spacing={10} direction="row">
             <Controls.Input
@@ -157,7 +157,7 @@ const UserForm = (props) => {
           )}
           </Button>
         </BaseCard>
-      </Grid>
+      </Grid> */}
     </form>
   );
 };
