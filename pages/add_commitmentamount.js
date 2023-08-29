@@ -18,7 +18,7 @@ const AmountForm = (props) => {
   const defaultValues = {
     currency_id: null,
     spendingtype_id: null,
-    amount: 0,
+    amount: null,
     commitment: commitmentId ? commitmentId : null
   }
 

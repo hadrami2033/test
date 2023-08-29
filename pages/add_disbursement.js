@@ -34,7 +34,7 @@ const DibursementForm = (props) => {
     type_id: null,
     status_id: null,
     date: "",
-    orderamount: 0,
+    orderamount: null,
     disbursementamount: null,
     convention: conventionId,
     currency_id: null,

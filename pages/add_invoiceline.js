@@ -17,7 +17,7 @@ const InvoiceLineForm = (props) => {
 
   const defaultValues = {
     currency_id: null,
-    amount: 0,
+    amount: null,
     invoice: invoiceId ? invoiceId : null
   }
 

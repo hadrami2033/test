@@ -17,7 +17,7 @@ const CategorieForm = (props) => {
   const defaultValues = Categorie === null ? {
     reference:"",
     type_id: null,
-    amount: 0,
+    amount: null,
     convention: conventionId
   } : 
   {
