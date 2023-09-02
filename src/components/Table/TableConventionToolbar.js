@@ -24,21 +24,19 @@ const EnhancedTableToolbar = (props) => {
       >
         {selected !== null ? (
             <Stack spacing={2} direction="row">
-                {!selected.deleted &&
                 <Tooltip onClick={deleteClick} title="Supprimer">
                     <IconButton>
                         <DeleteIcon color='danger' fontSize='large'/>
                     </IconButton>
                 </Tooltip>
-                }
-                {!selected.deleted &&
+                {editClick &&
                 <Tooltip onClick={editClick} title="Modifier">
                     <IconButton>
                         <CreateOutlined fontSize='large' />
                     </IconButton>
                 </Tooltip>
                 }
-                {!selected.deleted &&
+                {detail &&
                 <Tooltip onClick={detail} title="Detail">
                     <IconButton>
                         <InfoOutlined color='primary' fontSize='large' />

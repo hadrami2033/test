@@ -1,16 +1,16 @@
-/* const withExportImages = require('next-export-optimize-images')
+const withExportImages = require('next-export-optimize-images')
 
 module.exports = withExportImages({
   // write your next.js configuration values.
 })
- */
 
-module.exports = {
+
+/* module.exports = {
   reactStrictMode: true,
   env: {
     NEXT_PUBLIC_HOST_NAME: process.env.HOST,
   }
-}
+} */
 /* const withPlugins = require('next-compose-plugins');
 const optimizedImages = require('next-optimized-images');
 

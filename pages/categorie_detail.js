@@ -91,7 +91,7 @@ function a11yProps(index) {
   }
 
 const DetailCategorie = (props) => {
-  const {categorie, categoriecommitmentsamounts, categoriecommitmentsinvoices, currency} = props;
+  const {categorie, categoriecommitmentsamounts= [], categoriecommitmentsinvoices = [], currency} = props;
   const [loading, setLoading] = React.useState(false);
   const [value, setValue] = React.useState(0);
 

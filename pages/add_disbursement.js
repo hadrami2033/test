@@ -29,7 +29,7 @@ const DibursementForm = (props) => {
           availableAmount, currency, currenteState, availabeState, categories,
           Invoices, Commitments} = props;
 
-  const defaultValues = disbursement === null ? {
+  const defaultValues = !disbursement ? {
     reference: "",
     type_id: null,
     status_id: null,

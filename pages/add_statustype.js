@@ -9,54 +9,30 @@ import BaseCard from "../src/components/baseCard/BaseCard";
 import apiService from "../src/services/apiService";
 import { Form } from "../src/components/Form";
 import Controls from "../src/components/controls/Controls";
+import states from '../src/helper/states'
 
+const StatusTypeForm = (props) => {
+  const {StatusType, push, update, showSuccessToast, showFailedToast} = props;
 
-const CategorieForm = (props) => {
-  const {conventionId, Categorie, push, update, showSuccessToast, showFailedToast, availableAmount} = props;
-
-  const defaultValues = !Categorie ? {
-    reference:"",
-    type_id: null,
-    amount: null,
-    convention: conventionId
-  } : 
-  {
-    ...Categorie,
-    type_id:Categorie.type.id
-  }
+  const defaultValues = StatusType === null ? {
+    label: null,
+    code: null
+  } : StatusType
 
   const [formValues, setFormValues] = useState(defaultValues);
   const [loading, setLoading] = React.useState(false);
-  const [categoriesType, setCategoriesType] = React.useState([]);
+
 
   const validate = (fieldValues = values) => {
     let temp = { ...errors };
-    if ("reference" in fieldValues)
-      temp.reference = fieldValues.reference ? "" : "La reférence est requise";
-    if ("amount" in fieldValues)
-      temp.amount = fieldValues.amount ? "" : "Le montant est requis";
-    if ("type_id" in fieldValues)
-      temp.type_id = fieldValues.type_id ? "" : "Le type requis";
-   
-      setErrors({
+    if ("code" in fieldValues)
+      temp.code = fieldValues.code ? "" : "Libelé requis";
+    setErrors({
       ...temp,
     });
 
     if (fieldValues == values) return Object.values(temp).every((x) => x == "");
   };
-
-
-
-  React.useEffect(() => {
-    console.log( "availableAmount ", availableAmount);
-    apiService.getCategoriesType().then(
-      res => {
-        console.log(res.data);
-        setCategoriesType(res.data);
-      },  
-      error => console.log(error)
-    ) 
-  }, [])
 
   const { values, setValues, errors, setErrors, handleInputChange, resetForm } = Form(formValues, true, validate);
     
@@ -67,11 +43,15 @@ const CategorieForm = (props) => {
     if (validate()) {
       setLoading(true)
       console.log(values);
-      if(Categorie === null){
-        apiService.addCategorie(values).then(
+      let stateSelcted = states.filter(e => e.id === values.code)
+      let value = {...values, label: stateSelcted[0].label}
+      console.log(value);
+      if(StatusType === null){
+        apiService.addStatusType(value).then(
           (res) => {
             console.log("added => " ,res);
             if(res.data){
+              if(push)
               push(res.data)
               resetForm();
               showSuccessToast()
@@ -87,13 +67,14 @@ const CategorieForm = (props) => {
           setLoading(false)
         });
       }else{
-        apiService.updateCategorie(values).then(
+        apiService.updateStatusType(value).then(
           (res) => {
             console.log("updated => ", res);
             if(!res.data){
               showFailedToast()
             }else{
-              update(values)
+              if(update)
+              update(value)
               showSuccessToast()
             }
           },
@@ -105,58 +86,43 @@ const CategorieForm = (props) => {
           setLoading(false)
         });
       }
-    }else{
-        console.log(" invalid object ", values);
-    }
+    } 
     //console.log(formValues);
   };
 
-
   const titleName = () => {
-    if(Categorie == null) 
-      return "Ajouter une catégorie" 
+    if(StatusType == null) 
+      return "Ajouter un type de status" 
     else
-      return "Modifier une catégorie"
+      return "Modifier un type de status"
+  }
+
+  const handleLabelChange = e =>{
+    let v = e.target.value;
+        let selected = categories.filter(e => e.id === v );
+        console.log(selected[0]);
+        selected[0].commitments && setCommitments(selected[0].commitments)
+    handleInputChange(e)
   }
 
   return (
     
-        <BaseCard titleColor={"secondary"} title={titleName()}>
-          {values &&
+        <BaseCard titleColor={"secondary"} title= {titleName()}>
+        {values &&
           <form onSubmit={handleSubmit}>
           <br/>
           <Stack style={styles.stack} spacing={2} direction="row">
-            <Controls.Input
-              style={{width:'300px'}}
-              id="reference-input"
-              name="reference"
-              label="Reférence"
-              value={values.reference}
-              onChange={handleInputChange}
-              error={errors.reference}
-            />
-            <Controls.Input
-              style={{width:'300px'}}
-              id="amount-input"
-              name="amount"
-              label="Montant"
-              type="number"
-              value={values.amount}
-              onChange={handleInputChange}
-              error={errors.amount}
-            />
             <Controls.Select
-              style={{width:'300px'}}
-              name="type_id"
-              label="Type"
-              value={values.type_id}
-              onChange={handleInputChange}
-              options={categoriesType}
-              error={errors.type_id}
-            />
+                style={{ width:'460px'} }
+                name="code"
+                label="Libelé"
+                value={values.code}
+                onChange={handleInputChange}
+                options={states}
+                error={errors.code}
+              />
           </Stack>
-
-
+          
           <br />
           <Button
             type="submit"
@@ -180,7 +146,6 @@ const CategorieForm = (props) => {
             />
           )}
           </Button>
-          
           </form>
         }
         </BaseCard>
@@ -195,4 +160,4 @@ const styles = {
     marginBottom: 10,
   },
 };
-export default CategorieForm;
+export default StatusTypeForm;

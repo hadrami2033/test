@@ -19,20 +19,30 @@ import LogoIcon from "../logo/LogoIcon";
 import Menuitems from "./MenuItems";
 import { useRouter } from "next/router";
 import Diversity2Icon from '@mui/icons-material/Diversity2';
-
+import { ExpandLess, ExpandMore } from "@mui/icons-material";
 
 const Sidebar = ({ isMobileSidebarOpen, onSidebarClose, isSidebarOpen }) => {
   const [open, setOpen] = React.useState(true);
+  const [openSubItems, setOpenSubItems] = React.useState(false);
+  const [indexOpen, setIndexOpen] = React.useState(0);
 
   const lgUp = useMediaQuery((theme) => theme.breakpoints.up("lg"));
 
   const handleClick = (index) => {
+    console.log(index);
     if (open === index) {
       setOpen((prevopen) => !prevopen);
     } else {
       setOpen(index);
     }
   };
+
+  const handleOpenSubItems = (index) => {
+    setOpenSubItems(!openSubItems)
+    setIndexOpen(index)
+  }
+
+
   let curl = useRouter();
   const location = curl.pathname;
 
@@ -43,6 +53,7 @@ const Sidebar = ({ isMobileSidebarOpen, onSidebarClose, isSidebarOpen }) => {
         <List>
           {Menuitems.map((item, index) => (
             <List component="li" disablePadding key={item.title}>
+              {!item.items ?
               <NextLink href={item.href}>
                 <ListItem
                   onClick={() => handleClick(index)}
@@ -59,32 +70,80 @@ const Sidebar = ({ isMobileSidebarOpen, onSidebarClose, isSidebarOpen }) => {
                 >
 
                   <ListItemIcon>
-                  {item.href == "/commitments" ?
-
+                    {item.href == "/commitments" ?
                       <Diversity2Icon 
                         fontSize='medium'
                         color="white"
                       />
-
-
                       :
-                    <FeatherIcon
-                      style={{
-                        color: `${location === item.href ? "white" : ""} `,
-                      }}
-                      icon={item.icon}
-                     
-                    />
-                  }
+                      <FeatherIcon
+                        style={{
+                          color: `${location === item.href ? "white" : ""} `,
+                        }}
+                        icon={item.icon}
+                      />
+                    }
                   </ListItemIcon>
 
-                  <ListItemText onClick={onSidebarClose} >
-                    {/* <p style={{fontSize:'20px'}}> */}
+                  <ListItemText>
                       {item.title}
-                    {/* </p>  */}
                   </ListItemText>
                 </ListItem>
               </NextLink>
+              :
+              <>
+                <ListItem
+                  onClick={() => handleOpenSubItems(index)}
+                  button
+                  selected={location === item.href}
+                  sx={{
+                    mb: 1,
+                    ...(location === item.href && {
+                      color: "white",
+                      backgroundColor: (theme) =>
+                        `${theme.palette.primary.main}!important`,
+                    }),
+                  }}
+                >
+                  <ListItemIcon>
+                      <FeatherIcon
+                        style={{
+                          color: `${location === item.href ? "white" : ""} `,
+                        }}
+                        icon={item.icon}
+                      />
+                  </ListItemIcon>
+
+                  <ListItemText>
+                      {item.title}
+                  </ListItemText>
+                  { openSubItems ? <ExpandLess/> : <ExpandMore/> }
+                </ListItem>
+                { (openSubItems && indexOpen === index) && item.items.map((subitem, subindex) => (
+                    <NextLink href={subitem.href}>
+                      <ListItem
+                        onClick={() => handleClick(subindex)}
+                        button
+                        selected={location === subitem.href}
+                        sx={{
+                          ml:3,
+                          ...(location === subitem.href && {
+                            color: "white",
+                            backgroundColor: (theme) =>
+                              `${theme.palette.primary.main}!important`,
+                          }),
+                        }}
+                      >
+                        <ListItemText sx={{ fontSize: "14px" }} disableTypography >
+                         {subitem.title}
+                        </ListItemText>
+                      </ListItem>
+                    </NextLink>
+                ))
+
+                }
+              </>
+              }
             </List>
           ))}
         </List>

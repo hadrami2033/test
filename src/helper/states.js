@@ -1,19 +1,23 @@
 const states = [
     {
-        code:1,
+        id:1,
         label:"Encour de traitement"
     },
     {
-        code: 2,
+        id: 2,
         label: "Envoyé"
     },
     {
-        code: 3,
+        id: 3,
         label: "Reçu"
     },
     {
-        code: 4,
+        id: 4,
         label: "Traité"
+    },
+    {
+        id: 5,
+        label: "Teste"
     }
 ]
 

@@ -1,6 +1,6 @@
 import http from "../http-common";
 
-class JeffiService {
+class MGMService {
 
   // Conventions
   getConventions(){
@@ -58,6 +58,67 @@ class JeffiService {
   getContractor(id){
     return http.get(`/contractors/${id}`);
   }
+  addContractor(data){
+    return http.post(`/contractors`, data);
+  }
+  updateContractor(data){
+    return http.put(`/contractors/${data.id}`, data);
+  }
+  deleteContractor(id){
+    return http.delete(`/contractors/${id}`);
+  }
+
+
+    // Contractors
+    getContractors(){
+      return http.get(`/contractors`);
+    }
+    getContractor(id){
+      return http.get(`/contractors/${id}`);
+    }
+    addContractor(data){
+      return http.post(`/contractors`, data);
+    }
+    updateContractor(data){
+      return http.put(`/contractors/${data.id}`, data);
+    }
+    deleteContractor(id){
+      return http.delete(`/contractors/${id}`);
+    }
+
+    // CategorieType
+    getCategoriesType(){
+      return http.get(`/categoriestype`);
+    }
+    getCategorieType(id){
+      return http.get(`/categoriestype/${id}`);
+    }
+    addCategorieType(data){
+      return http.post(`/categoriestype`, data);
+    }
+    updateCategorieType(data){
+      return http.put(`/categoriestype/${data.id}`, data);
+    }
+    deleteCategorieType(id){
+      return http.delete(`/categoriestype/${id}`);
+    }
+
+  // Disbursement type
+  getDisbursementsTypes(){
+    return http.get(`/disbursementtypes`);
+  }
+  getDisbursementType(id){
+    return http.get(`/disbursementtypes/${id}`);
+  }
+  addDisbursementType(data){
+    return http.post(`/disbursementtypes`, data);
+  }
+  updateDisbursementType(data){
+    return http.put(`/disbursementtypes/${data.id}`, data);
+  }
+  deleteDisbursementType(id){
+    return http.delete(`/disbursementtypes/${id}`);
+  }
 
   // Spendings
   getConventionSpendings(){
@@ -73,9 +134,6 @@ class JeffiService {
   }
 
   //catgories
-  getCategoriesType(){
-    return http.get(`/categoriestype`);
-  }
   addCategorie(data){
     return http.post(`/categories`, data);
   }
@@ -123,17 +181,28 @@ class JeffiService {
   addDisbursement(data){
     return http.post(`/disbursements`, data);
   }
-  getDisbursementsTypes(){
-    return http.get(`/disbursementtypes`);
-  }
   updateDisbursement(data){
     return http.put(`/disbursements/${data.id}`, data);
   }
 
-
+  // Type de status
   getStatusType(){
     return http.get(`/statustype`);
   }
+  getStatusTypeById(id){
+    return http.get(`/statustype/${id}`);
+  }
+  addStatusType(data){
+    return http.post(`/statustype`, data);
+  }
+  updateStatusType(data){
+    return http.put(`/statustype/${data.id}`, data);
+  }
+  deleteStatusType(id){
+    return http.delete(`/statustype/${id}`);
+  }
+
+
 
   addStatus(data){
     return http.post(`/states`, data);
@@ -146,26 +215,66 @@ class JeffiService {
   getFunder(id){
     return http.get(`/funders/${id}`);
   }
+  addFunder(data){
+    return http.post(`/funders`, data);
+  }
+  updateFunder(data){
+    return http.put(`/funders/${data.id}`, data);
+  }
+  deleteFunder(id){
+    return http.delete(`/funders/${id}`);
+  }
 
-
+  // Borrowers
   getBorrowers(){
     return http.get(`/borrowers`);
   }
   getBorrower(id){
     return http.get(`/borrowers/${id}`);
   }
+  addBorrower(data){
+    return http.post(`/borrowers`, data);
+  }
+  updateBorrower(data){
+    return http.put(`/borrowers/${data.id}`, data);
+  }
+  deleteBorrower(id){
+    return http.delete(`/borrowers/${id}`);
+  }
 
+  // Currency
   getCurrencies(){
     return http.get(`/currencies`);
   }
   getCurrency(id){
     return http.get(`/currencies/${id}`);
   }
+  addCurrency(data){
+    return http.post(`/currencies`, data);
+  }
+  updateCurrency(data){
+    return http.put(`/currencies/${data.id}`, data);
+  }
+  deleteCurrency(id){
+    return http.delete(`/currencies/${id}`);
+  }
+
+
+  //SpendingType
   getSpendingsTypes(){
     return http.get(`/spendingtypes`);
   }
   addSpendingsType(data){
     return http.post(`/spendingtypes`, data);
+  }
+  getSpendingType(id){
+    return http.get(`/spendingtypes/${id}`);
+  }
+  updateSpendingType(data){
+    return http.put(`/spendingtypes/${data.id}`, data);
+  }
+  deleteSpendingType(id){
+    return http.delete(`/spendingtypes/${id}`);
   }
 
 
@@ -184,4 +293,4 @@ class JeffiService {
 
 }
 
-export default new JeffiService();
+export default new MGMService();
