@@ -97,14 +97,6 @@ const StatusTypeForm = (props) => {
       return "Modifier un type de status"
   }
 
-  const handleLabelChange = e =>{
-    let v = e.target.value;
-        let selected = categories.filter(e => e.id === v );
-        console.log(selected[0]);
-        selected[0].commitments && setCommitments(selected[0].commitments)
-    handleInputChange(e)
-  }
-
   return (
     
         <BaseCard titleColor={"secondary"} title= {titleName()}>
