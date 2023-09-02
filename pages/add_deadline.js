@@ -16,8 +16,8 @@ const DeadlineForm = (props) => {
 
   const defaultValues = deadline === null ? {
     label:"",
-    order: 0,
-    amount: 0,
+    order: null,
+    amount: null,
     convention: conventionId
   } : 
   {

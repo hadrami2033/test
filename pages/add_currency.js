@@ -10,55 +10,31 @@ import apiService from "../src/services/apiService";
 import { Form } from "../src/components/Form";
 import Controls from "../src/components/controls/Controls";
 
+const CurrencyForm = (props) => {
+  const {Currency, push, update, showSuccessToast, showFailedToast} = props;
 
-
-const InvoiceLineForm = (props) => {
-  const {push, update, showSuccessToast, showFailedToast, invoiceId} = props;
-
-  const defaultValues = {
-    currency_id: null,
-    amount: null,
-    invoice: invoiceId ? invoiceId : null
-  }
+  const defaultValues = Currency === null ? {
+    code: null,
+    label: null,
+    description: null
+  } : Currency
 
   const [formValues, setFormValues] = useState(defaultValues);
   const [loading, setLoading] = React.useState(false);
-  const [invoices, setInvoices] = React.useState([]);
-  const [currencies, setCurrencies] = React.useState([]);
 
 
   const validate = (fieldValues = values) => {
     let temp = { ...errors };
-    if ("currency_id" in fieldValues)
-      temp.currency_id = fieldValues.currency_id ? "" : "Devise est requis";
-    if ("invoice" in fieldValues)
-      temp.invoice = fieldValues.invoice ? "" : "Une facture requise";
-    if ("amount" in fieldValues)
-      temp.amount = fieldValues.amount ? "" : "Le montant requis";
+    if ("code" in fieldValues)
+      temp.code = fieldValues.code ? "" : "Le code est requis";
+    if ("label" in fieldValues)
+      temp.label = fieldValues.label ? "" : "Libelé requis";
     setErrors({
       ...temp,
     });
 
     if (fieldValues == values) return Object.values(temp).every((x) => x == "");
   };
-
-
-
-  React.useEffect(() => {
-    apiService.getInvoices().then(
-      res => {
-        setInvoices(res.data);
-      },  
-      error => console.log(error)
-    ) .then(() => {
-        apiService.getCurrencies().then(
-            res => {
-              setCurrencies(res.data);
-            },  
-            error => console.log(error)
-        ) 
-    })
-  }, [])
 
   const { values, setValues, errors, setErrors, handleInputChange, resetForm } = Form(formValues, true, validate);
     
@@ -69,10 +45,12 @@ const InvoiceLineForm = (props) => {
     if (validate()) {
       setLoading(true)
       console.log(values);
-        apiService.addInvoiceLine(values).then(
+      if(Currency === null){
+        apiService.addCurrency(values).then(
           (res) => {
             console.log("added => " ,res);
             if(res.data){
+              if(push)
               push(res.data)
               resetForm();
               showSuccessToast()
@@ -87,52 +65,74 @@ const InvoiceLineForm = (props) => {
         ).then(() => {
           setLoading(false)
         });
+      }else{
+        apiService.updateCurrency(values).then(
+          (res) => {
+            console.log("updated => ", res);
+            if(!res.data){
+              showFailedToast()
+            }else{
+              if(update)
+              update(values)
+              showSuccessToast()
+            }
+          },
+          (error) => {
+            console.log(error);
+            showFailedToast()
+          } 
+        ).then(() => {
+          setLoading(false)
+        });
+      }
     } 
     //console.log(formValues);
   };
 
   const titleName = () => {
-      return "Ajouter une ligne de facture" 
+    if(Currency == null) 
+      return "Ajouter une dévise" 
+    else
+      return "Modifier une dévise"
   }
 
   return (
+    
         <BaseCard titleColor={"secondary"} title= {titleName()}>
-          {values &&
+        {values &&
           <form onSubmit={handleSubmit}>
           <br/>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
-              style={invoiceId ? {width:'460px'} : {width:'300px'}}
-              id="amount-input"
-              name="amount"
-              label="Montant"
-              type="number"
-              value={values.amount}
+              style={{width:'460px'}}
+              id="code-input"
+              name="code"
+              label="Code"
+              value={values.code}
               onChange={handleInputChange}
-              error={errors.amount}
+              error={errors.code}
             />
-            <Controls.Select
-              name="currency_id"
-              style={invoiceId ? {width:'460px'} : {width:'300px'}}
-              label="Devise"
-              value={values.currency_id}
+            <Controls.Input
+              style={{width:'460px'}}
+              id="label"
+              name="label"
+              label="Libelé"
+              value={values.label}
               onChange={handleInputChange}
-              options={currencies}
-              error={errors.currency_id}
+              error={errors.label}
             />
-            {!invoiceId &&
-             <Controls.Select
-               name="invoice"
-               style={{width:'300px'}}
-               label="Facture"
-               value={values.invoice}
-               onChange={handleInputChange}
-               options={invoices}
-               error={errors.invoice}
-             />
-            }
           </Stack>
-
+          <Stack style={styles.stack} spacing={2} direction="row">
+            <Controls.Input
+              style={{width:'935px'}}
+              id="description-input"
+              name="description"
+              label="Description"
+              value={values.description}
+              onChange={handleInputChange}
+              error={errors.description}
+            />
+          </Stack>
           <br />
           <Button
             type="submit"
@@ -156,7 +156,6 @@ const InvoiceLineForm = (props) => {
             />
           )}
           </Button>
-          
           </form>
         }
         </BaseCard>
@@ -171,4 +170,4 @@ const styles = {
     marginBottom: 10,
   },
 };
-export default InvoiceLineForm;
+export default CurrencyForm;

@@ -22,8 +22,42 @@ const Menuitems = [
   {
     title: "Paramétrage",
     icon: "settings",
-    href: "#",
+    items: [
+      {
+        title: "Bailleurs",
+        href: "/funders",
+      },
+      {
+        title: "Emprunteurs",
+        href: "/borrowers",
+      },
+      {
+        title: "Prestateurs",
+        href: "/contractors",
+      },
+      {
+        title: "Types de catégorie",
+        href: "/categorie_type",
+      },
+      {
+        title: "Devise",
+        href: "/currencies",
+      },
+      {
+        title: "Type de décaissement",
+        href: "/disbursementtypes",
+      },
+      {
+        title: "Type de dépense",
+        href: "/spendings_type",
+      },
+      {
+        title: "Type de statut",
+        href: "/status_type",
+      }
+    ]
   },
+  
 ];
 
 export default Menuitems;

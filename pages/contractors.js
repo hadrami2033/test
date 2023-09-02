@@ -1,4 +1,4 @@
-import { Alert, Button, CircularProgress, MenuItem, Snackbar, Tooltip } from "@mui/material";
+import { Alert, Button, CircularProgress, IconButton, MenuItem, Snackbar, Tooltip } from "@mui/material";
 import BaseCard from "../src/components/baseCard/BaseCard";
 import * as React from 'react';
 import PropTypes from 'prop-types';
@@ -22,37 +22,39 @@ import {ArrowBack, ArrowForward } from "@material-ui/icons";
 import Select from '@mui/material/Select';
 import { Box } from "@material-ui/core";
 import EnhancedTableToolbar from "../src/components/Table/TableConventionToolbar";
+import { Close } from "@mui/icons-material";
+import ContractorForm from "./add_contractor";
 
 const headCells = [
   {
-    id: 'reference',
+    id: 'code',
     numeric: false,
     disablePadding: true,
-    label: 'Reférence',
+    label: 'Code',
   },
   {
-    id: 'paymentmethod',
+    id: 'label',
     numeric: false,
     disablePadding: false,
-    label: 'Mehhode de paiement',
+    label: 'Libelé',
   },
   {
-    id: 'paymentreference',
+    id: 'address',
     numeric: false,
     disablePadding: false,
-    label: 'Réference de paiement',
+    label: 'Addrésse',
   },
   {
-    id: 'date',
+    id: 'telephone',
     numeric: false,
     disablePadding: false,
-    label: 'Date',
+    label: 'Telephone',
   },
   {
-    id: 'comment',
+    id: 'iban',
     numeric: false,
     disablePadding: false,
-    label: 'Commentaire',
+    label: 'Iban',
   }
 ];
 
@@ -73,7 +75,7 @@ export default function EnhancedTable() {
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('calories');
   const [selected, setSelected] = React.useState(null);
-  const [Invoices, setInvoices] = React.useState([])
+  const [Contractors, setContractors] = React.useState([])
   const [search, setSearch] = React.useState("")
   const [getBy, setGetBy] = React.useState("")
   const [open, setOpen] = React.useState(false);
@@ -106,11 +108,11 @@ export default function EnhancedTable() {
       ).then( () => { */
         //console.log("time : ", cMonth);
         //if(cMonth){
-          apiService.getInvoices( //pageNumber, pageSize, getBy
+          apiService.getContractors( //pageNumber, pageSize, getBy
             ).then(
               res => {
                 console.log(res.data);
-                setInvoices(res.data);
+                setContractors(res.data);
                 //setHasNext(res.data.nextPage);
                 //setHasPrevious(res.data.previousPage);
                 //setTotalPages(res.data.TotalPages);
@@ -167,12 +169,12 @@ export default function EnhancedTable() {
   };
 
   const push = (e) =>{
-    //Invoices.push(e)
-    apiService.getInvoices( //pageNumber, pageSize, getBy, currentMonth.monthId
+    //Contractors.push(e)
+    apiService.getContractors( //pageNumber, pageSize, getBy, currentMonth.monthId
       ).then(
         res => {
           console.log(res.data);
-          setInvoices(res.data);
+          setContractors(res.data);
           //setHasNext(res.data.nextPage);
           //setHasPrevious(res.data.previousPage);
           //setTotalPages(res.data.TotalPages);
@@ -183,17 +185,17 @@ export default function EnhancedTable() {
   }
 
   const update = (e) =>{
-    var objIndex = Invoices.findIndex((obj => obj.id == e.id));
-    Invoices[objIndex] = e
+    var objIndex = Contractors.findIndex((obj => obj.id == e.id));
+    Contractors[objIndex] = e
   }
 
   const remove = () =>{
     if(selected !== null){
-      apiService.deleteInvoice(selected.id).then(
+      apiService.deleteContractor(selected.id).then(
         res => {
           console.log(res);
-          const index = Invoices.indexOf(selected);
-          Invoices.splice(index, 1);
+          const index = Contractors.indexOf(selected);
+          Contractors.splice(index, 1);
           setDelete(!deleted)
           handleCloseModalDelete()
           setSelected(null)
@@ -224,15 +226,7 @@ export default function EnhancedTable() {
   }
 
   const editClick = () => {
-    console.log("edit => ", selected);
-    router.push({
-      pathname: '/add_invoice',
-      query: { id: selected.id }
-    })
-  }
-
-  const addInvoice = () => {
-    router.push({ pathname: '/add_invoice' })
+    setOpen(true);
   }
 
   const deleteClick = () => {
@@ -262,11 +256,6 @@ export default function EnhancedTable() {
   const isSelected = (id) => {
     console.log("idddd ", id);
     return selected !== null && selected.id === id; //selected.indexOf(id) !== -1;
-  }
-
-  const formatDate = (date) => {
-    const dateFormat = new Date(date).getDate()+"/"+(new Date(date).getMonth()+1)+"/"+new Date(date).getFullYear();
-    return dateFormat;
   }
 
   const handleClickOpen = () => {
@@ -302,20 +291,13 @@ export default function EnhancedTable() {
           <Paper {...props} />
         </Draggable>
       );
-  }  
-
-  const InvoiceDetail = () => {
-    //setDetail(true);
-    router.push({
-      pathname: '/invoice_detail',
-      query: {id: selected.id}
-    })
   }
+
 
   return (<>
     {/* {authenticated &&} */}
     {/* {!detail ? */}
-    <BaseCard titleColor={"secondary"} title="GESTION DES FACTURES">
+    <BaseCard titleColor={"secondary"} title="GESTION DES PRESTATEURS">
 
       <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'center'}} open={openSuccessToast} autoHideDuration={6000} onClose={closeSuccessToast}>
         <Alert onClose={closeSuccessToast} severity="success" sx={{ width: '100%' }} style={{fontSize:"24px",fontWeight:"bold"}}>
@@ -328,6 +310,24 @@ export default function EnhancedTable() {
           L'oppération a échoué !
         </Alert>
       </Snackbar>
+
+      <Dialog fullWidth={true} maxWidth={'lg'} open={open} onClose={handleClose}>
+                <DialogContent>
+                <div style={{display:"flex", justifyContent:"end"}}>
+                    <IconButton onClick={handleClose}>
+                    <Close fontSize='medium'/>
+                    </IconButton>
+                </div>
+                <ContractorForm
+                    Contractor={selected}
+                    push={push}
+                    update={update}
+                    showSuccessToast={showSuccessToast}
+                    showFailedToast={showFailedToast}
+                /> 
+                </DialogContent>
+       </Dialog>
+
 
       <Dialog 
         open={openDelete}
@@ -352,18 +352,17 @@ export default function EnhancedTable() {
       </Dialog>
 
       <EnhancedTableToolbar
-        detail = {InvoiceDetail}
-        field = {shooseField("reference")} 
+        field = {shooseField("label")} 
         selected = {selected}
         deleteClick = {deleteClick}
         editClick = {editClick}
         onSearch = {onSearch}
         search = {search}
-        openModal = {addInvoice}
+        openModal = {handleClickOpen}
         goSearch = {goSearch}
       />
+
        <TableContainer>
-       
        {loading ?
           <Box style={{width:'100%', display:'flex', justifyContent:"center" }}>
             <CircularProgress
@@ -378,7 +377,7 @@ export default function EnhancedTable() {
          </Box>
         :
           <>
-          {Invoices.length > 0 ?
+          {Contractors.length > 0 ?
             <Table
               sx={{ minWidth: 750 }}
               aria-labelledby="tableTitle"
@@ -390,7 +389,7 @@ export default function EnhancedTable() {
                 orderBy={orderBy}
                 onSelectAllClick ={null}
                 onRequestSort={handleRequestSort}
-                rowCount={Invoices.length}
+                rowCount={Contractors.length}
                 headCells={headCells}
                 headerBG="#c8d789"
                 txtColor="#000000"
@@ -398,7 +397,7 @@ export default function EnhancedTable() {
               <TableBody>
                 {/* if you don't need to support IE11, you can replace the `stableSort` call with:
                   rows.slice().sort(getComparator(order, orderBy)) */}
-                {Invoices.map((row, index) => {
+                {Contractors.map((row, index) => {
                     const isItemSelected = isSelected(row.id);
                     const labelId = `enhanced-table-checkbox-${index}`;
                     //const bc = row.Deleted ? 'red' : "";
@@ -423,11 +422,11 @@ export default function EnhancedTable() {
                             }}
                           />
                         </TableCell>
-                        <TableCell align="left">{row.reference}</TableCell>
-                        <TableCell align="left">{row.paymentmethod}</TableCell>
-                        <TableCell align="left">{row.paymentreference}</TableCell>
-                        <TableCell align="left">{formatDate(row.date)} </TableCell>
-                        <TableCell align="left">{row.comment}</TableCell>
+                        <TableCell align="left">{row.code}</TableCell>
+                        <TableCell align="left">{row.label}</TableCell>
+                        <TableCell align="left">{row.address}</TableCell>
+                        <TableCell align="left">{row.telephone}</TableCell>
+                        <TableCell align="left">{row.iban}</TableCell>
                       </TableRow>
                     );
                   })}
@@ -443,7 +442,7 @@ export default function EnhancedTable() {
           </>
         }
         </TableContainer>
-          {Invoices.length > 0 &&
+          {Contractors.length > 0 &&
           <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "space-between"}}>
             <div style={{width:"50%", display:'flex', alignItems:'center'}}>
               <Box style={{display:'flex', alignItems:'center', marginInline:"20px", fontWeight:'bold', color:"GrayText"}} >
@@ -485,7 +484,7 @@ export default function EnhancedTable() {
           }
     </BaseCard>
     {/* :
-    <DetailInvoice clientsCount = {200 } numbersCount = {200 } Invoice = {selected} />
+    <DetailContractor clientsCount = {200 } numbersCount = {200 } Contractor = {selected} />
     } */}
   </>);
 }

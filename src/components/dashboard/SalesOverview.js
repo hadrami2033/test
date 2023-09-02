@@ -461,7 +461,7 @@ const SalesOverview = () => {
     </div>
 
       ) : (<>
-    <BaseCard titleColor={"secondary"} title="Statistiaues des conventions">
+    <BaseCard titleColor={"secondary"} title="Statistiques des conventions">
     {all > 0 ?
       <Chart
         options={optionssalesoverview}

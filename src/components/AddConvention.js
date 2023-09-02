@@ -30,7 +30,7 @@ const ConventionForm = (props) => {
     reference: "",
     object: "",
     retrocede: null,
-    amount: 0.0,
+    amount: null,
     start_date: "",
     end_date: "",
     start_date_refund: "",

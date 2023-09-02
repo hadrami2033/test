@@ -1,6 +1,7 @@
 import { Alert, Button, CircularProgress, MenuItem, Snackbar, Tooltip } from "@mui/material";
 import BaseCard from "../src/components/baseCard/BaseCard";
 import * as React from 'react';
+import { useEffect } from "react";
 import PropTypes from 'prop-types';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -23,34 +24,6 @@ import Select from '@mui/material/Select';
 import { Box } from "@material-ui/core";
 import EnhancedTableToolbar from "../src/components/Table/TableConventionToolbar";
 
-
-function descendingComparator(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
-  return 0;
-}
-
-function getComparator(order, orderBy) {
-  return order === 'desc'
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
-}
-
-function stableSort(array, comparator) {
-  const stabilizedThis = array.map((el, index) => [el, index]);
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) {
-      return order;
-    }
-    return a[1] - b[1];
-  });
-  return stabilizedThis.map((el) => el[0]);
-}
 
 const headCells = [
   {
@@ -134,15 +107,15 @@ export default function EnhancedTable() {
   const [totalPages, setTotalPages] = React.useState(0);
   const [all, setAll] = React.useState(0);
   const [openFailedToast, setOpenFailedToast] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
   const [deleted, setDelete] = React.useState(false);
   const [authenticated, setAuthenticated] = React.useState(false);
 
 
   const router = useRouter()
 
-  React.useEffect(() => {
-      setLoading(true)
+  useEffect(() => {
+      //setLoading(true)
       //var cMonth;
       /* apiService.getCurrentMonth().then(
         res => {
@@ -154,6 +127,7 @@ export default function EnhancedTable() {
       ).then( () => { */
         //console.log("time : ", cMonth);
         //if(cMonth){
+        if(loading){
           apiService.getConventions( //pageNumber, pageSize, getBy
             ).then(
               res => {
@@ -169,6 +143,7 @@ export default function EnhancedTable() {
           .then(() => {
             setLoading(false)
           })
+        }
        //}
       
       
@@ -176,15 +151,15 @@ export default function EnhancedTable() {
 
   }, [pageNumber, pageSize, getBy, deleted])
 
-  React.useEffect(() => {
-   /*  if(!localStorage.getItem('user')){
+  /*React.useEffect(() => {
+     if(!localStorage.getItem('user')){
       console.log("no user in loc storage :", localStorage.getItem('user'));
       router.push('/login')
     }else{
       console.log("user in loc storage :", localStorage.getItem('user'))
       setAuthenticated(true)
-    } */
-  }, [])
+    } 
+  }, [])*/
 
   const showFailedToast = () => {
     setOpenFailedToast(true);
@@ -424,10 +399,7 @@ export default function EnhancedTable() {
                 txtColor="#000000"
               />
               <TableBody>
-                {/* if you don't need to support IE11, you can replace the `stableSort` call with:
-                  rows.slice().sort(getComparator(order, orderBy)) */}
-                {stableSort(Conventions, getComparator(order, orderBy))
-                  //.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                {Conventions
                   .map((row, index) => {
                     const isItemSelected = isSelected(row.id);
                     const labelId = `enhanced-table-checkbox-${index}`;
