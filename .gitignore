@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Logs
 logs
 *.log
@@ -130,7 +129,7 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
-=======
+
 # See https://help.github.com/ignore-files/ for more about ignoring files.
 
 # dependencies
@@ -149,4 +148,3 @@ yarn-error.log*
 
 # Next.js
 /.next
->>>>>>> conventions_manage
