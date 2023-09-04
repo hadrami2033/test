@@ -20,8 +20,6 @@ import {
 import BaseCard from "../src/components/baseCard/BaseCard"
 import apiService from "../src/services/apiService";
 import { Form } from "../src/components/Form";
-import Image from "next/image";
-import userimg from "../assets/images/users/8.jpg";
 import { Visibility, VisibilityOff } from "@material-ui/icons";
 import UserForm from "./user_form";
 import { Close } from '@mui/icons-material';
@@ -182,17 +180,7 @@ const Login = () =>{
                 }} >
         <BaseCard title=" تسجيل الدخول">
         <Stack style={{...styles.stack, marginBottom:30 }}  spacing={10} direction="row">
-
-        <Image
-            src={userimg}
-            placeholder="blur"
-            alt=""
-            width="200"
-            height="150"
-            className="roundedCircle"
-          />
-          
-         
+                <img src='/static/images/users/8.jpg' alt="" />         
 
           {/* <Image
             src={userimg}
@@ -321,5 +309,17 @@ const styles = {
       marginBottom: 10,
     },
 };
+
+
+//<Image
+//src='/static/images/users/8.jpg'
+//placeholder="blur"
+//alt=""
+//width="200"
+//height="150"
+//className="roundedCircle"
+//unoptimized
+///>
+
 
 export default Login;

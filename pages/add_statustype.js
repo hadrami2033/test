@@ -92,9 +92,9 @@ const StatusTypeForm = (props) => {
 
   const titleName = () => {
     if(StatusType == null) 
-      return "Ajouter un type de status" 
+      return "Ajouter un type de statut" 
     else
-      return "Modifier un type de status"
+      return "Modifier un type de statut"
   }
 
   return (

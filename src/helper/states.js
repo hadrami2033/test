@@ -1,7 +1,7 @@
 const states = [
     {
         id:1,
-        label:"Encour de traitement"
+        label:"En cours de traitement "
     },
     {
         id: 2,
@@ -14,10 +14,6 @@ const states = [
     {
         id: 4,
         label: "Traité"
-    },
-    {
-        id: 5,
-        label: "Teste"
     }
 ]
 

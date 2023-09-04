@@ -1,8 +1,16 @@
-const withExportImages = require('next-export-optimize-images')
+module.exports = {
+  images: {
+    unoptimized: true,
+  },
+}
 
-module.exports = withExportImages({
+//module.exports = nextConfig
+
+//const withExportImages = require('next-export-optimize-images')
+
+//module.exports = withExportImages({
   // write your next.js configuration values.
-})
+//})
 
 
 /* module.exports = {
