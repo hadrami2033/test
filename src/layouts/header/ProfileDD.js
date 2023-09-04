@@ -1,15 +1,11 @@
 import React from "react";
 import FeatherIcon from "feather-icons-react";
-import Image from "next/image";
-import userimg from "../../../assets/images/users/8.jpg";
 import {
   Box,
   Menu,
   Typography,
-  Link,
   ListItemButton,
   List,
-  ListItemText,
   Button,
   Divider,
   IconButton,
@@ -118,16 +114,8 @@ const ProfileDD = () => {
         onClick={handleClick4}
       >
         <Box display="flex" alignItems="center">
-
-          <Image
-            src={userimg}
-            placeholder="blur"
-            alt=""
-            width="30"
-            height="30"
-            className="roundedCircle"
-          />
-
+          <img src='/static/images/users/8.jpg' alt="" width="30" height="30" />
+    
           <Box
             sx={{
               display: {
@@ -188,5 +176,16 @@ const ProfileDD = () => {
     </>
   );
 };
+
+//<Image
+//src='/static/images/users/8.jpg'
+//placeholder="blur"
+//alt=""
+//width="30"
+//height="30"
+//className="roundedCircle"
+//unoptimized
+///>
+
 
 export default ProfileDD;

@@ -273,7 +273,7 @@ export default function EnhancedTable() {
   return (<>
     {/* {authenticated &&} */}
     {/* {!detail ? */}
-    <BaseCard titleColor={"secondary"} title="TYPE DE STATUS">
+    <BaseCard titleColor={"secondary"} title="TYPE DE STATUT">
 
       <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'center'}} open={openSuccessToast} autoHideDuration={6000} onClose={closeSuccessToast}>
         <Alert onClose={closeSuccessToast} severity="success" sx={{ width: '100%' }} style={{fontSize:"24px",fontWeight:"bold"}}>

@@ -64,7 +64,7 @@
   "scripts": {
     "dev": "node server.js",
     "build": "next build",
-    "export": "next build && next export && next-export-optimize-images",
+    "export": "next build && next export",
     "start": "node server.js",
     "post-update": "echo \"codesandbox preview only, need an update\" && yarn upgrade --latest",
     "lint": "next lint"
