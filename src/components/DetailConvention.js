@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Alert, Card, CardContent, Typography, Button, Grid, Tooltip, Stack,Snackbar, Box, Tab ,Tabs, CircularProgress  } from "@mui/material";
 import BaseCard from "./baseCard/BaseCard";
-import apiService from "../services/apiService";
 import PropTypes from 'prop-types';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -24,6 +23,8 @@ import DetailDisbursement from "../../pages/disbursement_detail";
 import DetailCategorie from "../../pages/categorie_detail";
 import DeadlineForm from "../../pages/add_deadline";
 import DetailDeadline from "../../pages/deadline_detail";
+import useAxios from "../utils/useAxios";
+import { useRouter } from "next/router";
 
 
 const headCellsDecaissements = [
@@ -174,44 +175,49 @@ const DetailConvention = (props) => {
   const [commitments, setCommitments] = React.useState([]);
   const [invoices, setInvoices] = React.useState([]);
   const [disbursementTypes, setDisbursementTypes] = React.useState([]);
-
+  const axios = useAxios();
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+  const router = useRouter()
 
   useEffect(() => {
     setLoading(true)
-    apiService.getConvention(id).then(res => {
-        setConvention(res.data)
-        //console.log("disbursements ", res.data.disbursements); 
-        setBorrower(res.data.borrower)
-        setFunder(res.data.funder)
-        setCurrency(res.data.currency)
-        setDisbursements(res.data.disbursements)
-        setDeadlines(res.data.deadlines)
-        setCategories(res.data.categories)
-        setLoading(false)
-    })
+    if(id){
+      axios.get(`/conventions/${id}`).then(res => {
+          setConvention(res.data)
+          //console.log("disbursements ", res.data.disbursements); 
+          setBorrower(res.data.borrower)
+          setFunder(res.data.funder)
+          setCurrency(res.data.currency)
+          setDisbursements(res.data.disbursements)
+          setDeadlines(res.data.deadlines)
+          setCategories(res.data.categories)
+          setLoading(false)
+      })
+        .then( () => {
+          axios.get(`/statustype`).then(
+          res => {
+            console.log(res.data);
+            setDisbursementStatus(res.data)
+          },
+          error => console.log(error)
+        )
+      }
+      )
       .then( () => {
-        apiService.getStatusType().then(
-        res => {
-          console.log(res.data);
-          setDisbursementStatus(res.data)
-        },
-        error => console.log(error)
+        axios.get(`/disbursementtypes`).then(
+          res => {
+            console.log(res.data);
+            setDisbursementTypes(res.data)
+          },  
+          error => console.log(error)
+        )
+      }
       )
+    }else{
+      router.push("/conventions")
     }
-    )
-    .then( () => {
-        apiService.getDisbursementsTypes().then(
-        res => {
-          console.log(res.data);
-          setDisbursementTypes(res.data)
-        },  
-        error => console.log(error)
-      )
-    }
-    )
   }, [])
 
   const formatDate = (date) => {
@@ -274,12 +280,6 @@ const DetailConvention = (props) => {
     //console.log(invoices);
     return invoices;
   }
-
-  const getCommitmentsInvoicesAmount = (commitments) => {
-
-  }
-
-
   const closeFailedToast = (event, reason) => {
     if (reason === 'clickaway') {
       return;
@@ -357,7 +357,7 @@ const DetailConvention = (props) => {
   };
 
   const push = (e) =>{
-    apiService.getConvention(id).then(res => {
+    axios.get(`/conventions/${id}`).then(res => {
         console.log(res.data); 
         setConvention(res.data)
         setCurrency(res.data.currency)
@@ -369,7 +369,7 @@ const DetailConvention = (props) => {
 
   const update = (e) =>{
     setDisburssementSelected(null)
-    apiService.getConvention(id).then(res => {
+    axios.get(`/conventions/${id}`).then(res => {
         console.log(res.data); 
         setConvention(res.data)
         setCurrency(res.data.currency)
@@ -757,7 +757,7 @@ const DetailConvention = (props) => {
                                 fontStyle:'initial',
                                 }}
                             >
-                                Commission : {convention.costs}
+                                Commission : {pounds.format(convention.costs)}  {currency.label} 
                             </Typography>
                             }
                         </Grid>

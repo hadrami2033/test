@@ -6,9 +6,9 @@ import {
   CircularProgress
 } from "@mui/material";
 import BaseCard from "../src/components/baseCard/BaseCard";
-import apiService from "../src/services/apiService";
 import { Form } from "../src/components/Form";
 import Controls from "../src/components/controls/Controls";
+import useAxios from "../src/utils/useAxios";
 
 
 const DeadlineForm = (props) => {
@@ -52,7 +52,8 @@ const DeadlineForm = (props) => {
   }, [])
 
   const { values, setValues, errors, setErrors, handleInputChange, resetForm } = Form(formValues, true, validate);
-    
+  const axios = useAxios();
+
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -61,7 +62,7 @@ const DeadlineForm = (props) => {
       setLoading(true)
       console.log(values);
       if(deadline === null){
-        apiService.addDeadline(values).then(
+        axios.post(`/deadlines`, values).then(
           (res) => {
             console.log("added => " ,res);
             if(res.data){
@@ -80,7 +81,7 @@ const DeadlineForm = (props) => {
           setLoading(false)
         });
       }else{
-        apiService.updateDeadline(values).then(
+        axios.put(`/deadlines/${values.id}`, values).then(
           (res) => {
             console.log("updated => ", res);
             if(!res.data){
@@ -114,11 +115,11 @@ const DeadlineForm = (props) => {
   return (
         <BaseCard titleColor={"secondary"} title={titleName()}>
           {values &&
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} style={{paddingInline:'5%'}}>
           <br/>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
-              style={{width:'300px'}}
+              style={{width:'33.33%'}}
               id="label-input"
               name="label"
               label="Libelé"
@@ -127,7 +128,7 @@ const DeadlineForm = (props) => {
               error={errors.label}
             />
             <Controls.Input
-              style={{width:'300px'}}
+              style={{width:'33.33%'}}
               id="amount-input"
               name="amount"
               label="Montant"
@@ -137,7 +138,7 @@ const DeadlineForm = (props) => {
               error={errors.amount}
             />
             <Controls.Input
-              style={{width:'300px'}}
+              style={{width:'33.33%'}}
               id="order-input"
               name="order"
               label="Order"
@@ -150,6 +151,7 @@ const DeadlineForm = (props) => {
 
 
           <br />
+          <Stack style={styles.stack} spacing={2}>
           <Button
             type="submit"
             style={{ fontSize: "25px" }}
@@ -172,7 +174,8 @@ const DeadlineForm = (props) => {
             />
           )}
           </Button>
-          
+          </Stack>
+
           </form>
         }
         </BaseCard>

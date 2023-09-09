@@ -2,9 +2,9 @@ import * as React from 'react';
 import { useRouter } from 'next/router';
 import { Alert, Box, CircularProgress, Snackbar } from '@mui/material';
 import BaseCard from '../src/components/baseCard/BaseCard';
-import apiService from '../src/services/apiService';
 import { useEffect } from 'react';
 import InvoiceForm from '../src/components/AddInvoice';
+import useAxios from '../src/utils/useAxios';
 
 export default function AddInvoice(){
   const router = useRouter()
@@ -14,11 +14,12 @@ export default function AddInvoice(){
   const [openFailedToast, setOpenFailedToast] = React.useState(false);
   const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const axios = useAxios();
 
   useEffect(() => {
     if(id){
       setLoading(true)
-      apiService.getInvoice(id).then(res => {
+      axios.get(`/invoices/${id}`).then(res => {
           setInvoice(res.data)
           setLoading(false)
       })

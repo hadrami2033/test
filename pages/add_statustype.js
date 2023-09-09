@@ -6,10 +6,10 @@ import {
   CircularProgress
 } from "@mui/material";
 import BaseCard from "../src/components/baseCard/BaseCard";
-import apiService from "../src/services/apiService";
 import { Form } from "../src/components/Form";
 import Controls from "../src/components/controls/Controls";
 import states from '../src/helper/states'
+import useAxios from "../src/utils/useAxios";
 
 const StatusTypeForm = (props) => {
   const {StatusType, push, update, showSuccessToast, showFailedToast} = props;
@@ -35,7 +35,7 @@ const StatusTypeForm = (props) => {
   };
 
   const { values, setValues, errors, setErrors, handleInputChange, resetForm } = Form(formValues, true, validate);
-    
+  const axios = useAxios();
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -47,7 +47,7 @@ const StatusTypeForm = (props) => {
       let value = {...values, label: stateSelcted[0].label}
       console.log(value);
       if(StatusType === null){
-        apiService.addStatusType(value).then(
+        axios.post(`/statustype`,value).then(
           (res) => {
             console.log("added => " ,res);
             if(res.data){
@@ -67,7 +67,7 @@ const StatusTypeForm = (props) => {
           setLoading(false)
         });
       }else{
-        apiService.updateStatusType(value).then(
+        axios.put(`/statustype/${value.id}`,value).then(
           (res) => {
             console.log("updated => ", res);
             if(!res.data){
@@ -101,11 +101,11 @@ const StatusTypeForm = (props) => {
     
         <BaseCard titleColor={"secondary"} title= {titleName()}>
         {values &&
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} style={{paddingInline:'5%'}}>
           <br/>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Select
-                style={{ width:'460px'} }
+                style={{ width:'100%'} }
                 name="code"
                 label="Libelé"
                 value={values.code}
@@ -116,6 +116,7 @@ const StatusTypeForm = (props) => {
           </Stack>
           
           <br />
+          <Stack style={styles.stack} spacing={2}>
           <Button
             type="submit"
             style={{ fontSize: "25px" }}
@@ -138,6 +139,7 @@ const StatusTypeForm = (props) => {
             />
           )}
           </Button>
+          </Stack>
           </form>
         }
         </BaseCard>

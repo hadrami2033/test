@@ -6,9 +6,9 @@ import {
   CircularProgress
 } from "@mui/material";
 import BaseCard from "../src/components/baseCard/BaseCard";
-import apiService from "../src/services/apiService";
 import { Form } from "../src/components/Form";
 import Controls from "../src/components/controls/Controls";
+import useAxios from "../src/utils/useAxios";
 
 const FunderForm = (props) => {
   const {Funder, push, update, showSuccessToast, showFailedToast} = props;
@@ -39,7 +39,7 @@ const FunderForm = (props) => {
   };
 
   const { values, setValues, errors, setErrors, handleInputChange, resetForm } = Form(formValues, true, validate);
-    
+  const axios = useAxios();
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -48,7 +48,7 @@ const FunderForm = (props) => {
       setLoading(true)
       console.log(values);
       if(Funder === null){
-        apiService.addFunder(values).then(
+        axios.post(`/funders`, values).then(
           (res) => {
             console.log("added => " ,res);
             if(res.data){
@@ -68,7 +68,7 @@ const FunderForm = (props) => {
           setLoading(false)
         });
       }else{
-        apiService.updateFunder(values).then(
+        axios.put(`/funders/${values.id}`, values).then(
           (res) => {
             console.log("updated => ", res);
             if(!res.data){
@@ -102,11 +102,11 @@ const FunderForm = (props) => {
     
         <BaseCard titleColor={"secondary"} title= {titleName()}>
         {values &&
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} style={{paddingInline:'5%'}}>
           <br/>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
-              style={{width:'300px'}}
+              style={{width:'33.33%'}}
               id="code-input"
               name="code"
               label="Code"
@@ -115,7 +115,7 @@ const FunderForm = (props) => {
               error={errors.code}
             />
             <Controls.Input
-              style={{width:'300px'}}
+              style={{width:'33.33%'}}
               id="label"
               name="label"
               label="Libelé"
@@ -124,7 +124,7 @@ const FunderForm = (props) => {
               error={errors.label}
             />
             <Controls.Input
-              style={{width:'300px'}}
+              style={{width:'33.33%'}}
               id="category-input"
               name="category"
               label="Catégorie"
@@ -134,6 +134,9 @@ const FunderForm = (props) => {
             />
           </Stack>
           <br />
+
+          <Stack style={styles.stack} spacing={2}>
+
           <Button
             type="submit"
             style={{ fontSize: "25px" }}
@@ -141,7 +144,7 @@ const FunderForm = (props) => {
             disabled={loading}
             mt={4}
           >
-             Sauvegarder
+             SAUVEGARDER
             {loading && (
             <CircularProgress
               size={24}
@@ -156,6 +159,8 @@ const FunderForm = (props) => {
             />
           )}
           </Button>
+          </Stack>
+
           </form>
         }
         </BaseCard>

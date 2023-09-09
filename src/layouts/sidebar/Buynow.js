@@ -5,7 +5,6 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import apiService from "../../services/apiService";
 import Controls from "../../components/controls/Controls";
 import { useRouter } from "next/router";
 
@@ -34,14 +33,6 @@ const Buynow = () => {
   }
 
   const saveYear = () =>{
-    setOpen(false)
-    apiService.updateCurrentYear(yearId).then(
-      res => {
-        console.log(res)
-        router.reload()
-      },
-      error => console.log(error)
-    )
   }
 
   const getYear = e =>{

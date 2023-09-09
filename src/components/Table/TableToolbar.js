@@ -3,15 +3,12 @@ import { alpha } from '@mui/material/styles';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Fab, IconButton, InputBase, Paper, Stack, Tooltip, CircularProgress,  MenuItem, Select, Button, } from '@mui/material';
-import { CreateOutlined, FileDownloadOutlined, Menu, PersonAdd, Save } from '@mui/icons-material';
+import { Fab, IconButton, InputBase, Paper, Stack, Tooltip } from '@mui/material';
+import { CreateOutlined, InfoOutlined, Add } from '@mui/icons-material';
 import SearchIcon from '@mui/icons-material/Search';
-import { SheetJSFT } from '../../lib/types';
-import { Box } from '@material-ui/core';
 
 const EnhancedTableToolbar = (props) => {
-    const { selected, field, editClick, deleteClick, onSearch, search, openModal, goSearch, showMnthsNoPaids
-    } = props;
+    const { detail, selected, field, editClick, deleteClick, onSearch, search, openModal, goSearch } = props;
   
     return (
       <Toolbar
@@ -27,41 +24,52 @@ const EnhancedTableToolbar = (props) => {
       >
         {selected !== null ? (
             <Stack spacing={2} direction="row">
-                {!selected.deleted &&
-                <Tooltip onClick={deleteClick} title="حذف">
+                <Tooltip onClick={deleteClick} title="Supprimer">
                     <IconButton>
                         <DeleteIcon color='danger' fontSize='large'/>
                     </IconButton>
                 </Tooltip>
-                }
-                {!selected.deleted &&
-                <Tooltip onClick={editClick} title="تغيير">
+                {editClick &&
+                <Tooltip onClick={editClick} title="Modifier">
                     <IconButton>
                         <CreateOutlined fontSize='large' />
                     </IconButton>
                 </Tooltip>
                 }
-                {showMnthsNoPaids &&
-                <Button onClick={showMnthsNoPaids} title={"أشهر لم يدفعها " + field}>
-                    أشهر لم يدفعها الزبون
-                </Button>
+                {detail &&
+                <Tooltip onClick={detail} title="Detail">
+                    <IconButton>
+                        <InfoOutlined color='primary' fontSize='large' />
+                    </IconButton>
+                </Tooltip>
                 }
             </Stack>
 
         ) : (
           <Stack spacing={2} direction="row">
-            <Tooltip title="إضافة">
-              <Fab color="primary" aria-label="إضافة" onClick={openModal}>
-                  <PersonAdd/>
+            <Tooltip title="Ajouter">
+              <Fab color="primary" aria-label="Ajouter" onClick={openModal}>
+                  <Add/>
               </Fab>
             </Tooltip>
-          
-            
-       
           </Stack>
         )}
 
-        {selected === null &&
+        {selected !== null ? (
+          <Stack spacing={2} direction="row" style={{ width:"50%",display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+            <Typography
+              align="right"
+              color="inherit"
+              variant="subtitle1"
+              component="div"
+              fontSize={20}
+              marginRight="30px"
+            >
+              {field}
+            </Typography>
+          </Stack>
+
+        ) : 
         (
             <Paper
                 component="form"
@@ -69,7 +77,7 @@ const EnhancedTableToolbar = (props) => {
                 >
                 <InputBase
                     sx={{ ml: 1, flex: 1 }}
-                    placeholder="بحث بالإسم أو الهاتف"
+                    placeholder="Chercher ..."
                     value={search}
                     onChange={onSearch}
                 />

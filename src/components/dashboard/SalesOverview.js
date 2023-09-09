@@ -2,8 +2,7 @@ import React from "react";
 import { Card, Button, Typography, Snackbar, Alert, CircularProgress, Box } from "@mui/material";
 import dynamic from "next/dynamic";
 import BaseCard from "../baseCard/BaseCard";
-import apiService from "../../services/apiService";
-import BlogCard from "./BlogCard";
+//import BlogCard from "./BlogCard";
 import * as XLSX from 'xlsx/xlsx.js';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -14,6 +13,7 @@ import Paper from '@mui/material/Paper';
 import Draggable from 'react-draggable';
 import { useRouter } from "next/router";
 import Controls from "../controls/Controls";
+import useAxios from "../../utils/useAxios";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
@@ -36,30 +36,15 @@ const SalesOverview = () => {
   const [fournisseurs, setFournisseurs] = React.useState([]);
 
   const router = useRouter()
+  const axios = useAxios();
 
   React.useEffect(() => {
-   /*  setLoading(true)
-    apiService.getPaidsStatistics().then(
+    axios.get(`/conventions`).then(
       res => {
-        console.log("paids statistics : ", res.data);
-        setPaidsStatistics(res.data)
-      },  
+        console.log(res.data);
+      }, 
       error => console.log(error)
-    ).then(() => {
-      apiService.getCurrentMonth().then(
-        cMonth => {
-          console.log("current month : ", cMonth.data);
-          apiService.getClients(1, 0, "", cMonth.data.monthId).then(
-            res => {
-              setAll(res.data.TotalCount);
-            },  
-            error => console.log(error)
-          )
-        },
-        error => { console.log(error); }
-      )
-    })    
-    .then(() => setLoading(false)) */
+    )
   }, [])
 
 
@@ -288,31 +273,7 @@ const SalesOverview = () => {
 
   const remove = () =>{
     console.log("file to import is => ", fileToImport);
-    setLoadingFile(true);
-    apiService.deleteNumbers(fileToImport).then(
-      res => {
-        console.log(res);
-        setFileToImport([]);
-        setFileName(null);
-        showSuccessToast()
-        setLoadingFile(false);
-      },
-      error => {
-        console.log(error)
-        setLoadingFile(false);
-        showFailedToast()
-      }
-    ).then(() =>{
-      setLoadingFile(false);
-      setFileToImport([]);
-      setFileName(null);
-      setFile({})
-      handleCloseModalDelete()
-      setImportedFile(!importedFile)
-      router.reload();
-    })
-    
-
+    setLoadingFile(true)
   }
 
   const cancelDelete = () => {

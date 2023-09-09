@@ -6,9 +6,9 @@ import {
   CircularProgress
 } from "@mui/material";
 import BaseCard from "./baseCard/BaseCard";
-import apiService from "../services/apiService";
 import { Form } from "./Form";
 import Controls from "./controls/Controls";
+import useAxios from "../utils/useAxios";
 
 
 
@@ -27,7 +27,7 @@ const InvoiceForm = (props) => {
   const [formValues, setFormValues] = useState(defaultValues);
   const [loading, setLoading] = React.useState(false);
   const [commitments, setCommitments] = React.useState([]);
-
+  const axios = useAxios();
 
   const validate = (fieldValues = values) => {
     let temp = { ...errors };
@@ -47,7 +47,7 @@ const InvoiceForm = (props) => {
 
 
   React.useEffect(() => {
-    apiService.getCommitments().then(
+    axios.get(`/commitments`).then(
       res => {
         setCommitments(res.data);
       },  
@@ -65,7 +65,7 @@ const InvoiceForm = (props) => {
       setLoading(true)
       console.log(values);
       if(Invoice === null){
-        apiService.addInvoice(values).then(
+        axios.post(`/invoices`, values).then(
           (res) => {
             console.log("added => " ,res);
             if(res.data){
@@ -85,7 +85,7 @@ const InvoiceForm = (props) => {
           setLoading(false)
         });
       }else{
-        apiService.updateInvoice(values).then(
+        axios.put(`/invoices/${values.id}`, values).then(
           (res) => {
             console.log("updated => ", res);
             if(!res.data){
@@ -134,11 +134,11 @@ const InvoiceForm = (props) => {
     
         <BaseCard titleColor={"secondary"} title= {titleName()}>
           {values &&
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} style={{paddingInline:'5%'}} >
           <br/>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
-              style={{width:'460px'}}
+              style={{width:'50%'}}
               id="reference-input"
               name="reference"
               label="Reférence"
@@ -147,7 +147,7 @@ const InvoiceForm = (props) => {
               error={errors.reference}
             />
             <Controls.DatePiccker
-              style={{width:'460px'}}
+              style={{width:'50%'}}
               id="date"
               name="date"
               label="Date"
@@ -158,7 +158,7 @@ const InvoiceForm = (props) => {
           </Stack>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
-              style={{width:'460px'}}
+              style={{width:'50%'}}
               id="paymentmethod-input"
               name="paymentmethod"
               label="Mehhode de paiement"
@@ -166,7 +166,7 @@ const InvoiceForm = (props) => {
               onChange={handleInputChange}
             />
             <Controls.Input
-              style={{width:'460px'}}
+              style={{width:'50%'}}
               id="paymentreference-input"
               name="paymentreference"
               label="Reférence de paiement"
@@ -178,7 +178,7 @@ const InvoiceForm = (props) => {
 
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
-              style={commitmentId ? {width:'935px'} : {width:'460px'}}
+              style={commitmentId ? {width:'100%'} : {width:'50%'}}
               id="comment-input"
               name="comment"
               label="Commentaire"
@@ -188,7 +188,7 @@ const InvoiceForm = (props) => {
             {!commitmentId &&
               <Controls.Select
                 name="commitment"
-                style={{width:'460px'}}
+                style={{width:'50%'}}
                 label="Engagement"
                 value={values.commitment}
                 onChange={handleInputChange}
@@ -200,29 +200,30 @@ const InvoiceForm = (props) => {
  
 
           <br />
-          <Button
-            type="submit"
-            style={{ fontSize: "25px" }}
-            variant="contained"
-            disabled={loading}
-            mt={4}
-          >
-             Sauvegarder
-            {loading && (
-            <CircularProgress
-              size={24}
-              sx={{
-                color: 'primary',
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                marginTop: '-12px',
-                marginLeft: '-12px',
-              }}
-            />
-          )}
-          </Button>
-          
+          <Stack style={styles.stack} spacing={2}>
+            <Button
+              type="submit"
+              style={{ fontSize: "25px" }}
+              variant="contained"
+              disabled={loading}
+              mt={4}
+            >
+              SAUVEGARDER
+              {loading && (
+              <CircularProgress
+                size={24}
+                sx={{
+                  color: 'primary',
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  marginTop: '-12px',
+                  marginLeft: '-12px',
+                }}
+              />
+            )}
+            </Button>
+          </Stack>
           </form>
         }
         </BaseCard>

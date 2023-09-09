@@ -48,12 +48,12 @@ export default function DatePiccker(props) {
 
 
     return (
-        <Box>
-        <LocalizationProvider dateAdapter={AdapterDayjs} 
+        <Box sx={style}>
+        <LocalizationProvider  dateAdapter={AdapterDayjs} 
 
         >
             <DatePicker
-                sx ={style}
+                sx ={{width:'100%'}}
                 name = {name}
                 label={label}
                 //value={value}
@@ -61,7 +61,7 @@ export default function DatePiccker(props) {
                 defaultValue={dayjs(value)}
             />
         </LocalizationProvider>
-        {error && <FormHelperText style={{color:"red"}} >{error}</FormHelperText>} 
+        {error && <FormHelperText style={{color:"crimson"}} >{error}</FormHelperText>} 
 
         </Box>
     )

@@ -2,9 +2,9 @@ import * as React from 'react';
 import { useRouter } from 'next/router';
 import { Alert, Box, CircularProgress, Snackbar } from '@mui/material';
 import BaseCard from '../src/components/baseCard/BaseCard';
-import apiService from '../src/services/apiService';
 import { useEffect } from 'react';
 import CommitmentForm from '../src/components/AddCommitment';
+import useAxios from '../src/utils/useAxios';
 
 export default function AddCommitment(){
   const router = useRouter()
@@ -14,11 +14,12 @@ export default function AddCommitment(){
   const [openFailedToast, setOpenFailedToast] = React.useState(false);
   const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const axios = useAxios();
 
   useEffect(() => {
     if(id){
       setLoading(true)
-      apiService.getCommitment(id).then(res => {
+      axios.get(`/commitments/${id}`).then(res => {
           setCommitment(res.data)
           setLoading(false)
       })

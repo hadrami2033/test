@@ -7,9 +7,9 @@ import {
   Box
 } from "@mui/material";
 import BaseCard from "./baseCard/BaseCard";
-import apiService from "../services/apiService";
 import { Form } from "./Form";
 import Controls from "./controls/Controls";
+import useAxios from "../utils/useAxios";
 
 
 
@@ -32,7 +32,7 @@ const CommitmentForm = (props) => {
   const [contractors, setContractors] = React.useState([]);
   const [conventions, setConventions] = React.useState([]);
   const [categories, setCategories] = React.useState([]);
-
+  const axios = useAxios();
   const commitmentSatus = [
     {
         id:"active",
@@ -74,14 +74,14 @@ const CommitmentForm = (props) => {
 
 
   React.useEffect(() => {
-    apiService.getContractors().then(
+    axios.get(`/contractors`).then(
       res => {
         console.log(res.data);
         setContractors(res.data);
       },  
       error => console.log(error)
     ). then(() => {
-      apiService.getConventions().then(
+      axios.get(`/conventions`).then(
         res => {
           console.log(res.data);
           setConventions(res.data);
@@ -101,7 +101,7 @@ const CommitmentForm = (props) => {
       setLoading(true)
       console.log(values);
       if(Commitment === null){
-        apiService.addCommitment(values).then(
+        axios.post(`/commitments`, values).then(
           (res) => {
             console.log("added => " ,res);
             if(res.data){
@@ -119,7 +119,7 @@ const CommitmentForm = (props) => {
           setLoading(false)
         });
       }else{
-        apiService.updateCommitment(values).then(
+        axios.put(`/commitments/${values.id}`, values).then(
           (res) => {
             console.log("updated => ", res);
             if(!res.data){
@@ -176,12 +176,12 @@ const CommitmentForm = (props) => {
     
         <BaseCard titleColor={"secondary"} title= {titleName()}>
           {values &&
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} style={{paddingInline:'5%'}}>
           <br/>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
               id="reference-input"
-              style={{width:'460px'}}
+              style={{width:'50%'}}
               name="reference"
               label="Reférence"
               value={values.reference}
@@ -191,7 +191,7 @@ const CommitmentForm = (props) => {
 
             <Controls.Select
               name="contractor_id"
-              style={{width:'460px'}}
+              style={{width:'50%'}}
               label="Prestateur"
               value={values.contractor_id}
               onChange={handleInputChange}
@@ -203,14 +203,14 @@ const CommitmentForm = (props) => {
           {!Commitment &&
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Select
-              style={{width:'460px'}}
+              style={{width:'50%'}}
               label="Convention"
               onChange={conventionChange}
               options={conventions}
             />
             <Controls.Select
               name="categorie"
-              style={{width:'460px'}}
+              style={{width:'50%'}}
               label="Catégorie"
               value={values.categorie}
               onChange={handleInputChange}
@@ -222,7 +222,7 @@ const CommitmentForm = (props) => {
           <Stack style={styles.stack} spacing={2} direction="row">
             
           <Controls.DatePiccker
-              style={{width:'460px'}}
+              style={{width:'50%'}}
               id="start_date"
               name="start_date"
               label="Date début"
@@ -231,7 +231,7 @@ const CommitmentForm = (props) => {
               error={errors.start_date}
             />
             <Controls.DatePiccker
-              style={{width:'460px'}}
+              style={{width:'50%'}}
               id="end_date"
               name="end_date"
               label="Date fin"
@@ -242,7 +242,7 @@ const CommitmentForm = (props) => {
           </Stack>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.DatePiccker
-              style={{width:'935px'}}
+              style={{width:'100%'}}
               id="close_date-input"
               name="close_date"
               label="Date clôture"
@@ -254,7 +254,7 @@ const CommitmentForm = (props) => {
         
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
-              style={Commitment ? {width:'460px'} : {width:'935px'}}
+              style={Commitment ? {width:'50%'} : {width:'100%'}}
               id="description-input"
               name="description"
               label="Description"
@@ -264,7 +264,7 @@ const CommitmentForm = (props) => {
             />
             {Commitment &&
             <Controls.Select
-              style={{width:'460px'}}
+              style={{width:'50%'}}
               name="status"
               label="Statut"
               value={values.status}
@@ -276,30 +276,30 @@ const CommitmentForm = (props) => {
           </Stack>
 
           <br />
-          <Box style={{width:'100%', display:'flex', justifyContent:"end" }}>
-          <Button
-            type="submit"
-            style={{ fontSize: "25px" }}
-            variant="contained"
-            disabled={loading}
-            mt={4}
-          >
-             Sauvegarder
-            {loading && (
-            <CircularProgress
-              size={24}
-              sx={{
-                color: 'primary',
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                marginTop: '-12px',
-                marginLeft: '-12px'
-              }}
-            />
-          )}
-          </Button>
-          </Box>
+          <Stack style={styles.stack} spacing={2}>
+            <Button
+              type="submit"
+              style={{ fontSize: "25px" }}
+              variant="contained"
+              disabled={loading}
+              mt={4}
+            >
+              SAUVEGARDER
+              {loading && (
+              <CircularProgress
+                size={24}
+                sx={{
+                  color: 'primary',
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  marginTop: '-12px',
+                  marginLeft: '-12px'
+                }}
+              />
+            )}
+            </Button>
+          </Stack>
           </form>
         }
         </BaseCard>

@@ -6,9 +6,9 @@ import {
   CircularProgress
 } from "@mui/material";
 import BaseCard from "../src/components/baseCard/BaseCard";
-import apiService from "../src/services/apiService";
 import { Form } from "../src/components/Form";
 import Controls from "../src/components/controls/Controls";
+import useAxios from "../src/utils/useAxios";
 //import disbursementtypes from "../src/helper/disbursementtype"
 /*import dayjs from 'dayjs';
  import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
@@ -59,6 +59,7 @@ const DibursementForm = (props) => {
   const [invoices, setInvoices] = React.useState([]);
   const [disbursementTypes, setDisbursementTypes] = React.useState([]);
   const [disbursementStatus, setDisbursementStatus] = React.useState([]);
+  const axios = useAxios();
 
   let pounds = Intl.NumberFormat( {
     style: 'currency',
@@ -104,7 +105,7 @@ const DibursementForm = (props) => {
     setCommitments(Commitments)
     if(Invoices.length > 0)
     setInvoices(Invoices)
-    apiService.getDisbursementsTypes().then(
+    axios.get(`/disbursementtypes`).then(
       res => {
         console.log(res.data);
         setDisbursementTypes(res.data);
@@ -112,7 +113,7 @@ const DibursementForm = (props) => {
       error => console.log(error)
     ) 
     .then( () => {
-            apiService.getStatusType().then(
+        axios.get(`/statustype`).then(
             res => {
               console.log(res.data);
               setDisbursementStatus(res.data)
@@ -122,7 +123,7 @@ const DibursementForm = (props) => {
     }
     )
     .then( () => {
-          apiService.getCurrencies().then(
+      axios.get(`/currencies`).then(
           res => {
             console.log(res.data);
             setCurrencies(res.data)
@@ -131,27 +132,6 @@ const DibursementForm = (props) => {
         )
     }
     )
-  /*   .then( () => {
-        apiService.getDisbursementsTypes().then(
-        res => {
-          console.log(res.data);
-          setDisbursementTypes(res.data)
-        },  
-        error => console.log(error)
-      )
-    }
-    )
-    .then( () => {
-      apiService.getCommitment().then(
-      res => {
-        console.log(res.data);
-        setCommitments(res.data)
-      },  
-      error => console.log(error)
-    )
-  }
-  ) */
-
   }, [])
 
   const { values, setValues, errors, setErrors, handleInputChange, resetForm } = Form(formValues, true, validate);
@@ -164,7 +144,7 @@ const DibursementForm = (props) => {
       setLoading(true)
       console.log(values);
       if(disbursement === null){
-        apiService.addDisbursement(values).then(
+        axios.post(`/disbursements`, values).then(
           (res) => {
             console.log("added => " ,res);
             if(res.data){
@@ -177,7 +157,7 @@ const DibursementForm = (props) => {
                 date: formatDate(new Date()),
                 comment: null
               }
-              apiService.addStatus(state).then(
+              axios.post(`/states`, state).then(
                 (res) =>{
                   console.log("res  ", res);
                 },
@@ -198,7 +178,7 @@ const DibursementForm = (props) => {
           setLoading(false)
         });
       }else{
-        apiService.updateDisbursement(values).then(
+        axios.put(`/disbursements/${values.id}`, values).then(
           (res) => {
             console.log("updated => ", res);
             if(!res.data){
@@ -215,7 +195,7 @@ const DibursementForm = (props) => {
               console.log(" state ", state);
               if( getStatusCode(values.status_id) > currenteState.code ){
 
-                apiService.addStatus(state).then(
+                axios.post(`/states`, state).then(
                   (res) =>{
                     console.log("res  ", res);
                   },
@@ -332,11 +312,11 @@ const DibursementForm = (props) => {
     
         <BaseCard titleColor={"secondary"} title={titleName()}>
         {values && disbursementStatus.length > 0 && disbursementTypes.length > 0 &&
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} style={{paddingInline:'5%'}}>
           <br/>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
-              style={{ width:'460px'}}
+              style={{ width:'50%'}}
               id="reference-input"
               name="reference"
               label="Reférence"
@@ -346,7 +326,7 @@ const DibursementForm = (props) => {
             />
             {!disbursement ?
               <Controls.Select
-                style={{ width:'460px'} }
+                style={{ width:'50%'} }
                 name="type_id"
                 label="Type de décaissement"
                 value={values.type_id}
@@ -356,7 +336,7 @@ const DibursementForm = (props) => {
               />
             :
               <Controls.Select
-                style={{width:'460px'}}
+                style={{width:'50%'}}
                 name="status_id"
                 label="Statut de décaissement"
                 value={values.status_id}
@@ -370,7 +350,7 @@ const DibursementForm = (props) => {
             <Controls.Input
               style= {
                 (!disbursement || (getStatus(values.status_id) === getStatusByCode(3) && disbursement))
-                ? { width:'300px'} :  { width:'460px'}
+                ? { width:'33.33%'} :  { width:'50%'}
               }
               id="orderamount-input"
               name="orderamount"
@@ -383,7 +363,7 @@ const DibursementForm = (props) => {
             <Controls.Select
               style={
                 (!disbursement || (getStatus(values.status_id) === getStatusByCode(3) && disbursement))
-                ? { width:'300px'} :  { width:'460px'}
+                ? { width:'33.33%'} :  { width:'50%'}
               }
               name="currency_id"
               label="Devise de décaissement"
@@ -395,7 +375,7 @@ const DibursementForm = (props) => {
 
             {!disbursement &&            
             <Controls.DatePiccker
-              style={{ width:'300px'}}
+              style={{ width:'33.33%'}}
               id="date"
               name="date"
               label="Date"
@@ -406,7 +386,7 @@ const DibursementForm = (props) => {
             }
             {getStatus(values.status_id) === getStatusByCode(3) && disbursement &&
             <Controls.Input
-              style={{ width:'300px'}}
+              style={{ width:'33.33%'}}
               id="disbursementamount-input"
               name="disbursementamount"
               type = "number"
@@ -423,7 +403,7 @@ const DibursementForm = (props) => {
             <Stack style={styles.stack} spacing={2} direction="row">
 
                 <Controls.Select
-                  style={{width:'300px'}}
+                  style={{width:'33.33%'}}
                   name="categorie_id"
                   label="Catégorie"
                   value={values.categorie_id}
@@ -432,7 +412,7 @@ const DibursementForm = (props) => {
                   error={errors.categorie_id}
                 />
                 <Controls.Select
-                  style={{width:'300px'}}
+                  style={{width:'33.33%'}}
                   name="commitment_id"
                   label="Engagement"
                   value={values.commitment_id}
@@ -441,7 +421,7 @@ const DibursementForm = (props) => {
                   error={errors.commitment_id}
                 />
                 <Controls.Select
-                  style={{width:'300px'}}
+                  style={{width:'33.33%'}}
                   name="invoice_id"
                   label="Facture"
                   value={values.invoice_id}
@@ -561,6 +541,8 @@ const DibursementForm = (props) => {
 
 
           <br />
+          <Stack style={styles.stack} spacing={2}>
+
           <Button
             type="submit"
             style={{ fontSize: "25px" }}
@@ -568,7 +550,7 @@ const DibursementForm = (props) => {
             disabled={loading}
             mt={4}
           >
-             Sauvegarder
+             SAUVEGARDER
             {loading && (
             <CircularProgress
               size={24}
@@ -583,7 +565,8 @@ const DibursementForm = (props) => {
             />
           )}
           </Button>
-          
+          </Stack>
+
           </form>
         }
         </BaseCard>

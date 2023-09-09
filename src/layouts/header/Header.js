@@ -23,7 +23,7 @@ const Header = ({ sx, customClass, toggleMobileSidebar, position }) => {
            <Typography
               color={"primary"} //2596be
 
-              fontSize="30px" fontWeight={'1000'} variant="h1"
+              fontSize="25px" fontWeight={'600'} variant="h3"
               sx={{
                 ml: 1,
               }}

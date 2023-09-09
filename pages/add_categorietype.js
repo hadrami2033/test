@@ -6,9 +6,9 @@ import {
   CircularProgress
 } from "@mui/material";
 import BaseCard from "../src/components/baseCard/BaseCard";
-import apiService from "../src/services/apiService";
 import { Form } from "../src/components/Form";
 import Controls from "../src/components/controls/Controls";
+import useAxios from "../src/utils/useAxios";
 
 const CategorieTypeForm = (props) => {
   const {CategorieType, push, update, showSuccessToast, showFailedToast} = props;
@@ -33,7 +33,8 @@ const CategorieTypeForm = (props) => {
   };
 
   const { values, setValues, errors, setErrors, handleInputChange, resetForm } = Form(formValues, true, validate);
-    
+  const axios = useAxios();
+  
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -42,7 +43,7 @@ const CategorieTypeForm = (props) => {
       setLoading(true)
       console.log(values);
       if(CategorieType === null){
-        apiService.addCategorieType(values).then(
+        axios.post(`/categoriestype`, values).then(
           (res) => {
             console.log("added => " ,res);
             if(res.data){
@@ -62,7 +63,7 @@ const CategorieTypeForm = (props) => {
           setLoading(false)
         });
       }else{
-        apiService.updateCategorieType(values).then(
+        axios.put(`/categoriestype/${values.id}`,values).then(
           (res) => {
             console.log("updated => ", res);
             if(!res.data){
@@ -96,11 +97,11 @@ const CategorieTypeForm = (props) => {
     
         <BaseCard titleColor={"secondary"} title= {titleName()}>
         {values &&
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} style={{paddingInline:'5%'}}>
           <br/>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
-              style={{width:'935px'}}
+              style={{width:'100%'}}
               id="label"
               name="label"
               label="Libelé"
@@ -110,6 +111,8 @@ const CategorieTypeForm = (props) => {
             />
           </Stack>
           <br />
+
+          <Stack style={styles.stack} spacing={2}>
           <Button
             type="submit"
             style={{ fontSize: "25px" }}
@@ -117,7 +120,7 @@ const CategorieTypeForm = (props) => {
             disabled={loading}
             mt={4}
           >
-             Sauvegarder
+             SAUVEGARDER
             {loading && (
             <CircularProgress
               size={24}
@@ -132,6 +135,7 @@ const CategorieTypeForm = (props) => {
             />
           )}
           </Button>
+          </Stack>
           </form>
         }
         </BaseCard>

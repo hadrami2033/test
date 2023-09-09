@@ -11,7 +11,7 @@ const BaseCard = (props) => {
   return (
     <Card >
       <Box display="flex" alignItems="center" justifyContent="center">
-        <Typography color={props.titleColor} fontSize="25px" fontWeight={'1000'} variant="h2" >{props.title}</Typography>
+        <Typography color={props.titleColor} fontSize="24px" fontWeight={'600'} variant="h4" >{props.title}</Typography>
       </Box>
       <CardContent>{props.children}</CardContent>
     </Card>
