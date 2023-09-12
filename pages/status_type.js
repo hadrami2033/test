@@ -10,7 +10,6 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Checkbox from '@mui/material/Checkbox';
 import EnhancedTableHead from "../src/components/Table/TableHeader";
-import apiService from "../src/services/apiService";
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -21,9 +20,10 @@ import { useRouter } from "next/router";
 import {ArrowBack, ArrowForward } from "@material-ui/icons";
 import Select from '@mui/material/Select';
 import { Box } from "@material-ui/core";
-import EnhancedTableToolbar from "../src/components/Table/TableConventionToolbar";
+import EnhancedTableToolbar from "../src/components/Table/TableToolbar";
 import { Close } from "@mui/icons-material";
 import StatusTypeForm from "./add_statustype";
+import useAxios from "../src/utils/useAxios";
 
 const headCells = [
   {
@@ -68,7 +68,7 @@ export default function EnhancedTable() {
   const [deleted, setDelete] = React.useState(false);
   const [authenticated, setAuthenticated] = React.useState(false);
 
-
+  const axios = useAxios();
   const router = useRouter()
 
   React.useEffect(() => {
@@ -84,8 +84,7 @@ export default function EnhancedTable() {
       ).then( () => { */
         //console.log("time : ", cMonth);
         //if(cMonth){
-          apiService.getStatusType( //pageNumber, pageSize, getBy
-            ).then(
+        axios.get(`/statustype`).then(
               res => {
                 console.log(res.data);
                 setStatusTypes(res.data);
@@ -146,8 +145,7 @@ export default function EnhancedTable() {
 
   const push = (e) =>{
     //StatusTypes.push(e)
-    apiService.getStatusType( //pageNumber, pageSize, getBy, currentMonth.monthId
-      ).then(
+    axios.get(`/statustype`).then(
         res => {
           console.log(res.data);
           setStatusTypes(res.data);
@@ -167,7 +165,7 @@ export default function EnhancedTable() {
 
   const remove = () =>{
     if(selected !== null){
-      apiService.deleteStatusType(selected.id).then(
+      axios.delete(`/statustype/${selected.id}`).then(
         res => {
           console.log(res);
           const index = StatusTypes.indexOf(selected);
@@ -420,9 +418,11 @@ export default function EnhancedTable() {
               </Box>
 
               <Tooltip title="Précédente">
+                <span>
                 <Button disabled={!hasPrevious} onClick={previous}>
                   <ArrowBack/>
                 </Button>
+                </span>
               </Tooltip>
 
               <Select
@@ -440,9 +440,11 @@ export default function EnhancedTable() {
               </Select>  
 
               <Tooltip title="Suivante">
+              <span>
                 <Button disabled={!hasNext} onClick={next} >
                   <ArrowForward/>
                 </Button>
+                </span>
               </Tooltip>
             </div>
           </div>

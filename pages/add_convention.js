@@ -3,8 +3,8 @@ import { useRouter } from 'next/router';
 import ConventionForm from '../src/components/AddConvention';
 import { Alert, Box, CircularProgress, Snackbar } from '@mui/material';
 import BaseCard from '../src/components/baseCard/BaseCard';
-import apiService from '../src/services/apiService';
 import { useEffect } from 'react';
+import useAxios from '../src/utils/useAxios';
 
 export default function AddConvention(){
   const router = useRouter()
@@ -14,11 +14,12 @@ export default function AddConvention(){
   const [openFailedToast, setOpenFailedToast] = React.useState(false);
   const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const axios = useAxios();
 
   useEffect(() => {
     if(id){
       setLoading(true)
-      apiService.getConvention(id).then(res => {
+      axios.get(`/conventions/${id}`).then(res => {
           setConvention(res.data)
           setLoading(false)
       })

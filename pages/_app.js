@@ -10,6 +10,7 @@ import FullLayout from "../src/layouts/FullLayout";
 import "../styles/style.css";
 import { useRouter } from "next/router";
 import LogoIcon from "../src/layouts/logo/LogoIcon";
+import { AuthProvider } from "../src/context/AuthContext";
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
@@ -26,13 +27,15 @@ export default function MyApp(props) {
   }, [])
 
   return (
+    <AuthProvider>
     <CacheProvider value={emotionCache}>
       <Head>
         <title>SOGEM</title>
         <meta name="viewport" content="initial-scale=1, width=device-width" />
       </Head>
+
       <ThemeProvider theme={theme}>
-        {res !== "/login" && authenticated ?
+        {res !== "/login" ?
           <FullLayout>
             <CssBaseline /> 
             <Component {...pageProps} />
@@ -41,7 +44,9 @@ export default function MyApp(props) {
           <Component {...pageProps} />
         }
       </ThemeProvider>
+
     </CacheProvider>
+    </AuthProvider>
   );
 }
 

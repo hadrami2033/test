@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, Typography, Button, Grid, Tooltip, Stack, Box, Tab ,Tabs, IconButton, DialogContent, Dialog, Snackbar, Alert, DialogTitle, DialogContentText, DialogActions, Paper  } from "@mui/material";
 import BaseCard from "./baseCard/BaseCard";
-import apiService from "../services/apiService";
 import PropTypes from 'prop-types';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -13,6 +12,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import InvoiceLineForm from "../../pages/add_invoiceline";
 import { Close } from "@mui/icons-material";
 import Draggable from "react-draggable";
+import useAxios from "../utils/useAxios";
+import { useRouter } from "next/router";
 
 const headCellsInvoicelines = [
     {
@@ -65,7 +66,7 @@ function a11yProps(index) {
 
 const DetailInvoice = (props) => {
   const {id} = props;
-
+  const axios = useAxios();
   const [Commitment, setCommitment] = useState({})
   const [value, setValue] = React.useState(0);
   const [Invoice, setInvoice] = React.useState({});
@@ -113,22 +114,27 @@ const DetailInvoice = (props) => {
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+  const router = useRouter()
 
   useEffect(() => {
-      apiService.getInvoice(id).then(res => {
+    if(id){ 
+      axios.get(`/invoices/${id}`).then(res => {
         setInvoice(res.data)
         setInvoiceLines(res.data.invoicelines)
-        apiService.getCommitment(res.data.commitment)
+        axios.get(`/commitments/${res.data.commitment}`)
         .then(res => setCommitment(res.data))
       })
+    }else{
+      router.push("/invoices")
+    }
   }, [])
 
 
   const push = (e) =>{
-    apiService.getInvoice(id).then(res => {
+    axios.get(`/invoices/${id}`).then(res => {
       setInvoice(res.data)
       setInvoiceLines(res.data.invoicelines)
-      apiService.getCommitment(res.data.commitment)
+      axios.get(`/commitments/${res.data.commitment}`)
       .then(res => setCommitment(res.data))
     })
   }
@@ -176,7 +182,7 @@ const DetailInvoice = (props) => {
 
   const remove = () =>{
     if(line){
-      apiService.deleteInvoiceLine(line.id).then(
+      axios.delete(`/invoicelines/${line.id}`).then(
         res => {
           console.log(res);
           const index = invoicelines.indexOf(line);

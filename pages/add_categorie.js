@@ -6,9 +6,9 @@ import {
   CircularProgress
 } from "@mui/material";
 import BaseCard from "../src/components/baseCard/BaseCard";
-import apiService from "../src/services/apiService";
 import { Form } from "../src/components/Form";
 import Controls from "../src/components/controls/Controls";
+import useAxios from "../src/utils/useAxios";
 
 
 const CategorieForm = (props) => {
@@ -28,6 +28,7 @@ const CategorieForm = (props) => {
   const [formValues, setFormValues] = useState(defaultValues);
   const [loading, setLoading] = React.useState(false);
   const [categoriesType, setCategoriesType] = React.useState([]);
+  const axios = useAxios();
 
   const validate = (fieldValues = values) => {
     let temp = { ...errors };
@@ -49,7 +50,7 @@ const CategorieForm = (props) => {
 
   React.useEffect(() => {
     console.log( "availableAmount ", availableAmount);
-    apiService.getCategoriesType().then(
+    axios.get(`/categoriestype`).then(
       res => {
         console.log(res.data);
         setCategoriesType(res.data);
@@ -68,7 +69,7 @@ const CategorieForm = (props) => {
       setLoading(true)
       console.log(values);
       if(Categorie === null){
-        apiService.addCategorie(values).then(
+        axios.post(`/categories`, values).then(
           (res) => {
             console.log("added => " ,res);
             if(res.data){
@@ -87,7 +88,7 @@ const CategorieForm = (props) => {
           setLoading(false)
         });
       }else{
-        apiService.updateCategorie(values).then(
+        axios.put(`/categories/${values.id}`,values).then(
           (res) => {
             console.log("updated => ", res);
             if(!res.data){
@@ -123,11 +124,11 @@ const CategorieForm = (props) => {
     
         <BaseCard titleColor={"secondary"} title={titleName()}>
           {values &&
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} style={{paddingInline:'5%'}}>
           <br/>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
-              style={{width:'300px'}}
+              style={{width:'33.33%'}}
               id="reference-input"
               name="reference"
               label="Reférence"
@@ -136,7 +137,7 @@ const CategorieForm = (props) => {
               error={errors.reference}
             />
             <Controls.Input
-              style={{width:'300px'}}
+              style={{width:'33.33%'}}
               id="amount-input"
               name="amount"
               label="Montant"
@@ -146,7 +147,7 @@ const CategorieForm = (props) => {
               error={errors.amount}
             />
             <Controls.Select
-              style={{width:'300px'}}
+              style={{width:'33.33%'}}
               name="type_id"
               label="Type"
               value={values.type_id}
@@ -158,6 +159,8 @@ const CategorieForm = (props) => {
 
 
           <br />
+          <Stack style={styles.stack} spacing={2}>
+
           <Button
             type="submit"
             style={{ fontSize: "25px" }}
@@ -165,7 +168,7 @@ const CategorieForm = (props) => {
             disabled={loading}
             mt={4}
           >
-             Sauvegarder
+             SAUVEGARDER
             {loading && (
             <CircularProgress
               size={24}
@@ -180,7 +183,7 @@ const CategorieForm = (props) => {
             />
           )}
           </Button>
-          
+          </Stack>
           </form>
         }
         </BaseCard>

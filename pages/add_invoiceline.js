@@ -6,9 +6,9 @@ import {
   CircularProgress
 } from "@mui/material";
 import BaseCard from "../src/components/baseCard/BaseCard";
-import apiService from "../src/services/apiService";
 import { Form } from "../src/components/Form";
 import Controls from "../src/components/controls/Controls";
+import useAxios from "../src/utils/useAxios";
 
 
 
@@ -25,7 +25,7 @@ const InvoiceLineForm = (props) => {
   const [loading, setLoading] = React.useState(false);
   const [invoices, setInvoices] = React.useState([]);
   const [currencies, setCurrencies] = React.useState([]);
-
+  const axios = useAxios();
 
   const validate = (fieldValues = values) => {
     let temp = { ...errors };
@@ -45,13 +45,13 @@ const InvoiceLineForm = (props) => {
 
 
   React.useEffect(() => {
-    apiService.getInvoices().then(
+    axios.get(`/invoices`).then(
       res => {
         setInvoices(res.data);
       },  
       error => console.log(error)
     ) .then(() => {
-        apiService.getCurrencies().then(
+      axios.get(`/currencies`).then(
             res => {
               setCurrencies(res.data);
             },  
@@ -69,7 +69,7 @@ const InvoiceLineForm = (props) => {
     if (validate()) {
       setLoading(true)
       console.log(values);
-        apiService.addInvoiceLine(values).then(
+      axios.post(`/invoicelines`, values).then(
           (res) => {
             console.log("added => " ,res);
             if(res.data){
@@ -98,11 +98,11 @@ const InvoiceLineForm = (props) => {
   return (
         <BaseCard titleColor={"secondary"} title= {titleName()}>
           {values &&
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} style={{paddingInline:'5%'}}>
           <br/>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
-              style={invoiceId ? {width:'460px'} : {width:'300px'}}
+              style={invoiceId ? {width:'50%'} : {width:'33.33%'}}
               id="amount-input"
               name="amount"
               label="Montant"
@@ -113,7 +113,7 @@ const InvoiceLineForm = (props) => {
             />
             <Controls.Select
               name="currency_id"
-              style={invoiceId ? {width:'460px'} : {width:'300px'}}
+              style={invoiceId ? {width:'50%'} : {width:'33.33%'}}
               label="Devise"
               value={values.currency_id}
               onChange={handleInputChange}
@@ -123,7 +123,7 @@ const InvoiceLineForm = (props) => {
             {!invoiceId &&
              <Controls.Select
                name="invoice"
-               style={{width:'300px'}}
+               style={{width:'33.33%'}}
                label="Facture"
                value={values.invoice}
                onChange={handleInputChange}
@@ -134,6 +134,8 @@ const InvoiceLineForm = (props) => {
           </Stack>
 
           <br />
+          <Stack style={styles.stack} spacing={2}>
+
           <Button
             type="submit"
             style={{ fontSize: "25px" }}
@@ -141,7 +143,7 @@ const InvoiceLineForm = (props) => {
             disabled={loading}
             mt={4}
           >
-             Sauvegarder
+             SAUVEGARDER
             {loading && (
             <CircularProgress
               size={24}
@@ -156,7 +158,8 @@ const InvoiceLineForm = (props) => {
             />
           )}
           </Button>
-          
+          </Stack>
+
           </form>
         }
         </BaseCard>

@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import {
-  Grid,
   Stack,
   Button,
   CircularProgress
 } from "@mui/material";
 import BaseCard from "../src/components/baseCard/BaseCard";
-import apiService from "../src/services/apiService";
 import { Form } from "../src/components/Form";
 import Controls from "../src/components/controls/Controls";
+import useAxios from "../src/utils/useAxios";
 
 
 
@@ -27,6 +26,7 @@ const AmountForm = (props) => {
   const [commitments, setCommitments] = React.useState([]);
   const [currencies, setCurrencies] = React.useState([]);
   const [spendingtypes, setSpendingsType] = React.useState([]);
+  const axios = useAxios();
 
 
   const validate = (fieldValues = values) => {
@@ -49,20 +49,20 @@ const AmountForm = (props) => {
 
 
   React.useEffect(() => {
-    apiService.getCommitments().then(
+    axios.get(`/commitments`).then(
       res => {
         setCommitments(res.data);
       },  
       error => console.log(error)
     ) .then(() => {
-        apiService.getCurrencies().then(
+      axios.get(`/currencies`).then(
             res => {
               setCurrencies(res.data);
             },  
             error => console.log(error)
         ) 
     }).then(() => {
-        apiService.getSpendingsTypes().then(
+      axios.get(`/spendingtypes`).then(
             res => {
               setSpendingsType(res.data);
             },  
@@ -80,7 +80,7 @@ const AmountForm = (props) => {
     if (validate()) {
       setLoading(true)
       console.log(values);
-        apiService.addCommitmentAmount(values).then(
+      axios.post(`/commitmentamounts`, values).then(
           (res) => {
             console.log("added => " ,res);
             if(res.data){
@@ -113,7 +113,7 @@ const AmountForm = (props) => {
           <br/>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
-              style={{width:'460px'}}
+              style={{width:'50%'}}
               id="amount-input"
               name="amount"
               label="Montant"
@@ -124,7 +124,7 @@ const AmountForm = (props) => {
             />
             <Controls.Select
               name="currency_id"
-              style={{width:'460px'}}
+              style={{width:'50%'}}
               label="Devise"
               value={values.currency_id}
               onChange={handleInputChange}
@@ -135,7 +135,7 @@ const AmountForm = (props) => {
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Select
               name="spendingtype_id"
-              style={commitmentId ? {width:'935px'} : {width:'460px'}}
+              style={commitmentId ? {width:'100%'} : {width:'50%'}}
               label="Type de dépense"
               value={values.spendingtype_id}
               onChange={handleInputChange}
@@ -145,7 +145,7 @@ const AmountForm = (props) => {
             {!commitmentId &&
              <Controls.Select
                name="commitment"
-               style={{width:'460px'}}
+               style={{width:'50%'}}
                label="Engagement"
                value={values.commitment}
                onChange={handleInputChange}
@@ -157,6 +157,7 @@ const AmountForm = (props) => {
  
 
           <br />
+          <Stack style={styles.stack} spacing={2}>
           <Button
             type="submit"
             style={{ fontSize: "25px" }}
@@ -164,7 +165,7 @@ const AmountForm = (props) => {
             disabled={loading}
             mt={4}
           >
-             Sauvegarder
+             SAUVEGARDER
             {loading && (
             <CircularProgress
               size={24}
@@ -179,7 +180,7 @@ const AmountForm = (props) => {
             />
           )}
           </Button>
-          
+          </Stack>
           </form>
         }
         </BaseCard>

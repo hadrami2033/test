@@ -6,7 +6,7 @@ import TableSortLabel from '@mui/material/TableSortLabel';
 import { styled, Typography } from '@mui/material';
 
 function EnhancedTableHead(props) {
-    const { onSelectAllClick, order, orderBy, rowCount, onRequestSort, headCells, headerBG, txtColor } = props;
+    const {  order, orderBy, rowCount, onRequestSort, headCells, headerBG, txtColor } = props;
     const createSortHandler = (property) => (event) => {
       if(onRequestSort)
       onRequestSort(event, property);

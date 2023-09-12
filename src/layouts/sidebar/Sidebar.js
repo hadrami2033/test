@@ -120,7 +120,7 @@ const Sidebar = ({ isMobileSidebarOpen, onSidebarClose, isSidebarOpen }) => {
                   { openSubItems ? <ExpandLess/> : <ExpandMore/> }
                 </ListItem>
                 { (openSubItems && indexOpen === index) && item.items.map((subitem, subindex) => (
-                    <NextLink href={subitem.href}>
+                    <NextLink href={subitem.href} key={subitem.title}>
                       <ListItem
                         onClick={() => handleClick(subindex)}
                         button

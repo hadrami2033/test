@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Alert, Typography, Button, Grid, Box, Tab ,Tabs, Snackbar, Tooltip, IconButton, DialogTitle, DialogContentText, DialogActions, Paper  } from "@mui/material";
 import BaseCard from "./baseCard/BaseCard";
-import apiService from "../services/apiService";
 import PropTypes from 'prop-types';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -15,6 +14,8 @@ import AmountForm from "../../pages/add_commitmentamount";
 import DeleteIcon from '@mui/icons-material/Delete';
 import Draggable from "react-draggable";
 import InvoiceForm from "./AddInvoice";
+import useAxios from "../utils/useAxios";
+import { useRouter } from "next/router";
 
 const headCellsAmounts = [
     {
@@ -106,7 +107,7 @@ function a11yProps(index) {
 
 const DetailCommitment = (props) => {
   const {id} = props;
-
+  const axios = useAxios();
   const [commitment, setCommitment] = React.useState({});
   const [contractor, setContractor] = useState({})
   const [value, setValue] = React.useState(0);
@@ -118,23 +119,27 @@ const DetailCommitment = (props) => {
   const [openAmount, setOpenAmount] = React.useState(false);
   const [openDelete, setOpenDelete] = React.useState(false);
   const [line, setLine] = React.useState(null);
-
+  const router = useRouter()
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
   useEffect(() => {
-      apiService.getCommitment(id).then(res => {
-        setCommitment(res.data)
-        setContractor(res.data.contractor)
-        setInvoices(res.data.invoices)
-        setCommitmentamounts(res.data.commitmentamounts)
-      } )
+    if(id){ 
+      axios.get(`/commitments/${id}`).then(res => {
+          setCommitment(res.data)
+          setContractor(res.data.contractor)
+          setInvoices(res.data.invoices)
+          setCommitmentamounts(res.data.commitmentamounts)
+      })
+    }else{
+      router.push("/commitments")
+    }
   }, [])
 
 
   const push = (e) =>{
-    apiService.getCommitment(id).then(res => {
+    axios.get(`/commitments/${id}`).then(res => {
       setCommitment(res.data)
       setContractor(res.data.contractor)
       setInvoices(res.data.invoices)
@@ -143,7 +148,7 @@ const DetailCommitment = (props) => {
   }
 
   const update = (e) =>{
-    apiService.getCommitment(id).then(res => {
+    axios.get(`/commitments/${id}`).then(res => {
       setCommitment(res.data)
       setContractor(res.data.contractor)
       setInvoices(res.data.invoices)
@@ -240,7 +245,7 @@ const DetailCommitment = (props) => {
 
   const remove = () =>{
     if(line){
-      apiService.deleteCommitmenAmount(line.id).then(
+      axios.delete(`/commitmentamounts/${line.id}`).then(
         res => {
           console.log(res);
           const index = commitmentamounts.indexOf(line);

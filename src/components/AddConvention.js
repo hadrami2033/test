@@ -6,9 +6,9 @@ import {
   CircularProgress
 } from "@mui/material";
 import BaseCard from "./baseCard/BaseCard";
-import apiService from "../services/apiService";
 import { Form } from "./Form";
 import Controls from "./controls/Controls";
+import useAxios from "../utils/useAxios";
 /*import dayjs from 'dayjs';
  import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -65,7 +65,7 @@ const ConventionForm = (props) => {
   const [funders, setFunders] = React.useState([]);
   const [borrowers, setBorrowers] = React.useState([]);
   const [currencies, setCurrencies] = React.useState([]);
-
+  const axios = useAxios();
   const validate = (fieldValues = values) => {
     let temp = { ...errors };
     if ("reference" in fieldValues)
@@ -107,7 +107,7 @@ const ConventionForm = (props) => {
 
 
   React.useEffect(() => {
-    apiService.getFunders().then(
+    axios.get(`/funders`).then(
       res => {
         console.log(res.data);
         setFunders(res.data);
@@ -115,7 +115,7 @@ const ConventionForm = (props) => {
       error => console.log(error)
     ) 
     .then( () => {
-            apiService.getBorrowers().then(
+      axios.get(`/borrowers`).then(
             res => {
               console.log(res.data);
               setBorrowers(res.data)
@@ -125,7 +125,7 @@ const ConventionForm = (props) => {
     }
     )
     .then( () => {
-          apiService.getCurrencies().then(
+        axios.get(`/currencies`).then(
           res => {
             console.log(res.data);
             setCurrencies(res.data)
@@ -147,7 +147,7 @@ const ConventionForm = (props) => {
       setLoading(true)
       console.log(values);
       if(convention === null){
-        apiService.addConvention(values).then(
+        axios.post(`/conventions`, values).then(
           (res) => {
             console.log("added => " ,res);
             if(res.data){
@@ -165,7 +165,7 @@ const ConventionForm = (props) => {
           setLoading(false)
         });
       }else{
-        apiService.updateConvention(values).then(
+        axios.put(`/conventions/${values.id}`, values).then(
           (res) => {
             console.log("updated => ", res);
             if(!res.data){
@@ -213,11 +213,11 @@ const ConventionForm = (props) => {
     
         <BaseCard titleColor={"secondary"} title={titleName()}>
           {values &&
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} style={{paddingInline:'5%'}}>
           <br/>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
-              style={{width:'460px'}}
+              style={{width:'50%'}}
               id="reference-input"
               name="reference"
               label="Reférence"
@@ -226,7 +226,7 @@ const ConventionForm = (props) => {
               error={errors.reference}
             />
             <Controls.Select
-              style={{width:'460px'}}
+              style={{width:'50%'}}
               name="retrocede"
               label="Retrocedé ?"
               value={values.retrocede}
@@ -238,7 +238,7 @@ const ConventionForm = (props) => {
           </Stack>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
-              style= { values.retrocede === true ? { width:'460px'} :  { width:'935px'}}
+              style= { values.retrocede === true ? { width:'50%'} :  { width:'100%'}}
               id="amount-input"
               name="amount"
               label="Montant"
@@ -249,7 +249,7 @@ const ConventionForm = (props) => {
             />
             {values.retrocede === true &&
               <Controls.Input
-              style={{width:'460px'}}
+              style={{width:'50%'}}
               id="costs-input"
               name="costs"
               label="Commission"
@@ -262,7 +262,7 @@ const ConventionForm = (props) => {
           </Stack>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Select
-              style={{width:'460px'}}
+              style={{width:'50%'}}
               name="currency_id"
               label="Devise"
               value={values.currency_id}
@@ -271,7 +271,7 @@ const ConventionForm = (props) => {
               error={errors.currency_id}
             />
             <Controls.Input
-              style={{width:'460px'}}
+              style={{width:'50%'}}
               id="interest_rate-input"
               name="interest_rate"
               label="Taux d'intéret"
@@ -284,7 +284,7 @@ const ConventionForm = (props) => {
 
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Select
-              style={{width:'460px'}}
+              style={{width:'50%'}}
               name="funder_id"
               label="Bailleur"
               value={values.funder_id}
@@ -293,7 +293,7 @@ const ConventionForm = (props) => {
               error={errors.funder_id}
             />
             <Controls.Select
-              style={{width:'460px'}}
+              style={{width:'50%'}}
               name="borrower_id"
               label="Emprunteur"
               value={values.borrower_id}
@@ -305,7 +305,7 @@ const ConventionForm = (props) => {
 
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.DatePiccker
-              style={{width:'460px'}}
+              style={{width:'50%'}}
               id="start_date"
               name="start_date"
               label="Date début"
@@ -314,7 +314,7 @@ const ConventionForm = (props) => {
               error={errors.start_date}
             />
             <Controls.DatePiccker
-              style={{width:'460px'}}
+              style={{width:'50%'}}
               id="end_date"
               name="end_date"
               label="Date fin"
@@ -325,7 +325,7 @@ const ConventionForm = (props) => {
           </Stack>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.DatePiccker
-              style={{width:'460px'}}
+              style={{width:'50%'}}
               id="start_date_refund-input"
               name="start_date_refund"
               label="Date début de remboursement"
@@ -334,7 +334,7 @@ const ConventionForm = (props) => {
               error={errors.start_date_refund}
             />
             <Controls.DatePiccker
-              style={{width:'460px'}}
+              style={{width:'50%'}}
               id="end_date_refund-input"
               name="end_date_refund"
               label="Date fin de remboursement"
@@ -346,7 +346,7 @@ const ConventionForm = (props) => {
 
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.DatePiccker
-              style={{width:'935px'}}
+              style={{width:'100%'}}
               id="end_date_grace_period-input"
               name="end_date_grace_period"
               label="Date de la fin de la periode de grace"
@@ -357,7 +357,7 @@ const ConventionForm = (props) => {
           </Stack>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
-              style={{width:'935px'}}
+              style={{width:'100%'}}
               id="object-input"
               name="object"
               label="Objet"
@@ -368,7 +368,7 @@ const ConventionForm = (props) => {
           </Stack>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
-              style={{width:'935px'}}
+              style={{width:'100%'}}
               id="description-input"
               name="description"
               label="Description"
@@ -390,14 +390,16 @@ const ConventionForm = (props) => {
 
 
           <br />
+          <Stack style={styles.stack} spacing={2}>
           <Button
             type="submit"
             style={{ fontSize: "25px" }}
             variant="contained"
             disabled={loading}
             mt={4}
+            
           >
-             Sauvegarder
+             SAUVEGARDER
             {loading && (
             <CircularProgress
               size={24}
@@ -412,7 +414,7 @@ const ConventionForm = (props) => {
             />
           )}
           </Button>
-          
+          </Stack>
           </form>
         }
         </BaseCard>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext} from "react";
 import {
   Grid,
   Stack,
@@ -18,142 +18,122 @@ import {
   DialogContent
 } from "@mui/material";
 import BaseCard from "../src/components/baseCard/BaseCard"
-import apiService from "../src/services/apiService";
 import { Form } from "../src/components/Form";
 import { Visibility, VisibilityOff } from "@material-ui/icons";
 import UserForm from "./user_form";
 import { Close } from '@mui/icons-material';
 import { useRouter } from "next/router";
-
+import AuthContext from "../src/context/AuthContext";
 
 const Login = () =>{
 
     const user = {
-        phone: "",
-        password: ""
-      };
-    
-      const [formValues, setFormValues] = useState(user);
-      const [loading, setLoading] = React.useState(false);
-      const [showPassword, setShowPassword] = React.useState(false);
-      const [invalid, setInvalid] = React.useState(false);
-      const [openModal, setOpenModal] = React.useState(false);
-      const [openFailedToast, setOpenFailedToast] = React.useState(false);
-      const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
-      const [users, setUsers] = React.useState([]);
-      const router = useRouter()
-
-      const validate = (fieldValues = values) => {
-        let temp = { ...errors };
-        if ("phone" in fieldValues)
-          temp.phone = /^[234][\d]{7}$/.test(fieldValues.phone)
-            ? ""
-            : "الرقم غير صحيح";
-        if ("password" in fieldValues)
-          temp.password = fieldValues.password.toString().length > 2 ? "" : " الرجاء إدخال كلمة مرور";
-        setErrors({
-          ...temp,
-        });
-    
-        if (fieldValues == values) return Object.values(temp).every((x) => x == "");
-      };
-        
-      const { values, setValues, errors, setErrors, handleInputChange, resetForm } = Form(formValues, true, validate);
-
-      const handleSubmit = (event) => {
-       // event.preventDefault();
-        setLoading(true);
-        apiService.login(values.phone, values.password).then(
-              (res) => {
-                console.log("added => ", res);
-                if (res.data) {
-                  //save to storage
-                  localStorage.setItem('user', res.data.name)
-                  localStorage.setItem('phone', res.data.phone)
-                  localStorage.setItem('password', res.data.password)
-                  //navigate to home
-                  router.push('/')
-                } else {
-                  setInvalid(true);
-                }
-              },
-              (error) => {
-                console.log(error);
-                setInvalid(true);
-              }
-            )
-            .then(() => {
-              setLoading(false);
-            });
-      };
-
-      const handleClickShowPassword = () => {
-        setShowPassword(!showPassword)
-      };
-    
-      const handleMouseDownPassword = (event) => {
-        event.preventDefault();
-      };
-
-      const handleOpenModal = () => {
-        console.log('open modal');
-        setOpenModal(true)
-      };
-
-      const handleCloseModal = (event, reason) => {
-        if (reason === "backdropClick") {
-            console.log(reason);
-        } else {
-            setOpenModal(false)
-        }
-      };
-
-      const showFailedToast = () => {
-        setOpenFailedToast(true);
-      };
-    
-      const showSuccessToast = () => {
-        setOpenSuccessToast(true);
-      };
-
-      const closeFailedToast = (event, reason) => {
-        if (reason === 'clickaway') {
-          return;
-        }
-        setOpenFailedToast(false);
-      };
-
-      const closeSuccessToast = (event, reason) => {
-        if (reason === 'clickaway') {
-          return;
-        }
-        setOpenSuccessToast(false);
-      };
-
-      React.useEffect(() => {
-        apiService.getUsers().then(
-            (res) => {
-              console.log("res => ", res.data);
-              setUsers(res.data)
-            },
-            (error) => {
-              console.log(error);
-            }
-        )
-      }, [])
+      username: "",
+      password: ""
+    };
+    const { loginUser, invalid, loging } = useContext(AuthContext);
+    const [formValues, setFormValues] = useState(user);
+    const [showPassword, setShowPassword] = React.useState(false);
+    const [openModal, setOpenModal] = React.useState(false);
+    const [openFailedToast, setOpenFailedToast] = React.useState(false);
+    const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
+    const [users, setUsers] = React.useState([]);
+    const router = useRouter()
+    const validate = (fieldValues = values) => {
+      let temp = { ...errors };
+      if ("username" in fieldValues)
+        temp.username = fieldValues.username ? "" : "Utilisateur est réquis";
+      if ("password" in fieldValues)
+        temp.password = fieldValues.password.toString().length > 2 ? "" : "Mot de passe est réquis";
+      setErrors({
+        ...temp,
+      });
+  
+      if (fieldValues == values) return Object.values(temp).every((x) => x == "");
+    };
+      
+    const { values, setValues, errors, setErrors, handleInputChange, resetForm } = Form(formValues, true, validate);
+    const handleSubmit = async (event) => {
+     // event.preventDefault();
+      let res = await loginUser(values)
+      
+      /* .then(
+        (res) => {
+          if (res === true) { */
+            //console.log("login res ", res);
+            //save to storage
+            //navigate to home
+            //router.push('/')
+         /*  } else {
+            console.log("login res ",res);
+            setInvalid(true);
+          }
+        },
+      ).then(() => {
+        setLoading(false);
+      }); */
+    };
+    const handleClickShowPassword = () => {
+      setShowPassword(!showPassword)
+    };
+  
+    const handleMouseDownPassword = (event) => {
+      event.preventDefault();
+    };
+    const handleOpenModal = () => {
+      console.log('open modal');
+      setOpenModal(true)
+    };
+    const handleCloseModal = (event, reason) => {
+      if (reason === "backdropClick") {
+          console.log(reason);
+      } else {
+          setOpenModal(false)
+      }
+    };
+    const showFailedToast = () => {
+      setOpenFailedToast(true);
+    };
+  
+    const showSuccessToast = () => {
+      setOpenSuccessToast(true);
+    };
+    const closeFailedToast = (event, reason) => {
+      if (reason === 'clickaway') {
+        return;
+      }
+      setOpenFailedToast(false);
+    };
+    const closeSuccessToast = (event, reason) => {
+      if (reason === 'clickaway') {
+        return;
+      }
+      setOpenSuccessToast(false);
+    };
+    React.useEffect(() => {
+      /* apiService.getUsers().then(
+          (res) => {
+            console.log("res => ", res.data);
+            setUsers(res.data)
+          },
+          (error) => {
+            console.log(error);
+          }
+      ) */
+    }, [])
 
     return (
     <Container>
 
       <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'center'}} open={openSuccessToast} autoHideDuration={6000} onClose={closeSuccessToast}>
         <Alert onClose={closeSuccessToast} severity="success" sx={{ width: '100%' }} style={{fontSize:"24px",fontWeight:"bold"}}>
-          تمت العملية بنجاح 
+        L'oppération a été effectué avec succée
         </Alert>
       </Snackbar>
 
       <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'center'}} open={openFailedToast} autoHideDuration={6000} onClose={closeFailedToast}>
         <Alert onClose={closeFailedToast} severity="error" sx={{ width: '100%' }} style={{fontSize:"24px",fontWeight:"bold"}}>
-          واجهتك مشكلة ,العملية لم تتم
+        Vous avez rencontré un probléme !
         </Alert>
       </Snackbar>
       
@@ -176,11 +156,11 @@ const Login = () =>{
             style={{
                 maxWidth:500, 
                 borderRadius:20,
-                backgroundColor:'#03c9d7',
+                backgroundColor:'#90d791',
                 }} >
-        <BaseCard title=" تسجيل الدخول">
+        <BaseCard title="Authentification" titleColor={"secondary"}>
         <Stack style={{...styles.stack, marginBottom:30 }}  spacing={10} direction="row">
-                <img src='/static/images/users/8.jpg' alt="" />         
+                <img src='/static/images/SOGEM.jpg' alt="" />         
 
           {/* <Image
             src={userimg}
@@ -202,16 +182,14 @@ const Login = () =>{
 
         <Stack spacing={2} direction="column" style={{marginBottom:20}}>
             <TextField
-              id="phone"
-              label="الهاتف"
-              name="phone"  
-              type="number"
+              id="username"
+              label="Utilisateur"
+              name="username"
               variant="outlined"
               onChange={handleInputChange}
             />
-
             <FormControl sx={{ m: 1, width: '100%' }} variant="outlined" >
-                <InputLabel htmlFor="outlined-adornment-password">كلمة المرور</InputLabel>
+                <InputLabel htmlFor="outlined-adornment-password"> Mot de passe</InputLabel>
                 <OutlinedInput
                     id="password"
                     type={showPassword ? 'text' : 'password'}
@@ -229,45 +207,21 @@ const Login = () =>{
                         </IconButton>
                     </InputAdornment>
                     }
-                    label="كلمة المرور"
+                    label="Mot de passe"
                 />
             </FormControl>
-
-            
-            {/* <Controls.Input
-              id="phone-input"
-              name="phone"
-              label="الهاتف"
-              type="number"
-              value={values.phone}
-              onChange={handleInputChange}
-              error={errors.phone}
-            />
-
-            <Controls.Input
-              id="price-input"
-              name="password"
-              label=" كلمة المرور"
-              type="password"
-              value={values.password}
-              onChange={handleInputChange}
-              error={errors.password}
-            /> */}
           </Stack>
-
-
-            
           <Stack >
             <Button
                 onClick={handleSubmit}
                 style={{ fontSize: "20px" }}
                 variant="contained"
-                disabled={loading || !values.phone || !values.password }
+                disabled={loging || !values.username || !values.password }
                 mt={4}
                 fullWidth
             >
-             تسجيل الدخول
-                {loading && (
+              CONNEXION
+                {loging && (
                 <CircularProgress
                 size={24}
                 sx={{
@@ -284,12 +238,12 @@ const Login = () =>{
           </Stack>
           {invalid &&
           <Stack spacing={2} direction="row" style={{marginTop:15, marginBottom:5, display:'flex', justifyContent:'center'}}>
-            <Box style={{fontSize:'20px', color:'red'}} color="danger"> خطأ في الهاتف أو كلمة المرور </Box>
+            <Box style={{fontSize:'20px', color:'red'}} color="danger"> Authentification invalide </Box>
           </Stack>
           }
           {users.length === 0 &&
           <Stack spacing={2} direction="row" style={{marginTop:10}}>
-            <Button style={{fontSize:'20px'}} color="primary" onClick={handleOpenModal} >إنشاء حساب</Button>
+            <Button style={{fontSize:'20px'}} color="primary" onClick={handleOpenModal} > Inscription </Button>
           </Stack>
           }
         </BaseCard>

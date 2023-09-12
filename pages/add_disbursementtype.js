@@ -6,9 +6,9 @@ import {
   CircularProgress
 } from "@mui/material";
 import BaseCard from "../src/components/baseCard/BaseCard";
-import apiService from "../src/services/apiService";
 import { Form } from "../src/components/Form";
 import Controls from "../src/components/controls/Controls";
+import useAxios from "../src/utils/useAxios";
 
 const DisbursementTypeForm = (props) => {
   const {DisbursementType, push, update, showSuccessToast, showFailedToast} = props;
@@ -36,7 +36,7 @@ const DisbursementTypeForm = (props) => {
   };
 
   const { values, setValues, errors, setErrors, handleInputChange, resetForm } = Form(formValues, true, validate);
-    
+  const axios = useAxios();
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -45,7 +45,7 @@ const DisbursementTypeForm = (props) => {
       setLoading(true)
       console.log(values);
       if(DisbursementType === null){
-        apiService.addDisbursementType(values).then(
+        axios.post(`/disbursementtypes`, values).then(
           (res) => {
             console.log("added => " ,res);
             if(res.data){
@@ -65,7 +65,7 @@ const DisbursementTypeForm = (props) => {
           setLoading(false)
         });
       }else{
-        apiService.updateDisbursementType(values).then(
+        axios.put(`/disbursementtypes/${values.id}`, values).then(
           (res) => {
             console.log("updated => ", res);
             if(!res.data){
@@ -99,11 +99,11 @@ const DisbursementTypeForm = (props) => {
     
         <BaseCard titleColor={"secondary"} title= {titleName()}>
         {values &&
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} style={{paddingInline:'5%'}}>
           <br/>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
-              style={{width:'460px'}}
+              style={{width:'50%'}}
               id="code-input"
               name="code"
               type='number'
@@ -113,7 +113,7 @@ const DisbursementTypeForm = (props) => {
               error={errors.code}
             />
             <Controls.Input
-              style={{width:'460px'}}
+              style={{width:'50%'}}
               id="label"
               name="label"
               label="Libelé"
@@ -123,6 +123,8 @@ const DisbursementTypeForm = (props) => {
             />
           </Stack>
           <br />
+          <Stack style={styles.stack} spacing={2}>
+
           <Button
             type="submit"
             style={{ fontSize: "25px" }}
@@ -130,7 +132,7 @@ const DisbursementTypeForm = (props) => {
             disabled={loading}
             mt={4}
           >
-             Sauvegarder
+             SAUVEGARDER
             {loading && (
             <CircularProgress
               size={24}
@@ -145,6 +147,8 @@ const DisbursementTypeForm = (props) => {
             />
           )}
           </Button>
+          </Stack>
+
           </form>
         }
         </BaseCard>
