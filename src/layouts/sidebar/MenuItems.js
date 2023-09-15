@@ -10,6 +10,11 @@ const Menuitems = [
     href: "/conventions",
   },
   {
+    title: "Utilisateurs",
+    icon: "users",
+    href: "/users",
+  },
+  {
     title: "Engagements",
     icon: "",
     href: "/commitments",

@@ -144,23 +144,22 @@ const ProfileDD = () => {
         }}
       >
         <Box>
-          <Box p={2} pt={0}>
+        {/*           <Box p={2} pt={0}>
             <List
               component="nav"
               aria-label="secondary mailbox folder"
               onClick={handleClose4}
             >
               <ListItemButton onClick={handleOpenModal} >
-                {/* <ListItemText primary="إضافة مستخدم " style={{ display:'flex', justifyContent:'center', fontWeight:'bold', fontSize:'24px'}} /> */}
                 <Button fullWidth variant="contained" color="grey" style={{fontSize:"22px"}}>
                   Ajouter un utilisateur
                 </Button>
               </ListItemButton>
             </List>
-          </Box>
-          <Divider />
+          </Box> */}
+          {/* <Divider /> */}
           <Box p={2}>
-              <Button onClick={logoutUser} fullWidth variant="contained" color="primary" style={{fontSize:"20px"}}>
+              <Button onClick={logoutUser} fullWidth variant="contained" color="secondary" style={{fontSize:"20px"}}>
                 Déconnecter
               </Button>
           </Box>

@@ -23,58 +23,44 @@ import Select from '@mui/material/Select';
 import { Box } from "@material-ui/core";
 import EnhancedTableToolbar from "../src/components/Table/TableToolbar";
 import useAxios from "../src/utils/useAxios";
-
+import { Check, Close, Delete, Edit } from "@mui/icons-material";
+import DoDisturbIcon from '@mui/icons-material/DoDisturb';
+import { useContext } from "react";
+import AuthContext from "../src/context/AuthContext";
+import jwt_decode from "jwt-decode";
+import UserForm from "./user_form";
 
 const headCells = [
   {
-    id: 'reference',
+    id: 'username',
     numeric: false,
     disablePadding: false,
-    label: 'Reférence',
+    label: 'Utilisateur',
   },
   {
-    id: 'funder',
+    id: 'role',
     numeric: false,
     disablePadding: false,
-    label: 'Bailleur',
+    label: 'Role',
   },
   {
-    id: 'amount',
+    id: 'date_joined',
     numeric: false,
     disablePadding: false,
-    label: 'Montant',
+    label: 'Date de création',
   },
   {
-    id: 'cummule_dec',
+    id: 'is_active',
     numeric: false,
     disablePadding: false,
-    label: 'Décaissé',
+    label: 'Statut',
   },
   {
-    id: 'reste',
+    id: 'action',
     numeric: false,
     disablePadding: false,
-    label: 'Reste',
-  },
-  {
-    id: 'start_date',
-    numeric: false,
-    disablePadding: false,
-    label: 'Date debut',
-  },
-  {
-    id: 'end_date',
-    numeric: false,
-    disablePadding: false,
-    label: 'Date fin',
-  }/* ,
-  {
-    id: 'end_date_grace_period',
-    numeric: false,
-    disablePadding: false,
-    label: 'Fin du grace période',
-  } */
-  
+    label: 'Action',
+  } 
 ];
 
 EnhancedTableHead.propTypes = {
@@ -92,9 +78,10 @@ EnhancedTableToolbar .propTypes = {
 
 export default function EnhancedTable() {
   const [order, setOrder] = React.useState('asc');
-  const [orderBy, setOrderBy] = React.useState('calories');
+  const [orderBy, setOrderBy] = React.useState('username');
   const [selected, setSelected] = React.useState(null);
-  const [Conventions, setConventions] = React.useState([])
+  const [user, setUser] = React.useState({});
+  const [Users, setUsers] = React.useState([])
   const [search, setSearch] = React.useState("")
   const [getBy, setGetBy] = React.useState("")
   const [open, setOpen] = React.useState(false);
@@ -109,46 +96,38 @@ export default function EnhancedTable() {
   const [openFailedToast, setOpenFailedToast] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [deleted, setDelete] = React.useState(false);
+  const [openEditState, setOpenEditState] = React.useState(false);
+  const [openModalUser, setOpenModalUser] = React.useState(false);
+
+  const { authTokens } = useContext(AuthContext);
+  const User = authTokens ? jwt_decode(authTokens.access) : {};
 
   const router = useRouter()
   const axios = useAxios();
 
   useEffect(() => {
-      //setLoading(true)
-      //var cMonth;
-      /* apiService.getCurrentMonth().then(
-        res => {
-          cMonth = res.data
-          console.log("current month : ", res.data);
-          setCurrentMonth(res.data);
-        },
-        error => { console.log(error); }
-      ).then( () => { */
-        //console.log("time : ", cMonth);
-        //if(cMonth){
-         //if(authTokens){
-          //console.log(authTokens);
-          setLoading(true)
-          axios.get(`/conventions`).then(
-            res => {
-              console.log(res.data);
-              setConventions(res.data);
-              //setHasNext(res.data.nextPage);
-              //setHasPrevious(res.data.previousPage);
-              //setTotalPages(res.data.TotalPages);
-              //setAll(res.data.TotalCount);
-            }, 
-            error => console.log(error)
-          ).then(() => {
-            setLoading(false)
-          })
-       //}
-      
-      
-    
-
+    if(User.role === "Admin")
+    getUsers()
+    else
+    router.push('/')
   }, [pageNumber, pageSize, getBy, deleted])
 
+  const getUsers = () => {
+    setLoading(true)
+    axios.get(`/users`).then(
+      res => {
+        console.log(res.data);
+        setUsers(res.data);
+        //setHasNext(res.data.nextPage);
+        //setHasPrevious(res.data.previousPage);
+        //setTotalPages(res.data.TotalPages);
+        //setAll(res.data.TotalCount);
+      }, 
+      error => console.log(error)
+    ).then(() => {
+      setLoading(false)
+    })
+  }
   /*React.useEffect(() => {
      if(!localStorage.getItem('user')){
       console.log("no user in loc storage :", localStorage.getItem('user'));
@@ -188,33 +167,22 @@ export default function EnhancedTable() {
   };
 
   const remove = () =>{
-    if(selected !== null){
-      axios.delete(`/conventions/${selected.id}`).then(
+      axios.delete(`/users/${user.id}`).then(
         res => {
           console.log(res);
-          const index = Conventions.indexOf(selected);
-          Conventions.splice(index, 1);
+          //const index = Users.indexOf(user);
+          //Users.splice(index, 1);
           setDelete(!deleted)
-          handleCloseModalDelete()
-          setSelected(null)
           showSuccessToast()
         },
         error => {
           console.log(error)
           showFailedToast()
         }
+      ).then(
+        handleCloseModalDelete()
       )      
-    }
   }
-
-  const handleClick = (event, row) => {
-    console.log("select => ", row);
-    if(!isSelected(row.id)){
-      setSelected(row);
-    }else{
-      setSelected(null);
-    }
-  };
 
   const next = () => {
     setPageNumber(pageNumber+1)
@@ -226,13 +194,9 @@ export default function EnhancedTable() {
   const editClick = () => {
     console.log("edit => ", selected);
     router.push({
-      pathname: '/add_convention',
+      pathname: '/add_User',
       query: { id: selected.id }
     })
-  }
-
-  const addConvention = () => {
-    router.push({ pathname: '/add_convention' })
   }
 
   const deleteClick = () => {
@@ -278,12 +242,32 @@ export default function EnhancedTable() {
     return [year, month, day].join('-');
   }
 
+  const handleCloseModalUser = () =>{
+    setOpenModalUser(false)
+    getUsers()
+  }
+
+  const handleOpenModalUser = () =>{
+    setOpenModalUser(true)
+  }
+
   const handleCloseModalDelete = () =>{
     setOpenDelete(false)
   }
 
-  const handleOpenModalDelete = () =>{
+  const handleOpenModalDelete = (row) =>{
+    console.log(row);
+    setUser(row)
     setOpenDelete(true)
+  }
+
+  const handleCloseModalEditState = () =>{
+    setOpenEditState(false)
+  }
+
+  const handleOpenModalEditState = (row) =>{
+    setUser(row)
+    setOpenEditState(true)
   }
 
   const handleSelectSizeChange = (event) => {
@@ -301,31 +285,48 @@ export default function EnhancedTable() {
       );
   }  
 
-  const conventionDetail = () => {
+  const UserDetail = () => {
     //setDetail(true);
     router.push({
-      pathname: '/convention_detail',
+      pathname: '/User_detail',
       query: { id: selected.id }
     })
   }
 
-  const getDisbursementsAmount = (disbursements) => {
-    var sum = disbursements.reduce((accumulator, e) => {
-      return accumulator + e.orderamount
-    },0);
-    return sum;
+  const userState = () => {
+    if(user.is_active)
+    return "Suspension d'un utilisateur"
+    else return "Activation d'un utilisateur"
   }
 
-  let pounds = Intl.NumberFormat( {
-    style: 'currency',
-    maximumSignificantDigits: 3,
-    minimumFractionDigits: 2
-  });
+  const editState = () => {
+    axios.put(`/users/${user.id}`, { ...user, is_active : !user.is_active }).then(
+        (res) => {
+          console.log("updated => ", res);
+          if(!res.data){
+            showFailedToast()
+          }else{
+            showSuccessToast()
+          }
+          getUsers()
+          handleCloseModalEditState()
+        },
+        (error) => {
+          console.log(error);
+          showFailedToast()
+          handleCloseModalEditState()
+        } 
+      )
+  }
+
+  const editUser = (row) => {
+    console.log(row);
+  }
 
   return (<>
     {/* {authenticated &&} */}
     {/* {!detail ? */}
-    <BaseCard titleColor={"secondary"} title="GESTION DES CONVENTIONS">
+    <BaseCard titleColor={"secondary"} title="GESTION DES UTILISATEURS">
 
       <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'center'}} open={openSuccessToast} autoHideDuration={6000} onClose={closeSuccessToast}>
         <Alert onClose={closeSuccessToast} severity="success" sx={{ width: '100%' }} style={{fontSize:"24px",fontWeight:"bold"}}>
@@ -339,6 +340,21 @@ export default function EnhancedTable() {
         </Alert>
       </Snackbar>
 
+      <Dialog fullWidth={true} open={openModalUser} onClose={handleCloseModalUser}>
+        <DialogContent>
+          <div style={{display:"flex", justifyContent:"end"}}>
+            <IconButton onClick={handleCloseModalUser}>
+              <Close fontSize='large'/>
+            </IconButton>
+          </div>
+          <UserForm
+            //user = {user}
+            showSuccessToast={showSuccessToast}
+            showFailedToast={showFailedToast}
+          />
+        </DialogContent>
+      </Dialog>
+
       <Dialog 
         open={openDelete}
         onClose={handleCloseModalDelete}
@@ -350,26 +366,48 @@ export default function EnhancedTable() {
         </DialogTitle>
         <DialogContent style={{width:300,display:"flex" ,justifyContent:"center" }}>
           <DialogContentText>
-            Confirmer l'oppération
+            Confirmer la suppression
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button style={{fontSize:"24px",fontWeight:"bold"}} autoFocus onClick={handleCloseModalDelete}>
             Annuler
           </Button>
-          <Button style={{fontSize:"24px",fontWeight:"bold"}} onClick={remove}>Supprimer</Button>
+          <Button style={{fontSize:"24px",fontWeight:"bold"}} onClick={remove}>
+            Supprimer
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog 
+        open={openEditState}
+        onClose={handleCloseModalEditState}
+        PaperComponent={PaperComponent}
+        aria-labelledby="draggable-dialog-title"
+      >
+        <DialogTitle style={{ cursor: 'move', display:"flex" ,justifyContent:"end" , fontSize:"24px",fontWeight:"bold" }} id="draggable-dialog-title">
+        {/* Activation/Suspension d'un utilisateur */}
+        {userState()}
+        </DialogTitle>
+        <DialogContent style={{width:300,display:"flex" ,justifyContent:"center" }}>
+          <DialogContentText>
+            Confirmer le changement de statut
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button style={{fontSize:"24px",fontWeight:"bold"}} autoFocus onClick={handleCloseModalEditState}>
+            Annuler
+          </Button>
+          <Button style={{fontSize:"24px",fontWeight:"bold"}} onClick={editState}>
+            Confirmer
+          </Button>
         </DialogActions>
       </Dialog>
 
       <EnhancedTableToolbar
-        detail = {conventionDetail}
-        field = {shooseField("object")} 
-        selected = {selected}
-        deleteClick = {deleteClick}
-        editClick = {editClick}
         onSearch = {onSearch}
         search = {search}
-        openModal = {addConvention}
+        openModal = {handleOpenModalUser}
         goSearch = {goSearch}
       />
        <TableContainer>
@@ -388,32 +426,30 @@ export default function EnhancedTable() {
          </Box>
         :
           <>
-          {Conventions.length > 0 ?
+          {Users.length > 0 ?
             <Table
               sx={{ minWidth: 750 }}
               aria-labelledby="tableTitle"
               size={'medium'}
             >
               <EnhancedTableHead
-                selected={selected}
                 order={order}
                 orderBy={orderBy}
-                onSelectAllClick ={null}
                 onRequestSort={handleRequestSort}
-                rowCount={Conventions.length}
+                rowCount={Users.length}
                 headCells={headCells}
                 headerBG="#c8d789"
                 txtColor="#000000"
               />
               <TableBody>
-                {Conventions
+                {Users.filter(e => e.username != User.username && e.username != "Binor" )
                   .map((row, index) => {
-                    const isItemSelected = isSelected(row.id);
-                    const labelId = `enhanced-table-checkbox-${index}`;
+                    //const isItemSelected = isSelected(row.id);
+                    //const labelId = `enhanced-table-checkbox-${index}`;
                     return (
                       <TableRow
-                        hover
-                        onClick={(event) => handleClick(event, row)}
+                        //hover
+                        //onClick={(event) => handleClick(event, row)}
                         role="checkbox"
                         //aria-checked={isItemSelected}
                         tabIndex={-1}
@@ -422,23 +458,51 @@ export default function EnhancedTable() {
                       >
                         
                         <TableCell padding="checkbox">
-                          <Checkbox
+                          {/* <Checkbox
                             color="primary"
                             checked={isItemSelected}
                             inputProps={{ 
                               'aria-labelledby': labelId,
                             }}
-                          />
+                          /> */}
                         </TableCell>
-                        <TableCell align="left" style={{fontWeight:"bold"}} >{row.reference}</TableCell>
-                        <TableCell align="left">{row.funder.label}</TableCell>
-                        <TableCell align="left"> <Box style={{display:"flex", flexDirection:"row"}} >  {pounds.format(parseFloat(row.amount).toFixed(2))} <Box style={{fontSize:'12px', fontWeight:"bold", marginInlineStart:"5px", paddingTop:"1.7px" }}>  {row.currency.label}</Box> </Box> </TableCell>
-                        <TableCell align="left"> <Box style={{display:"flex", flexDirection:"row"}} >{pounds.format(getDisbursementsAmount(row.disbursements))} <Box style={{fontSize:'12px', fontWeight:"bold", marginInlineStart:"5px" , paddingTop:"1.7px" }}>  {row.currency.label}</Box> </Box> </TableCell>
-                        <TableCell align="left"> <Box style={{display:"flex", flexDirection:"row"}} >{pounds.format(row.amount-getDisbursementsAmount(row.disbursements))} <Box style={{fontSize:'12px', fontWeight:"bold", marginInlineStart:"5px", paddingTop:"1.7px" }}>  {row.currency.label}</Box> </Box> </TableCell>
-                        <TableCell align="left">{formatDate(row.start_date)} </TableCell>
-                        <TableCell align="left">{formatDate(row.end_date)} </TableCell>
-
-
+                        <TableCell align="left" style={{fontWeight:"bold"}} >{row.username}</TableCell>
+                        <TableCell align="left">{row.role}</TableCell>
+                        <TableCell align="left">{formatDate(row.date_joined)} </TableCell>
+                        <TableCell align="left"> 
+                            {row.is_active ?
+                             'Active'
+                            :
+                             'Suspendu'
+                            }
+                        </TableCell>
+                        <TableCell align="left"> 
+                            <Box style={{display:"flex", flexDirection:"row"}} >
+                                {!row.is_active ?
+                                    <Tooltip onClick={() => handleOpenModalEditState(row)} title="Activer">
+                                        <IconButton>
+                                            <Check fontSize='medium' color="primary" />
+                                        </IconButton>
+                                    </Tooltip>
+                                    :
+                                    <Tooltip onClick={() => handleOpenModalEditState(row)} title="Suspender">
+                                        <IconButton>
+                                            <DoDisturbIcon fontSize='medium' color="danger" />
+                                        </IconButton>
+                                    </Tooltip>
+                                }
+                                <Tooltip onClick={() => editUser(row)} title="Modifier">
+                                    <IconButton>
+                                        <Edit fontSize='medium' color="action" />
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip onClick={() => handleOpenModalDelete(row)} title="Supprimer">
+                                    <IconButton>
+                                        <Delete fontSize='medium' color="secondary" />
+                                    </IconButton>
+                                </Tooltip>
+                            </Box> 
+                        </TableCell>
                       </TableRow>
                     );
                   })}
@@ -454,7 +518,7 @@ export default function EnhancedTable() {
           </>
         }
         </TableContainer>
-          {Conventions.length > 0 &&
+          {Users.length > 0 &&
           <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "space-between"}}>
             <div style={{width:"50%", display:'flex', alignItems:'center'}}>
               <Box style={{display:'flex', alignItems:'center', marginInline:"20px", fontWeight:'bold', color:"GrayText"}} >
@@ -500,7 +564,7 @@ export default function EnhancedTable() {
           }
     </BaseCard>
     {/* :
-    <DetailConvention clientsCount = {200 } numbersCount = {200 } convention = {selected} />
+    <DetailUser clientsCount = {200 } numbersCount = {200 } User = {selected} />
     } */}
   </>);
 }

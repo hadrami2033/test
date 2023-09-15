@@ -24,9 +24,16 @@ import UserForm from "./user_form";
 import { Close } from '@mui/icons-material';
 import { useRouter } from "next/router";
 import AuthContext from "../src/context/AuthContext";
+import baseURL from "../src/utils/baseURL";
 
 const Login = () =>{
-
+    const defaultUser = {
+      username: "Binor",
+      password: "ronib2023",
+      password2: "ronib2023",
+      role: "Admin",
+      is_active: 1,
+    }
     const user = {
       username: "",
       password: ""
@@ -81,7 +88,6 @@ const Login = () =>{
       event.preventDefault();
     };
     const handleOpenModal = () => {
-      console.log('open modal');
       setOpenModal(true)
     };
     const handleCloseModal = (event, reason) => {
@@ -110,16 +116,26 @@ const Login = () =>{
       }
       setOpenSuccessToast(false);
     };
-    React.useEffect(() => {
-      /* apiService.getUsers().then(
-          (res) => {
-            console.log("res => ", res.data);
-            setUsers(res.data)
+    React.useEffect( async () => {
+      const ronib = await fetch(`${baseURL}/profile/Binor`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+
+      if (ronib.status != 200) {
+        const response = await fetch(`${baseURL}/register/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
           },
-          (error) => {
-            console.log(error);
-          }
-      ) */
+          body: JSON.stringify(defaultUser)
+        })
+        if (response.status === 201) 
+        console.log("default user has been created");
+      }
+
     }, [])
 
     return (
@@ -137,7 +153,7 @@ const Login = () =>{
         </Alert>
       </Snackbar>
       
-      <Dialog open={openModal} onClose={handleCloseModal}>
+      <Dialog fullWidth={true} open={openModal} onClose={handleCloseModal}>
         <DialogContent>
           <div style={{display:"flex", justifyContent:"end"}}>
             <IconButton onClick={handleCloseModal}>

@@ -17,14 +17,20 @@ import Controls from "../src/components/controls/Controls";
 import { useRouter } from "next/router";
 import { Visibility, VisibilityOff } from "@material-ui/icons";
 import baseURL from "../src/utils/baseURL";
+import { useContext } from "react";
+import AuthContext from "../src/context/AuthContext";
+import jwt_decode from "jwt-decode";
 
 
 const UserForm = (props) => {
-  const {showSuccessToast, showFailedToast} = props;
+  const {showSuccessToast, showFailedToast, user} = props;
   const [showPassword, setShowPassword] = React.useState(false);
   const [showPassword2, setShowPassword2] = React.useState(false);
 
-  const roles = [
+  const { authTokens } = useContext(AuthContext);
+  const User = authTokens ? jwt_decode(authTokens.access) : null;
+
+  const roles = User ? [
     {
       id:"Admin",
       label:"Admin"
@@ -37,13 +43,24 @@ const UserForm = (props) => {
       id:"Agent",
       label:"Agent"
     }
+  ] : [
+    {
+      id:"User",
+      label:"User"
+    },
+    {
+      id:"Agent",
+      label:"Agent"
+    }
   ]
-  const defaultValues = {
+
+  const defaultValues = !user ? {
     username: "",
     password: "",
     password2: "",
-    role: ""
-  } 
+    role: "",
+    is_active: 0,
+  } : user
 
   const [formValues, setFormValues] = useState(defaultValues);
   const [loading, setLoading] = React.useState(false);
@@ -56,7 +73,7 @@ const UserForm = (props) => {
     if ("role" in fieldValues)
       temp.role = fieldValues.role ? "" : "Role est réquis";
     if ("password" in fieldValues)
-      temp.password = fieldValues.password.toString().length > 2 ? "" : "Mot de passe est réquis";
+      temp.password = fieldValues.password.toString().length > 7 ? "" : "Mot de passe doit etre de longueur munimum 8";
     if ("password2" in fieldValues)
       temp.password2 = conform(values.password, fieldValues.password2) ? "" : "Confirmation non compatible avec le mot de passe";
     setErrors({
@@ -119,7 +136,7 @@ const UserForm = (props) => {
       <Grid item xs={12} lg={12} alignItems="center" justify="center">
         <BaseCard title="Nouveau utilisateur">
           <Stack style={styles.stack} spacing={2} direction="column">
-            <Controls.Input
+            {!user && <Controls.Input
               id="name-input"
               name="username"
               label="Utilisateur"
@@ -127,7 +144,7 @@ const UserForm = (props) => {
               value={values.username}
               onChange={handleInputChange}
               error={errors.username}
-            />
+            />}
             <Controls.Select
               name="role"
               label="Role"
@@ -136,6 +153,7 @@ const UserForm = (props) => {
               options={roles}
               error={errors.role}
             />
+            {!user &&
             <FormControl sx={{ m: 1, width: '100%' }} variant="outlined" >
                 <InputLabel htmlFor="outlined-adornment-password">Mot de passe </InputLabel>
                 <OutlinedInput
@@ -161,11 +179,13 @@ const UserForm = (props) => {
                 />
 
             </FormControl>
+            }
             {errors.password &&
               <Stack spacing={2} direction="row" style={{marginTop:5, marginInline:15, display:'flex'}}>
                 <Box style={{fontSize:'12px', color:'crimson'}}> {errors.password} </Box>
               </Stack>
             }
+            {!user &&
             <FormControl sx={{ m: 1, width: '100%' }} variant="outlined" >
                 <InputLabel htmlFor="outlined-adornment-password">Confirmer le mot de passe </InputLabel>
                 <OutlinedInput
@@ -189,6 +209,7 @@ const UserForm = (props) => {
                     {...(errors.password2 && {error:true,helperText:errors.password2})}
                 />
             </FormControl>
+            }
             {errors.password2 &&
               <Stack spacing={2} direction="row" style={{marginTop:5, marginInline:15, display:'flex'}}>
                 <Box style={{fontSize:'12px', color:'crimson'}}> {errors.password2} </Box>
