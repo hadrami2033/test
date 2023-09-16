@@ -1,14 +1,14 @@
 const disbursementtypes = [
     {
-        code:1,
+        id:1,
         label:"Paiement direct"
     },
     {
-        code: 2,
+        id: 2,
         label: "DRF"
     },
     {
-        code: 3,
+        id: 3,
         label: "Avance"
     }
 ]

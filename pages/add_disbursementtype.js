@@ -9,6 +9,7 @@ import BaseCard from "../src/components/baseCard/BaseCard";
 import { Form } from "../src/components/Form";
 import Controls from "../src/components/controls/Controls";
 import useAxios from "../src/utils/useAxios";
+import disbursementtypes from "../src/helper/disbursementtype"; 
 
 const DisbursementTypeForm = (props) => {
   const {DisbursementType, push, update, showSuccessToast, showFailedToast} = props;
@@ -26,8 +27,6 @@ const DisbursementTypeForm = (props) => {
     let temp = { ...errors };
     if ("code" in fieldValues)
       temp.code = fieldValues.code ? "" : "Le code est requis";
-    if ("label" in fieldValues)
-      temp.label = fieldValues.label ? "" : "Libelé requis";
     setErrors({
       ...temp,
     });
@@ -41,11 +40,13 @@ const DisbursementTypeForm = (props) => {
   const handleSubmit = (event) => {
     event.preventDefault();
     console.log(values);
+    let stateSelcted = disbursementtypes.filter(e => e.id === values.code)
+    let value = {...values, label: stateSelcted[0].label}
     if (validate()) {
       setLoading(true)
       console.log(values);
       if(DisbursementType === null){
-        axios.post(`/disbursementtypes`, values).then(
+        axios.post(`/disbursementtypes`, value).then(
           (res) => {
             console.log("added => " ,res);
             if(res.data){
@@ -65,7 +66,7 @@ const DisbursementTypeForm = (props) => {
           setLoading(false)
         });
       }else{
-        axios.put(`/disbursementtypes/${values.id}`, values).then(
+        axios.put(`/disbursementtypes/${value.id}`, value).then(
           (res) => {
             console.log("updated => ", res);
             if(!res.data){
@@ -102,24 +103,14 @@ const DisbursementTypeForm = (props) => {
           <form onSubmit={handleSubmit} style={{paddingInline:'5%'}}>
           <br/>
           <Stack style={styles.stack} spacing={2} direction="row">
-            <Controls.Input
-              style={{width:'50%'}}
-              id="code-input"
+            <Controls.Select
+              style={{ width:'100%'} }
               name="code"
-              type='number'
-              label="Code"
+              label="Libelé"
               value={values.code}
               onChange={handleInputChange}
+              options={disbursementtypes}
               error={errors.code}
-            />
-            <Controls.Input
-              style={{width:'50%'}}
-              id="label"
-              name="label"
-              label="Libelé"
-              value={values.label}
-              onChange={handleInputChange}
-              error={errors.label}
             />
           </Stack>
           <br />

@@ -3,7 +3,8 @@ import {
   Grid,
   Stack,
   Button,
-  CircularProgress
+  CircularProgress,
+  Box
 } from "@mui/material";
 import BaseCard from "../src/components/baseCard/BaseCard";
 import { Form } from "../src/components/Form";
@@ -26,7 +27,7 @@ const todayStartOfTheDay = today.startOf('day'); */
 
 const DibursementForm = (props) => {
   const { conventionId, disbursement, push, update, showSuccessToast, showFailedToast, 
-          availableAmount, currency, currenteState, availabeState, categories,
+          availableAmount, currency, currenteState, availabeState, categories = [],
           Invoices, Commitments} = props;
 
   const defaultValues = !disbursement ? {
@@ -107,7 +108,6 @@ const DibursementForm = (props) => {
     setInvoices(Invoices)
     axios.get(`/disbursementtypes`).then(
       res => {
-        console.log(res.data);
         setDisbursementTypes(res.data);
       },  
       error => console.log(error)
@@ -119,7 +119,7 @@ const DibursementForm = (props) => {
               setDisbursementStatus(res.data)
             },
             error => console.log(error)
-          )
+        )
     }
     )
     .then( () => {
@@ -216,7 +216,7 @@ const DibursementForm = (props) => {
         });
       }
     }else{
-        console.log(" invalid object ", values);
+        console.log("invalid object ", values);
     }
     //console.log(formValues);
   };
@@ -311,7 +311,7 @@ const DibursementForm = (props) => {
   return (
     
         <BaseCard titleColor={"secondary"} title={titleName()}>
-        {values && disbursementStatus.length > 0 && disbursementTypes.length > 0 &&
+        { ( values && disbursementStatus.length > 0 && disbursementTypes.length > 0 && disbursementTypes.filter(e => e.code === 1).length > 0 ) ?
           <form onSubmit={handleSubmit} style={{paddingInline:'5%'}}>
           <br/>
           <Stack style={styles.stack} spacing={2} direction="row">
@@ -402,7 +402,7 @@ const DibursementForm = (props) => {
           {getType(values.type_id) === getTypeByCode(1) &&
             <Stack style={styles.stack} spacing={2} direction="row">
 
-                <Controls.Select
+                 <Controls.Select
                   style={{width:'33.33%'}}
                   name="categorie_id"
                   label="Catégorie"
@@ -568,6 +568,12 @@ const DibursementForm = (props) => {
           </Stack>
 
           </form>
+          :
+          <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "center"}}>
+          <Box style={{fontSize: '16px'}}>
+            Pas de données de configuration !
+          </Box>
+        </div>
         }
         </BaseCard>
       

@@ -292,7 +292,7 @@ export default function EnhancedTable() {
         </Alert>
       </Snackbar>
 
-      <Dialog fullWidth={true} maxWidth={'lg'} open={open} onClose={handleClose}>
+      <Dialog fullWidth={true} maxWidth={'md'} open={open} onClose={handleClose}>
                 <DialogContent>
                 <div style={{display:"flex", justifyContent:"end"}}>
                     <IconButton onClick={handleClose}>
