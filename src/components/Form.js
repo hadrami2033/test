@@ -7,7 +7,7 @@ export function Form(initialFValues, validateOnChange = false, validate) {
     const [errors, setErrors] = useState({});
 
     const handleInputChange = e => {
-        console.log(e);
+        //console.log(e);
         const { name, value } = e.target ? e.target : e
         setValues({
             ...values,
@@ -17,7 +17,7 @@ export function Form(initialFValues, validateOnChange = false, validate) {
             validate({ [name]: value })
     }
 
-    console.log("value to edit ", values);
+    //console.log("value to edit ", values);
 
 
     const resetForm = () => {

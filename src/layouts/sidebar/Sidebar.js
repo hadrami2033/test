@@ -20,6 +20,9 @@ import Menuitems from "./MenuItems";
 import { useRouter } from "next/router";
 import Diversity2Icon from '@mui/icons-material/Diversity2';
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
+import { useContext } from "react";
+import AuthContext from "../../context/AuthContext";
+import jwt_decode from "jwt-decode";
 
 const Sidebar = ({ isMobileSidebarOpen, onSidebarClose, isSidebarOpen }) => {
   const [open, setOpen] = React.useState(true);
@@ -27,6 +30,9 @@ const Sidebar = ({ isMobileSidebarOpen, onSidebarClose, isSidebarOpen }) => {
   const [indexOpen, setIndexOpen] = React.useState(0);
 
   const lgUp = useMediaQuery((theme) => theme.breakpoints.up("lg"));
+
+  const { authTokens } = useContext(AuthContext);
+  const User = authTokens ? jwt_decode(authTokens.access) : {};
 
   const handleClick = (index) => {
     console.log(index);
@@ -51,7 +57,7 @@ const Sidebar = ({ isMobileSidebarOpen, onSidebarClose, isSidebarOpen }) => {
       <LogoIcon />
       <Box mt={2}>
         <List>
-          {Menuitems.map((item, index) => (
+          {Menuitems.filter(e => ( e.href != '/users' || User.role === 'Admin' )) .map((item, index) => (
             <List component="li" disablePadding key={item.title}>
               {!item.items ?
               <NextLink href={item.href}>

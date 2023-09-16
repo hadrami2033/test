@@ -22,7 +22,7 @@ const EnhancedTableToolbar = (props) => {
           }),
         }}
       >
-        {selected !== null ? (
+        {selected ? (
             <Stack spacing={2} direction="row">
                 <Tooltip onClick={deleteClick} title="Supprimer">
                     <IconButton>

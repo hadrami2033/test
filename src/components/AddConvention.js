@@ -9,14 +9,15 @@ import BaseCard from "./baseCard/BaseCard";
 import { Form } from "./Form";
 import Controls from "./controls/Controls";
 import useAxios from "../utils/useAxios";
-/*import dayjs from 'dayjs';
- import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
+/*import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { TimePicker } from '@mui/x-date-pickers/TimePicker';
-import { DateRangePicker } from "@mui/x-date-pickers-pro/DateRangePicker"; */
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';*/
+
+//import { DateRangePicker } from "@mui/x-date-pickers-pro/DateRangePicker"; 
+//import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+//import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+//import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
 
 /* const today = dayjs();
 const yesterday = dayjs().subtract(1, 'day');
@@ -26,16 +27,40 @@ const todayStartOfTheDay = today.startOf('day'); */
 const ConventionForm = (props) => {
   const {convention, showSuccessToast, showFailedToast} = props;
 
+  const formatDate = (date) => {
+    var d = new Date(date),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
+
+    if (month.length < 2) 
+        month = '0' + month;
+    if (day.length < 2) 
+        day = '0' + day;
+
+    return [year, month, day].join('-');
+  }
+
+  const [valueDateRange, setValueDateRange] = useState([
+    dayjs(new Date()),
+    dayjs(new Date()),
+  ]);
+
+  const [valueRefundDateRange, setValueRefundDateRange] = useState([
+    dayjs(new Date()),
+    dayjs(new Date()),
+  ]);
+
   const defaultValues = convention === null ? {
     reference: "",
     object: "",
     retrocede: null,
     amount: null,
-    start_date: "",
-    end_date: "",
-    start_date_refund: "",
-    end_date_refund: "",
-    end_date_grace_period: "",
+    start_date: formatDate(valueDateRange[0]),
+    end_date: formatDate(valueDateRange[1]),
+    start_date_refund: formatDate(new Date()),
+    end_date_refund: formatDate(new Date()),
+    end_date_grace_period: formatDate(new Date()),
     interest_rate: "",
     costs: null,
     description: "",
@@ -60,6 +85,16 @@ const ConventionForm = (props) => {
         label:"Non" 
     }
   ]
+
+
+  const compareDates = (d1, d2) => {
+    console.log(formatDate(d1), formatDate(d2));
+    console.log(d1>d2);
+    return d1>d2;
+  }
+
+
+
   const [formValues, setFormValues] = useState(defaultValues);
   const [loading, setLoading] = React.useState(false);
   const [funders, setFunders] = React.useState([]);
@@ -85,7 +120,8 @@ const ConventionForm = (props) => {
     if ("end_date_refund" in fieldValues)
       temp.end_date_refund = fieldValues.end_date_refund ? "" : "Date fin de rembourssement requise";
     if ("end_date_grace_period" in fieldValues)
-      temp.end_date_grace_period = fieldValues.end_date_grace_period ? "" : "Date fin grace période requise";
+      temp.end_date_grace_period = fieldValues.end_date_grace_period && 
+      compareDates(new Date(fieldValues.end_date_grace_period) , new Date(values.start_date)) ? "" : "Date fin de la grace période doit etre supérieur a la date début";
     if ("interest_rate" in fieldValues)
       temp.interest_rate = fieldValues.interest_rate ? "" : "Taux d'intéret est requis";
     if ("object" in fieldValues)
@@ -187,26 +223,25 @@ const ConventionForm = (props) => {
     //console.log(formValues);
   };
 
-
-  const formatDate = (date) => {
-    var d = new Date(date),
-        month = '' + (d.getMonth() + 1),
-        day = '' + d.getDate(),
-        year = d.getFullYear();
-
-    if (month.length < 2) 
-        month = '0' + month;
-    if (day.length < 2) 
-        day = '0' + day;
-
-    return [year, month, day].join('-');
-  }
-
   const titleName = () => {
     if(convention == null) 
       return "Ajouter une convention" 
     else
       return "Modifier une convention"
+  }
+
+  const changeRangeDate = (val) =>{
+    console.log(val);
+    values["start_date"] = formatDate(val[0])
+    values["end_date"] = formatDate(val[1])
+    setValueDateRange(val)
+  }
+
+  const changeRefundRangeDate = (val) =>{
+    console.log(val);
+    values["start_date_refund"] = formatDate(val[0])
+    values["end_date_refund"] = formatDate(val[1])
+    setValueRefundDateRange(val)
   }
 
   return (
@@ -323,6 +358,8 @@ const ConventionForm = (props) => {
               error={errors.end_date}
             />
           </Stack>
+
+
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.DatePiccker
               style={{width:'50%'}}
@@ -344,7 +381,28 @@ const ConventionForm = (props) => {
             />
           </Stack>
 
-          <Stack style={styles.stack} spacing={2} direction="row">
+
+            {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DemoContainer components={['DateRangePicker']}>
+                <DateRangePicker localeText={{ start: 'Date debut', end: 'Date fin' }} 
+                    value={valueDateRange}
+                    onChange={(newValue) => changeRangeDate(newValue) }
+                />
+              </DemoContainer>
+            </LocalizationProvider> */}
+
+
+           {/*  <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DemoContainer components={['DateRangePicker']}>
+                <DateRangePicker localeText={{ start: 'Date début de remboursement', end: 'Date fin de remboursement' }} 
+                    value={valueRefundDateRange}
+                    onChange={(newValue) => changeRefundRangeDate(newValue) }
+                />
+              </DemoContainer>
+            </LocalizationProvider> */}
+
+
+          <Stack style={{...styles.stack, marginTop:8 }} spacing={2} direction="row">
             <Controls.DatePiccker
               style={{width:'100%'}}
               id="end_date_grace_period-input"
@@ -378,15 +436,6 @@ const ConventionForm = (props) => {
             />
           </Stack>
 
-
-
-
-
-{/* <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <DemoContainer components={['DateRangePicker']}>
-        <DateRangePicker localeText={{ start: 'Check-in', end: 'Check-out' }} />
-      </DemoContainer>
-    </LocalizationProvider> */}
 
 
           <br />
