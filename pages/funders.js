@@ -24,6 +24,7 @@ import EnhancedTableToolbar from "../src/components/Table/TableToolbar";
 import { Close } from "@mui/icons-material";
 import FunderForm from "./add_funder";
 import useAxios from "../src/utils/useAxios";
+import AuthContext from "../src/context/AuthContext";
 
 const headCells = [
   {
@@ -83,6 +84,7 @@ export default function EnhancedTable() {
 
   const router = useRouter()
   const axios = useAxios();
+  const { logoutUser } = React.useContext(AuthContext);
 
   React.useEffect(() => {
       setLoading(true)
@@ -106,7 +108,11 @@ export default function EnhancedTable() {
                 //setTotalPages(res.data.TotalPages);
                 //setAll(res.data.TotalCount);
               }, 
-              error => console.log(error)
+              error => {
+                console.log(error)
+                if(error.response && error.response.status === 401)
+                logoutUser()
+              }
             )
           .then(() => {
             setLoading(false)
@@ -385,8 +391,8 @@ export default function EnhancedTable() {
                 onRequestSort={handleRequestSort}
                 rowCount={Funders.length}
                 headCells={headCells}
-                headerBG="#c8d789"
-                txtColor="#000000"
+                headerBG="#1A7795"
+                txtColor="#DCDCDC"
               />
               <TableBody>
                 {/* if you don't need to support IE11, you can replace the `stableSort` call with:
@@ -409,7 +415,7 @@ export default function EnhancedTable() {
 
                         <TableCell padding="checkbox">
                           <Checkbox
-                            color="primary"
+                            color="secondary"
                             checked={isItemSelected}
                             inputProps={{ 
                               'aria-labelledby': labelId,

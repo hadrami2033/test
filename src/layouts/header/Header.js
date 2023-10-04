@@ -8,7 +8,10 @@ import ProfileDD from "./ProfileDD";
 
 const Header = ({ sx, customClass, toggleMobileSidebar, position }) => {
   return (
-    <AppBar sx={sx} position={position} elevation={0} className={customClass}>
+    <AppBar sx={sx} position={position} elevation={0} 
+            className={customClass} 
+            style={{backgroundColor:'#6ebb4b'}} 
+    >
       <Toolbar>
         
         {/* ------------------------------------------- */}
@@ -16,12 +19,25 @@ const Header = ({ sx, customClass, toggleMobileSidebar, position }) => {
         {/* ------------------------------------------- */}
         {/* <SearchDD /> */}
         {/* ------------ End Menu icon ------------- */}
-
+        <IconButton
+          size="large"
+          color="inherit"
+          aria-label="menu"
+          onClick={toggleMobileSidebar}
+          sx={{
+            display: {
+              lg: "none",
+              xs: "flex",
+            },
+          }}
+        >
+          <FeatherIcon color='#F6EEFA' icon="menu" width="30" height="30" />
+        </IconButton>
 
 
         <Box flexGrow={1} >
            <Typography
-              color={"primary"} //2596be
+              color={"#F6EEFA"} //2596be
 
               fontSize="25px" fontWeight={'600'} variant="h3"
               sx={{

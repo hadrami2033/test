@@ -9,17 +9,31 @@ import BaseCard from "./baseCard/BaseCard";
 import { Form } from "./Form";
 import Controls from "./controls/Controls";
 import useAxios from "../utils/useAxios";
+import { useContext } from "react";
+import AuthContext from "../context/AuthContext";
 
 
 
 const InvoiceForm = (props) => {
   const {Invoice, push, update, showSuccessToast, showFailedToast, commitmentId} = props;
+  const formatDate = (date) => {
+    var d = new Date(date),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
 
+    if (month.length < 2) 
+        month = '0' + month;
+    if (day.length < 2) 
+        day = '0' + day;
+
+    return [year, month, day].join('-');
+  }
   const defaultValues = Invoice === null ? {
     reference: "",
     paymentmethod: null,
     paymentreference: null,
-    date: "",
+    date: formatDate(new Date()),
     comment: null,
     commitment: commitmentId ? commitmentId : null
   } : Invoice
@@ -44,6 +58,8 @@ const InvoiceForm = (props) => {
     if (fieldValues == values) return Object.values(temp).every((x) => x == "");
   };
 
+  const { logoutUser } = useContext(AuthContext);
+
 
 
   React.useEffect(() => {
@@ -51,7 +67,11 @@ const InvoiceForm = (props) => {
       res => {
         setCommitments(res.data);
       },  
-      error => console.log(error)
+      error => {
+        console.log(error)
+        if(error.response && error.response.status === 401)
+        logoutUser()
+      }
     ) 
   }, [])
 
@@ -107,21 +127,6 @@ const InvoiceForm = (props) => {
     } 
     //console.log(formValues);
   };
-
-
-  const formatDate = (date) => {
-    var d = new Date(date),
-        month = '' + (d.getMonth() + 1),
-        day = '' + d.getDate(),
-        year = d.getFullYear();
-
-    if (month.length < 2) 
-        month = '0' + month;
-    if (day.length < 2) 
-        day = '0' + day;
-
-    return [year, month, day].join('-');
-  }
 
   const titleName = () => {
     if(Invoice == null) 

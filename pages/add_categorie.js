@@ -9,6 +9,8 @@ import BaseCard from "../src/components/baseCard/BaseCard";
 import { Form } from "../src/components/Form";
 import Controls from "../src/components/controls/Controls";
 import useAxios from "../src/utils/useAxios";
+import { useContext } from "react";
+import AuthContext from "../src/context/AuthContext";
 
 
 const CategorieForm = (props) => {
@@ -46,6 +48,7 @@ const CategorieForm = (props) => {
     if (fieldValues == values) return Object.values(temp).every((x) => x == "");
   };
 
+  const { logoutUser } = useContext(AuthContext);
 
 
   React.useEffect(() => {
@@ -55,7 +58,11 @@ const CategorieForm = (props) => {
         console.log(res.data);
         setCategoriesType(res.data);
       },  
-      error => console.log(error)
+      error => {
+        console.log(error)
+        if(error.response && error.response.status === 401)
+        logoutUser()
+      }
     ) 
   }, [])
 

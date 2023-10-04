@@ -220,8 +220,8 @@ const DetailCategorie = (props) => {
                         <EnhancedTableHead
                             rowCount={categoriecommitmentsinvoices.length}
                             headCells={headCellsInvoice}
-                            headerBG="#c8d789"
-                            txtColor="#000000"
+                            headerBG="#1A7795"
+                            txtColor="#DCDCDC"
                         />
                         <TableBody>
                             {categoriecommitmentsinvoices

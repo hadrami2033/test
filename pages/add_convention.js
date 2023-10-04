@@ -5,6 +5,8 @@ import { Alert, Box, CircularProgress, Snackbar } from '@mui/material';
 import BaseCard from '../src/components/baseCard/BaseCard';
 import { useEffect } from 'react';
 import useAxios from '../src/utils/useAxios';
+import { useContext } from 'react';
+import AuthContext from '../src/context/AuthContext';
 
 export default function AddConvention(){
   const router = useRouter()
@@ -15,6 +17,7 @@ export default function AddConvention(){
   const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const axios = useAxios();
+  const { logoutUser } = useContext(AuthContext);
 
   useEffect(() => {
     if(id){
@@ -22,7 +25,13 @@ export default function AddConvention(){
       axios.get(`/conventions/${id}`).then(res => {
           setConvention(res.data)
           setLoading(false)
-      })
+      },
+      error => {
+        console.log(error)
+        if(error.response && error.response.status === 401)
+        logoutUser()
+      }
+      )
     }
   }, [])
 

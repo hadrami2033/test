@@ -22,6 +22,8 @@ import Select from '@mui/material/Select';
 import { Box } from "@material-ui/core";
 import EnhancedTableToolbar from "../src/components/Table/TableToolbar";
 import useAxios from "../src/utils/useAxios";
+import { useContext } from "react";
+import AuthContext from "../src/context/AuthContext";
 
 
 function descendingComparator(a, b, orderBy) {
@@ -128,6 +130,7 @@ export default function EnhancedTable() {
 
   const router = useRouter()
   const axios = useAxios();
+  const { logoutUser } = useContext(AuthContext);
 
   React.useEffect(() => {
       setLoading(true)
@@ -151,7 +154,11 @@ export default function EnhancedTable() {
                 //setTotalPages(res.data.TotalPages);
                 //setAll(res.data.TotalCount);
               }, 
-              error => console.log(error)
+              error => {
+                console.log(error)
+                if(error.response && error.response.status === 401)
+                logoutUser()
+              }
             )
           .then(() => {
             setLoading(false)
@@ -406,8 +413,8 @@ export default function EnhancedTable() {
                 onRequestSort={handleRequestSort}
                 rowCount={Commitments.length}
                 headCells={headCells}
-                headerBG="#c8d789"
-                txtColor="#000000"
+                headerBG="#1A7795"
+                txtColor="#DCDCDC"
               />
               <TableBody>
                 {/* if you don't need to support IE11, you can replace the `stableSort` call with:
@@ -429,7 +436,7 @@ export default function EnhancedTable() {
                         
                         <TableCell padding="checkbox">
                           <Checkbox
-                            color="primary"
+                            color="secondary"
                             checked={isItemSelected}
                             inputProps={{ 
                               'aria-labelledby': labelId,

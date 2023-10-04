@@ -53,7 +53,7 @@ const Sidebar = ({ isMobileSidebarOpen, onSidebarClose, isSidebarOpen }) => {
   const location = curl.pathname;
 
   const SidebarContent = (
-    <Box p={2} height="100%">
+      <Box p={2} height="100%" bgcolor={'#fbfbfa'} >
       <LogoIcon />
       <Box mt={2}>
         <List>
@@ -79,7 +79,9 @@ const Sidebar = ({ isMobileSidebarOpen, onSidebarClose, isSidebarOpen }) => {
                     {item.href == "/commitments" ?
                       <Diversity2Icon 
                         fontSize='medium'
-                        color="white"
+                        style={{
+                          color: `${location === item.href ? "white" : ""} `,
+                        }}                      
                       />
                       :
                       <FeatherIcon
@@ -185,7 +187,7 @@ const Sidebar = ({ isMobileSidebarOpen, onSidebarClose, isSidebarOpen }) => {
           border: "0 !important",
         },
       }}
-      variant="temporary"
+      variant="temporary"      
     >
       {SidebarContent}
     </Drawer>

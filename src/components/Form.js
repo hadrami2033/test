@@ -7,12 +7,12 @@ export function Form(initialFValues, validateOnChange = false, validate) {
     const [errors, setErrors] = useState({});
 
     const handleInputChange = e => {
-        //console.log(e);
         const { name, value } = e.target ? e.target : e
         setValues({
             ...values,
             [name]: value
-        })
+        })  
+        console.log(values);
         if (validateOnChange)
             validate({ [name]: value })
     }

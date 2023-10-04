@@ -1,10 +1,12 @@
 import React from "react";
-import { Card, CardContent, Typography, Button, Grid, Tooltip } from "@mui/material";
-import { SheetJSFT } from "../../lib/types";
-
+import { Card, CardContent, Typography, Button, Grid, Tooltip, Stack } from "@mui/material";
+import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt';
+import Diversity2Icon from '@mui/icons-material/Diversity2';
+import PeopleIcon from '@mui/icons-material/People';
 
 const BlogCard = (props) => {
   const {clientsCount, numbersCount, selectFile, fileName, handleFile, verifyCompatibility} = props;
+  //colors: ['#6ebb4b', '#1a7795',  '#a52e36' , '#079ff0', '#cc7c67' , '#c8d789']
 
   return (
     <Grid container>
@@ -17,12 +19,11 @@ const BlogCard = (props) => {
             alignItems: "stretch",
           }}
         >
-        
-
           <Card
             sx={{
               p: 0,
               width: "100%",
+              bgcolor:'#6ebb4b'
             }}
           >
             <CardContent
@@ -31,8 +32,28 @@ const BlogCard = (props) => {
                 paddingRight: "30px",
               }}
             >
+            <SentimentSatisfiedAltIcon 
+                        fontSize='large'
+                        style={{
+                          color: "white",
+                        }}                      
+                      />
               <Typography
-                color="primary"
+                color={"#F6EEFA"}
+                sx={{
+                  fontSize: "h2.fontSize",
+                  fontWeight: "1000",
+                  fontStyle:'initial',
+                  display:'flex', 
+                  justifyContent: 'center'
+                }}
+              >
+                Conventions
+              </Typography>
+              
+              <Typography
+                //color="primary"
+                color={"#F6EEFA"}
                 sx={{
                   fontSize: "h1.fontSize",
                   fontWeight: "1000",
@@ -41,29 +62,8 @@ const BlogCard = (props) => {
                   justifyContent: 'center'
                 }}
               >
-                {clientsCount}
+                 25
               </Typography>
-              <Typography
-                color="primary"
-                sx={{
-                  fontSize: "h2.fontSize",
-                  fontWeight: "400",
-                  marginTop:1,
-                  display:'flex', 
-                  justifyContent: 'center',
-                }}
-              >
-                 مجموع الزبناء
-              </Typography>
-              {/* <Button
-                variant="contained"
-                sx={{
-                  mt: "15px",
-                }}
-                color={'primary'}
-              >
-                Learn More
-              </Button> */}
             </CardContent>
           </Card>
 
@@ -71,7 +71,7 @@ const BlogCard = (props) => {
 
         <Grid
           item
-          xs={6}
+          xs={12}
           lg={3}
           sx={{
             display: "flex",
@@ -82,6 +82,7 @@ const BlogCard = (props) => {
             sx={{
               p: 0,
               width: "100%",
+              bgcolor:'#cc7c67'
             }}
           >
             <CardContent
@@ -90,39 +91,37 @@ const BlogCard = (props) => {
                 paddingRight: "30px",
               }}
             >
+              <PeopleIcon 
+                        fontSize='large'
+                        style={{
+                          color: "white",
+                        }}                      
+                      />
               <Typography
-                color="secondary"
+                color={"#F6EEFA"}
                 sx={{
-                  fontSize: "h1.fontSize",
+                  fontSize: "h2.fontSize",
                   fontWeight: "1000",
                   fontStyle:'initial',
                   display:'flex', 
                   justifyContent: 'center'
                 }}
               >
-                {numbersCount}
+                Bailleurs
               </Typography>
               <Typography
-                color="secondary"
+                //color="primary"
+                color={"#F6EEFA"}
                 sx={{
-                  fontSize: "h2.fontSize",
-                  fontWeight: "400",
+                  fontSize: "h1.fontSize",
+                  fontWeight: "1000",
                   marginTop:1,
                   display:'flex', 
                   justifyContent: 'center',
                 }}
               >
-                 مجموع الأرقام
+                 300
               </Typography>
-              {/* <Button
-                variant="contained"
-                sx={{
-                  mt: "15px",
-                }}
-                color={'primary'}
-              >
-                Learn More
-              </Button> */}
             </CardContent>
           </Card>
 
@@ -143,6 +142,7 @@ const BlogCard = (props) => {
             sx={{
               p: 0,
               width: "100%",
+              bgcolor:'#c8d789'
             }}
           >
             <CardContent
@@ -151,47 +151,42 @@ const BlogCard = (props) => {
                 paddingRight: "30px",
               }}
             >
+
+              <PeopleIcon 
+                        fontSize='large'
+                        style={{
+                          color: "white",
+                        }}                      
+                      />
               <Typography
-                color="primary"
+                color={"#F6EEFA"}
                 sx={{
                   fontSize: "h2.fontSize",
-                  fontWeight: "600",
+                  fontWeight: "1000",
                   fontStyle:'initial',
-                  display:'flex',
+                  display:'flex', 
                   justifyContent: 'center'
                 }}
               >
-                  مطابقة ارقام مورد
+                Emprunteurs
               </Typography>
               <Typography
+                //color="primary"
+                color={"#F6EEFA"}
                 sx={{
-                  display:'flex',
-                  justifyContent: 'center',
-                  alignItems:'center',
-                  height:'100%'
-                }}
-              >
-                
-              <Button
-                variant="contained"
-                onClick={verifyCompatibility}
-                sx={{
-                  fontSize: "h2.fontSize",
-                  fontWeight: "800",
-                  mt: "15px",
+                  fontSize: "h1.fontSize",
+                  fontWeight: "1000",
                   marginTop:1,
-                  width:'100%'
+                  display:'flex', 
+                  justifyContent: 'center',
                 }}
-                color={'primary'}
               >
-                 إجراء مطابقة
-              </Button> 
+                 123
               </Typography>
             </CardContent>
           </Card>
 
         </Grid>
-      {fileName ?
         <Grid
           item
           xs={12}
@@ -205,6 +200,8 @@ const BlogCard = (props) => {
             sx={{
               p: 0,
               width: "100%",
+              bgcolor:'#079ff0'
+
             }}
           >
             <CardContent
@@ -212,114 +209,43 @@ const BlogCard = (props) => {
                 paddingLeft: "30px",
                 paddingRight: "30px",
               }}
-            >
+            >  
+
+                  <Diversity2Icon 
+                        fontSize='large'
+                        style={{
+                          color: "white",
+                        }}                      
+                      />
               <Typography
-                color="secondary"
+                color={"#F6EEFA"}
                 sx={{
                   fontSize: "h2.fontSize",
-                  fontWeight: "200",
+                  fontWeight: "1000",
                   fontStyle:'initial',
-                  display:'flex',
+                  display:'flex', 
                   justifyContent: 'center'
                 }}
               >
-              {fileName}
+                Engagements
               </Typography>
               <Typography
+                //color="primary"
+                color={"#F6EEFA"}
                 sx={{
-                  display:'flex',
+                  fontSize: "h1.fontSize",
+                  fontWeight: "1000",
+                  marginTop:1,
+                  display:'flex', 
                   justifyContent: 'center',
-                  alignItems:'center',
-                  height:'100%'
                 }}
               >
-                <Button
-                  variant="contained"
-                  title="حذف أرقام الملف"
-                  sx={{
-                    fontSize: "h2.fontSize",
-                    fontWeight: "800",
-                    mt: "15px",
-                    marginTop:1,
-                    width:'100%'
-                  }}
-                  color={'secondary'}
-                  onClick={handleFile}
-                >
-                  حذف الأرقام
-                </Button> 
-
+                 45
               </Typography>
             </CardContent>
           </Card>
 
         </Grid>
-        :
-        <Grid
-          item
-          xs={12}
-          lg={3}
-          sx={{
-            display: "flex",
-            alignItems: "stretch",
-          }}
-        >
-          <Card
-            sx={{
-              p: 0,
-              width: "100%",
-            }}
-          >
-            <CardContent
-              sx={{
-                paddingLeft: "30px",
-                paddingRight: "30px",
-              }}
-            >
-              <Typography
-                color="secondary"
-                sx={{
-                  fontSize: "h2.fontSize",
-                  fontWeight: "600",
-                  fontStyle:'initial',
-                  display:'flex',
-                  justifyContent: 'center'
-                }}
-              >
-              حذف مجموعة أرقام
-              </Typography>
-              <Typography
-                sx={{
-                  display:'flex',
-                  justifyContent: 'center',
-                  alignItems:'center',
-                  height:'100%'
-                }}
-              >
-              <Tooltip variant="contained" component="label" title="اختر ملف">
-                <Button
-                  variant="contained"
-                  sx={{
-                    fontSize: "h2.fontSize",
-                    fontWeight: "800",
-                    mt: "15px",
-                    marginTop:1,
-                    width:'100%'
-                  }}
-                  color={'secondary'}
-                  aria-label="import"
-                >
-                  اختر ملف
-                  <input type="file" hidden accept={SheetJSFT} onChange={selectFile} />
-                </Button> 
-              </Tooltip>
-
-              </Typography>
-            </CardContent>
-          </Card>
-
-        </Grid>
-      }
     </Grid>
   );
 };

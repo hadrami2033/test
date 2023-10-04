@@ -125,10 +125,13 @@ const ProfileDD = () => {
               sx={{
                 ml: 1,
               }}
+              //color={'secondary'}
+              color={"#F6EEFA"}
+              mx={1}
             >
               {user.username}
             </Typography>
-            <FeatherIcon icon="chevron-down" width="20" height="20" />
+            <FeatherIcon icon="chevron-down" width="20" color={"#F6EEFA"} height="20"/>
           </Box>
         </Box>
       </Button>

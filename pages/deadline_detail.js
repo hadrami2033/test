@@ -167,8 +167,8 @@ const DetailDeadline = (props) => {
                         <EnhancedTableHead
                             rowCount={deadline.deadlinespayments.length}
                             headCells={headCellsPayments}
-                            headerBG="#c8d789"
-                            txtColor="#000000"
+                            headerBG="#1A7795"
+                            txtColor="#DCDCDC"
                         />
                         <TableBody>
                             {deadline.deadlinespayments

@@ -24,6 +24,8 @@ import EnhancedTableToolbar from "../src/components/Table/TableToolbar";
 import { Close } from "@mui/icons-material";
 import StatusTypeForm from "./add_statustype";
 import useAxios from "../src/utils/useAxios";
+import { useContext } from "react";
+import AuthContext from "../src/context/AuthContext";
 
 const headCells = [
   {
@@ -70,6 +72,7 @@ export default function EnhancedTable() {
 
   const axios = useAxios();
   const router = useRouter()
+  const { logoutUser } = useContext(AuthContext);
 
   React.useEffect(() => {
       setLoading(true)
@@ -93,7 +96,11 @@ export default function EnhancedTable() {
                 //setTotalPages(res.data.TotalPages);
                 //setAll(res.data.TotalCount);
               }, 
-              error => console.log(error)
+              error => {
+                console.log(error)
+                if(error.response && error.response.status === 401)
+                logoutUser()
+              }
             )
           .then(() => {
             setLoading(false)
@@ -364,8 +371,8 @@ export default function EnhancedTable() {
                 onRequestSort={handleRequestSort}
                 rowCount={StatusTypes.length}
                 headCells={headCells}
-                headerBG="#c8d789"
-                txtColor="#000000"
+                headerBG="#1A7795"
+                txtColor="#DCDCDC"
               />
               <TableBody>
                 {StatusTypes.map((row, index) => {
@@ -382,7 +389,7 @@ export default function EnhancedTable() {
 
                         <TableCell padding="checkbox">
                           <Checkbox
-                            color="primary"
+                            color="secondary"
                             checked={isItemSelected}
                             inputProps={{ 
                               'aria-labelledby': labelId,

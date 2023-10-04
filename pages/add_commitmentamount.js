@@ -8,6 +8,8 @@ import BaseCard from "../src/components/baseCard/BaseCard";
 import { Form } from "../src/components/Form";
 import Controls from "../src/components/controls/Controls";
 import useAxios from "../src/utils/useAxios";
+import { useContext } from "react";
+import AuthContext from "../src/context/AuthContext";
 
 
 
@@ -16,8 +18,8 @@ const AmountForm = (props) => {
 
   const defaultValues = {
     currency_id: null,
-    spendingtype_id: null,
     amount: null,
+    amount_by_ref_currency: null,
     commitment: commitmentId ? commitmentId : null
   }
 
@@ -25,7 +27,6 @@ const AmountForm = (props) => {
   const [loading, setLoading] = React.useState(false);
   const [commitments, setCommitments] = React.useState([]);
   const [currencies, setCurrencies] = React.useState([]);
-  const [spendingtypes, setSpendingsType] = React.useState([]);
   const axios = useAxios();
 
 
@@ -39,6 +40,8 @@ const AmountForm = (props) => {
       temp.spendingtype_id = fieldValues.spendingtype_id ? "" : "Type de dépense requis";
     if ("amount" in fieldValues)
       temp.amount = fieldValues.amount ? "" : "Le montant requis";
+    if ("amount_by_ref_currency" in fieldValues)
+      temp.amount_by_ref_currency = fieldValues.amount_by_ref_currency ? "" : "Le montant en monnaie de référence est requis";
     setErrors({
       ...temp,
     });
@@ -47,26 +50,28 @@ const AmountForm = (props) => {
   };
 
 
+  const { logoutUser } = useContext(AuthContext);
 
   React.useEffect(() => {
     axios.get(`/commitments`).then(
       res => {
         setCommitments(res.data);
       },  
-      error => console.log(error)
+      error => {
+        console.log(error)
+        if(error.response && error.response.status === 401)
+        logoutUser()
+      }
     ) .then(() => {
       axios.get(`/currencies`).then(
             res => {
               setCurrencies(res.data);
             },  
-            error => console.log(error)
-        ) 
-    }).then(() => {
-      axios.get(`/spendingtypes`).then(
-            res => {
-              setSpendingsType(res.data);
-            },  
-            error => console.log(error)
+            error => {
+              console.log(error)
+              if(error.response && error.response.status === 401)
+              logoutUser()
+            }
         ) 
     })
   }, [])
@@ -113,7 +118,7 @@ const AmountForm = (props) => {
           <br/>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
-              style={{width:'50%'}}
+              style={{width:'85%'}}
               id="amount-input"
               name="amount"
               label="Montant"
@@ -124,7 +129,7 @@ const AmountForm = (props) => {
             />
             <Controls.Select
               name="currency_id"
-              style={{width:'50%'}}
+              style={{width:'15%'}}
               label="Devise"
               value={values.currency_id}
               onChange={handleInputChange}
@@ -133,14 +138,15 @@ const AmountForm = (props) => {
             />
           </Stack>
           <Stack style={styles.stack} spacing={2} direction="row">
-            <Controls.Select
-              name="spendingtype_id"
+            <Controls.Input
               style={commitmentId ? {width:'100%'} : {width:'50%'}}
-              label="Type de dépense"
-              value={values.spendingtype_id}
+              id="amount_by_ref_currency-input"
+              name="amount_by_ref_currency"
+              label="Montant en monnaie de référence "
+              type="number"
+              value={values.amount_by_ref_currency}
               onChange={handleInputChange}
-              options={spendingtypes}
-              error={errors.spendingtype_id}
+              error={errors.amount_by_ref_currency}
             />
             {!commitmentId &&
              <Controls.Select

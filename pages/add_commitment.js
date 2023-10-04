@@ -5,6 +5,8 @@ import BaseCard from '../src/components/baseCard/BaseCard';
 import { useEffect } from 'react';
 import CommitmentForm from '../src/components/AddCommitment';
 import useAxios from '../src/utils/useAxios';
+import AuthContext from '../src/context/AuthContext';
+import { useContext } from 'react';
 
 export default function AddCommitment(){
   const router = useRouter()
@@ -15,6 +17,7 @@ export default function AddCommitment(){
   const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const axios = useAxios();
+  const { logoutUser } = useContext(AuthContext);
 
   useEffect(() => {
     if(id){
@@ -22,7 +25,13 @@ export default function AddCommitment(){
       axios.get(`/commitments/${id}`).then(res => {
           setCommitment(res.data)
           setLoading(false)
-      })
+      },
+      error => {
+        console.log(error)
+        if(error.response && error.response.status === 401)
+        logoutUser()
+      }
+      )
     }
   }, [])
 

@@ -10,6 +10,9 @@ import { Form } from "./Form";
 import Controls from "./controls/Controls";
 import useAxios from "../utils/useAxios";
 import dayjs from 'dayjs';
+import { useContext } from "react";
+import AuthContext from "../context/AuthContext";
+import { useRouter } from "next/router";
 /*import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';*/
@@ -54,8 +57,9 @@ const ConventionForm = (props) => {
   const defaultValues = convention === null ? {
     reference: "",
     object: "",
-    retrocede: null,
+    retrocede: false,
     amount: null,
+    amount_ref_currency: null,
     start_date: formatDate(valueDateRange[0]),
     end_date: formatDate(valueDateRange[1]),
     start_date_refund: formatDate(new Date()),
@@ -67,7 +71,9 @@ const ConventionForm = (props) => {
     object: "",
     funder_id: null,
     borrower_id: null,
-    currency_id: null
+    currency_id: null,
+    convention_periode: null,
+    grace_periode: null
   } : { 
         ...convention, 
         funder_id: convention.funder.id, 
@@ -105,12 +111,14 @@ const ConventionForm = (props) => {
     let temp = { ...errors };
     if ("reference" in fieldValues)
       temp.reference = fieldValues.reference ? "" : "La référence est requise";
-    if ("retrocede" in fieldValues)
-      temp.retrocede = fieldValues.retrocede !== null ? "" : "Rétrocéde requise";
+    /* if ("retrocede" in fieldValues)
+      temp.retrocede = fieldValues.retrocede !== null ? "" : "Rétrocéde requise"; */
     if ("amount" in fieldValues)
-      temp.amount = fieldValues.amount ? "" : "Le montant requis";
+      temp.amount = fieldValues.amount ? "" : "Le montant de la convention est requis";
+    if ("amount_ref_currency" in fieldValues)
+      temp.amount_ref_currency = fieldValues.amount_ref_currency ? "" : "Le montant en monnaie de référence est requis";
     if ("costs" in fieldValues)
-      temp.costs = !(fieldValues.retrocede === true && ( fieldValues.costs === null || fieldValues.costs === '' || fieldValues.costs === '0' )) ? "" : "La commission est requise d'une convention retrocedée";
+      temp.costs = (fieldValues.retrocede === false || ( fieldValues.costs && fieldValues.costs.length <= 2 )) ? "" : "La commission est requise d'une convention rétrocédée et doit être deux chiffres en max";
     if ("start_date" in fieldValues)
       temp.start_date = fieldValues.start_date ? "" : "Date début requise";
     if ("end_date" in fieldValues)
@@ -119,11 +127,12 @@ const ConventionForm = (props) => {
       temp.start_date_refund = fieldValues.start_date_refund ? "" : "Date début de rembourssement requise";
     if ("end_date_refund" in fieldValues)
       temp.end_date_refund = fieldValues.end_date_refund ? "" : "Date fin de rembourssement requise";
-    if ("end_date_grace_period" in fieldValues)
+   /*  if ("end_date_grace_period" in fieldValues)
       temp.end_date_grace_period = fieldValues.end_date_grace_period && 
       compareDates(new Date(fieldValues.end_date_grace_period) , new Date(values.start_date)) ? "" : "Date fin de la grace période doit etre supérieur a la date début";
+     */
     if ("interest_rate" in fieldValues)
-      temp.interest_rate = fieldValues.interest_rate ? "" : "Taux d'intéret est requis";
+      temp.interest_rate = ( fieldValues.interest_rate && fieldValues.interest_rate.length <= 2 ) ? "" : "Taux d'intéret est requis et doit être deux chiffres en max";
     if ("object" in fieldValues)
       temp.object = fieldValues.object ? "" : "L'objet est requis";
     if ("funder_id" in fieldValues)
@@ -131,7 +140,13 @@ const ConventionForm = (props) => {
     if ("borrower_id" in fieldValues)
       temp.borrower_id = fieldValues.borrower_id ? "" : "L'emprunteur est requis";   
     if ("currency_id" in fieldValues)
-      temp.currency_id = fieldValues.currency_id ? "" : "La dévise est requise";   
+      temp.currency_id = fieldValues.currency_id ? "" : "La dévise est requise";
+    if ("convention_periode" in fieldValues)
+      temp.convention_periode = fieldValues.convention_periode ? "" : "La periode de la convenion est requise";   
+    if ("grace_periode" in fieldValues)
+      temp.grace_periode = fieldValues.grace_periode ? "" : "La période de grace est requise";     
+    if ("currency_id" in fieldValues)
+      temp.currency_id = fieldValues.currency_id ? "" : "La dévise est requise";  
     
     setErrors({
       ...temp,
@@ -140,6 +155,8 @@ const ConventionForm = (props) => {
     if (fieldValues == values) return Object.values(temp).every((x) => x == "");
   };
 
+  const { logoutUser } = useContext(AuthContext);
+  const router = useRouter()
 
 
   React.useEffect(() => {
@@ -148,7 +165,11 @@ const ConventionForm = (props) => {
         console.log(res.data);
         setFunders(res.data);
       },  
-      error => console.log(error)
+      error => {
+        console.log(error)
+        if(error.response && error.response.status === 401)
+        logoutUser()
+      }
     ) 
     .then( () => {
       axios.get(`/borrowers`).then(
@@ -189,6 +210,10 @@ const ConventionForm = (props) => {
             if(res.data){
               resetForm();
               showSuccessToast()
+              router.push({
+                pathname: '/convention_detail',
+                query: { id: res.data.id }
+              })
             }else{
               showFailedToast()
             }
@@ -209,6 +234,10 @@ const ConventionForm = (props) => {
               showFailedToast()
             }else{
               showSuccessToast()
+              router.push({
+                pathname: '/convention_detail',
+                query: { id: convention.id }
+              })
             }
           },
           (error) => {
@@ -244,6 +273,14 @@ const ConventionForm = (props) => {
     setValueRefundDateRange(val)
   }
 
+  const getBorrower = (id) => {
+    let b = id ? borrowers.find((e) => e.id === id) : null ;
+    if(b)
+     return b.label
+    else
+      return null
+  }
+
   return (
     
         <BaseCard titleColor={"secondary"} title={titleName()}>
@@ -260,42 +297,97 @@ const ConventionForm = (props) => {
               onChange={handleInputChange}
               error={errors.reference}
             />
-            <Controls.Select
+            <Controls.Input
               style={{width:'50%'}}
-              name="retrocede"
-              label="Retrocedé ?"
-              value={values.retrocede}
+              id="object-input"
+              name="object"
+              label="Objet"
+              value={values.object}
               onChange={handleInputChange}
-              options={retrocedes}
-              error={errors.retrocede}
+              error={errors.object}
             />
 
           </Stack>
+
+          <Stack style={styles.stack} spacing={2} direction="row">
+            <Controls.Select
+              style={getBorrower(values.borrower_id) != "SOGEM" ? {width:'42%'} : {width:'50%'}}
+              name="funder_id"
+              label="Bailleur"
+              value={values.funder_id}
+              onChange={handleInputChange}
+              options={funders}
+              error={errors.funder_id}
+            />  
+            <Controls.Select
+              style={getBorrower(values.borrower_id) != "SOGEM" ? {width:'42%'} : {width:'50%'}}
+              name="borrower_id"
+              label="Emprunteur"
+              value={values.borrower_id}
+              onChange={handleInputChange}
+              options={borrowers}
+              error={errors.borrower_id}
+            />
+
+          {getBorrower(values.borrower_id) != "SOGEM" &&
+              <Controls.Checkbox
+                name="retrocede"
+                label="Retrocedée"
+                value={values.retrocede}
+                onChange={handleInputChange}
+                options={retrocedes}
+              />
+          }
+          </Stack>
+
+
+
+          <Stack style={styles.stack} spacing={2} direction="row">
+              {values.retrocede === true &&
+                <Controls.Input
+                  style={{width:'33.33%'}}
+                  id="costs-input"
+                  name="costs"
+                  label="Taux de la commission en %"
+                  type="number"
+                  value={values.costs}
+                  onChange={handleInputChange}
+                  error={errors.costs}
+              />
+              }
+            <Controls.Input
+              style= {values.retrocede === true ? { width:'33.33%'} : { width:'50%'}}
+              id="amount_ref_currency-input"
+              name="amount_ref_currency"
+              label="Montant en monnaie de référence "
+              type="number"
+              value={values.amount_ref_currency}
+              onChange={handleInputChange}
+              error={errors.amount_ref_currency}
+            />
+            <Controls.Input
+              style= {values.retrocede === true ? { width:'33.33%'} : { width:'50%'}}
+              id="interest_rate-input"
+              name="interest_rate"
+              label="Taux d'intérêt en %"
+              type="number"
+              value={values.interest_rate}
+              onChange={handleInputChange}
+              error={errors.interest_rate}
+            />
+          </Stack>
+
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
-              style= { values.retrocede === true ? { width:'50%'} :  { width:'100%'}}
+              style= {{ width:'50%'}}
               id="amount-input"
               name="amount"
-              label="Montant"
+              label="Montant de la convention"
               type="number"
               value={values.amount}
               onChange={handleInputChange}
               error={errors.amount}
             />
-            {values.retrocede === true &&
-              <Controls.Input
-              style={{width:'50%'}}
-              id="costs-input"
-              name="costs"
-              label="Commission"
-              type="number"
-              value={values.costs}
-              onChange={handleInputChange}
-              error={errors.costs}
-            />
-            }
-          </Stack>
-          <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Select
               style={{width:'50%'}}
               name="currency_id"
@@ -305,39 +397,7 @@ const ConventionForm = (props) => {
               options={currencies}
               error={errors.currency_id}
             />
-            <Controls.Input
-              style={{width:'50%'}}
-              id="interest_rate-input"
-              name="interest_rate"
-              label="Taux d'intéret"
-              type="number"
-              value={values.interest_rate}
-              onChange={handleInputChange}
-              error={errors.interest_rate}
-            />
           </Stack>
-
-          <Stack style={styles.stack} spacing={2} direction="row">
-            <Controls.Select
-              style={{width:'50%'}}
-              name="funder_id"
-              label="Bailleur"
-              value={values.funder_id}
-              onChange={handleInputChange}
-              options={funders}
-              error={errors.funder_id}
-            />
-            <Controls.Select
-              style={{width:'50%'}}
-              name="borrower_id"
-              label="Emprunteur"
-              value={values.borrower_id}
-              onChange={handleInputChange}
-              options={borrowers}
-              error={errors.borrower_id}
-            />
-          </Stack>
-
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.DatePiccker
               style={{width:'50%'}}
@@ -358,8 +418,6 @@ const ConventionForm = (props) => {
               error={errors.end_date}
             />
           </Stack>
-
-
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.DatePiccker
               style={{width:'50%'}}
@@ -403,40 +461,41 @@ const ConventionForm = (props) => {
 
 
           <Stack style={{...styles.stack, marginTop:8 }} spacing={2} direction="row">
-            <Controls.DatePiccker
-              style={{width:'100%'}}
-              id="end_date_grace_period-input"
-              name="end_date_grace_period"
-              label="Date de la fin de la periode de grace"
-              value={formatDate(values.end_date_grace_period)}
+            <Controls.Input
+              style={{width:'50%'}}
+              id="periode-input"
+              name="convention_periode"
+              type='number'
+              label="Période de la convention (en mois)"
+              value={values.convention_periode}
               onChange={handleInputChange}
-              error={errors.end_date_grace_period}
+              error={errors.convention_periode}
+            />
+            <Controls.Input
+              style={{width:'50%'}}
+              id="grace_periode-input"
+              name="grace_periode"
+              type='number'
+              label="Période de grace (en mois)"
+              value={values.grace_periode}
+              onChange={handleInputChange}
+              error={errors.grace_periode}
             />
           </Stack>
+
           <Stack style={styles.stack} spacing={2} direction="row">
-            <Controls.Input
-              style={{width:'100%'}}
-              id="object-input"
-              name="object"
-              label="Objet"
-              value={values.object}
-              onChange={handleInputChange}
-              error={errors.object}
-            />
-          </Stack>
-          <Stack style={styles.stack} spacing={2} direction="row">
-            <Controls.Input
+            <Controls.TextArea
               style={{width:'100%'}}
               id="description-input"
               name="description"
               label="Description"
+              multiline="multiline"
+              rows={4}
               value={values.description}
               onChange={handleInputChange}
               error={errors.description}
             />
           </Stack>
-
-
 
           <br />
           <Stack style={styles.stack} spacing={2}>
@@ -446,7 +505,6 @@ const ConventionForm = (props) => {
             variant="contained"
             disabled={loading}
             mt={4}
-            
           >
              SAUVEGARDER
             {loading && (

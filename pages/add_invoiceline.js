@@ -9,6 +9,8 @@ import BaseCard from "../src/components/baseCard/BaseCard";
 import { Form } from "../src/components/Form";
 import Controls from "../src/components/controls/Controls";
 import useAxios from "../src/utils/useAxios";
+import { useContext } from "react";
+import AuthContext from "../src/context/AuthContext";
 
 
 
@@ -41,21 +43,28 @@ const InvoiceLineForm = (props) => {
 
     if (fieldValues == values) return Object.values(temp).every((x) => x == "");
   };
-
-
+  const { logoutUser } = useContext(AuthContext);
 
   React.useEffect(() => {
     axios.get(`/invoices`).then(
       res => {
         setInvoices(res.data);
       },  
-      error => console.log(error)
+      error => {
+        console.log(error)
+        if(error.response && error.response.status === 401)
+        logoutUser()
+      }
     ) .then(() => {
       axios.get(`/currencies`).then(
             res => {
               setCurrencies(res.data);
             },  
-            error => console.log(error)
+            error => {
+              console.log(error)
+              if(error.response && error.response.status === 401)
+              logoutUser()
+            }
         ) 
     })
   }, [])

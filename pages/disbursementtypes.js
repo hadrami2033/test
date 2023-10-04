@@ -372,8 +372,8 @@ export default function EnhancedTable() {
                 onRequestSort={handleRequestSort}
                 rowCount={DisbursementTypes.length}
                 headCells={headCells}
-                headerBG="#c8d789"
-                txtColor="#000000"
+                headerBG="#1A7795"
+                txtColor="#DCDCDC"
               />
               <TableBody>
                 {DisbursementTypes.map((row, index) => {
@@ -390,7 +390,7 @@ export default function EnhancedTable() {
 
                         <TableCell padding="checkbox">
                           <Checkbox
-                            color="primary"
+                            color="secondary"
                             checked={isItemSelected}
                             inputProps={{ 
                               'aria-labelledby': labelId,

@@ -438,8 +438,8 @@ export default function EnhancedTable() {
                 onRequestSort={handleRequestSort}
                 rowCount={Users.length}
                 headCells={headCells}
-                headerBG="#c8d789"
-                txtColor="#000000"
+                headerBG="#1A7795"
+                txtColor="#DCDCDC"
               />
               <TableBody>
                 {Users.filter(e => e.username != User.username && e.username != "Binor" )
@@ -459,7 +459,7 @@ export default function EnhancedTable() {
                         
                         <TableCell padding="checkbox">
                           {/* <Checkbox
-                            color="primary"
+                            color="secondary"
                             checked={isItemSelected}
                             inputProps={{ 
                               'aria-labelledby': labelId,

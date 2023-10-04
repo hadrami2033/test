@@ -10,6 +10,8 @@ import BaseCard from "../src/components/baseCard/BaseCard";
 import { Form } from "../src/components/Form";
 import Controls from "../src/components/controls/Controls";
 import useAxios from "../src/utils/useAxios";
+import { useContext } from "react";
+import AuthContext from "../src/context/AuthContext";
 //import disbursementtypes from "../src/helper/disbursementtype"
 /*import dayjs from 'dayjs';
  import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
@@ -37,6 +39,7 @@ const DibursementForm = (props) => {
     date: "",
     orderamount: null,
     disbursementamount: null,
+    amount_by_ref_currency: null,
     convention: conventionId,
     currency_id: null,
     commitment_id: null,
@@ -89,8 +92,10 @@ const DibursementForm = (props) => {
    if ("currency_id" in fieldValues)
       temp.currency_id = !(fieldValues.currency_id == null) ? "" : "Dévise de décaissement requis";
     if ("disbursementamount" in fieldValues)
-      temp.disbursementamount = !( fieldValues.disbursementamount == null && getStatus(fieldValues.status_id) === getStatusByCode(3) && disbursement ) ? "" : "Le montant dévise requis d'un décaissement reçu";
-        
+      temp.disbursementamount = !( fieldValues.disbursementamount == null && getStatus(fieldValues.status_id) === getStatusByCode(3) && disbursement ) ? "" : "Le montant décaissé requis d'un décaissement reçu";
+    if ("amount_by_ref_currency" in fieldValues)
+      temp.amount_by_ref_currency = !( fieldValues.disbursementamount == null && getStatus(fieldValues.status_id) === getStatusByCode(3) && disbursement ) ? "" : "Le montant en monnaie de référence requis d'un décaissement reçu";
+          
       setErrors({
       ...temp,
     });
@@ -98,6 +103,7 @@ const DibursementForm = (props) => {
     if (fieldValues == values) return Object.values(temp).every((x) => x == "");
   };
 
+  const { logoutUser } = useContext(AuthContext);
 
 
   React.useEffect(() => {
@@ -110,7 +116,11 @@ const DibursementForm = (props) => {
       res => {
         setDisbursementTypes(res.data);
       },  
-      error => console.log(error)
+      error => {
+        console.log(error)
+        if(error.response && error.response.status === 401)
+        logoutUser()
+      }
     ) 
     .then( () => {
         axios.get(`/statustype`).then(
@@ -118,7 +128,11 @@ const DibursementForm = (props) => {
               console.log(res.data);
               setDisbursementStatus(res.data)
             },
-            error => console.log(error)
+            error => {
+              console.log(error)
+              if(error.response && error.response.status === 401)
+              logoutUser()
+            }
         )
     }
     )
@@ -128,7 +142,11 @@ const DibursementForm = (props) => {
             console.log(res.data);
             setCurrencies(res.data)
           },  
-          error => console.log(error)
+          error => {
+            console.log(error)
+            if(error.response && error.response.status === 401)
+            logoutUser()
+          }
         )
     }
     )
@@ -350,7 +368,7 @@ const DibursementForm = (props) => {
             <Controls.Input
               style= {
                 (!disbursement || (getStatus(values.status_id) === getStatusByCode(3) && disbursement))
-                ? { width:'33.33%'} :  { width:'50%'}
+                ? !disbursement ? {width:'45%'} : {width:'30%'} :  { width:'90%'}
               }
               id="orderamount-input"
               name="orderamount"
@@ -361,12 +379,9 @@ const DibursementForm = (props) => {
               error={errors.orderamount}
             />
             <Controls.Select
-              style={
-                (!disbursement || (getStatus(values.status_id) === getStatusByCode(3) && disbursement))
-                ? { width:'33.33%'} :  { width:'50%'}
-              }
+              style={{ width:'10%'}}
               name="currency_id"
-              label="Devise de décaissement"
+              label="Devise"
               value={values.currency_id}
               onChange={handleInputChange}
               options={currencies}
@@ -375,7 +390,7 @@ const DibursementForm = (props) => {
 
             {!disbursement &&            
             <Controls.DatePiccker
-              style={{ width:'33.33%'}}
+              style={{ width:'45%'}}
               id="date"
               name="date"
               label="Date"
@@ -386,12 +401,24 @@ const DibursementForm = (props) => {
             }
             {getStatus(values.status_id) === getStatusByCode(3) && disbursement &&
             <Controls.Input
-              style={{ width:'33.33%'}}
+              style={{ width:'30%'}}
               id="disbursementamount-input"
               name="disbursementamount"
               type = "number"
               label="Montant décaissé"
               value={values.disbursementamount}
+              onChange={handleInputChange}
+              error={errors.disbursementamount}
+            />
+            }
+            {getStatus(values.status_id) === getStatusByCode(3) && disbursement &&
+            <Controls.Input
+              style={{ width:'30%'}}
+              id="amount_by_ref_currency-input"
+              name="amount_by_ref_currency"
+              type = "number"
+              label="Montant en monnaie de référence "
+              value={values.amount_by_ref_currency}
               onChange={handleInputChange}
               error={errors.disbursementamount}
             />
