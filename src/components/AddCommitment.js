@@ -10,18 +10,34 @@ import BaseCard from "./baseCard/BaseCard";
 import { Form } from "./Form";
 import Controls from "./controls/Controls";
 import useAxios from "../utils/useAxios";
+import { useContext } from "react";
+import AuthContext from "../context/AuthContext";
 
 
 
 const CommitmentForm = (props) => {
   const {Commitment, showSuccessToast, showFailedToast} = props;
 
+  const formatDate = (date) => {
+    var d = new Date(date),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
+
+    if (month.length < 2) 
+        month = '0' + month;
+    if (day.length < 2) 
+        day = '0' + day;
+
+    return [year, month, day].join('-');
+  }
+
   const defaultValues = Commitment === null ? {
     reference: "",
     status: "active",
-    start_date: "",
-    end_date: "",
-    close_date: "",
+    start_date: formatDate(new Date()),
+    end_date: formatDate(new Date()),
+    close_date: formatDate(new Date()),
     description: "",
     contractor_id: null,
     categorie: null
@@ -71,6 +87,7 @@ const CommitmentForm = (props) => {
     if (fieldValues == values) return Object.values(temp).every((x) => x == "");
   };
 
+  const { logoutUser } = useContext(AuthContext);
 
 
   React.useEffect(() => {
@@ -79,7 +96,11 @@ const CommitmentForm = (props) => {
         console.log(res.data);
         setContractors(res.data);
       },  
-      error => console.log(error)
+      error => {
+        console.log(error)
+        if(error.response && error.response.status === 401)
+        logoutUser()
+      }
     ). then(() => {
       axios.get(`/conventions`).then(
         res => {
@@ -140,21 +161,6 @@ const CommitmentForm = (props) => {
     } 
     //console.log(formValues);
   };
-
-
-  const formatDate = (date) => {
-    var d = new Date(date),
-        month = '' + (d.getMonth() + 1),
-        day = '' + d.getDate(),
-        year = d.getFullYear();
-
-    if (month.length < 2) 
-        month = '0' + month;
-    if (day.length < 2) 
-        day = '0' + day;
-
-    return [year, month, day].join('-');
-  }
 
   const titleName = () => {
     if(Commitment == null) 
@@ -253,7 +259,7 @@ const CommitmentForm = (props) => {
           </Stack>
         
           <Stack style={styles.stack} spacing={2} direction="row">
-            <Controls.Input
+            <Controls.TextArea
               style={Commitment ? {width:'50%'} : {width:'100%'}}
               id="description-input"
               name="description"

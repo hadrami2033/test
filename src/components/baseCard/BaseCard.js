@@ -9,7 +9,7 @@ import {
 
 const BaseCard = (props) => {
   return (
-    <Card >
+    <Card style={{backgroundColor:'#fbfbfa'}} >
       <Box display="flex" alignItems="center" justifyContent="center">
         <Typography color={props.titleColor} fontSize="24px" fontWeight={'600'} variant="h4" >{props.title}</Typography>
       </Box>

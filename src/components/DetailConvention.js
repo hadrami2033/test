@@ -25,6 +25,8 @@ import DeadlineForm from "../../pages/add_deadline";
 import DetailDeadline from "../../pages/deadline_detail";
 import useAxios from "../utils/useAxios";
 import { useRouter } from "next/router";
+import { useContext } from "react";
+import AuthContext from "../context/AuthContext";
 
 
 const headCellsDecaissements = [
@@ -180,6 +182,7 @@ const DetailConvention = (props) => {
     setValue(newValue);
   };
   const router = useRouter()
+  const { logoutUser } = useContext(AuthContext);
 
   useEffect(() => {
     setLoading(true)
@@ -194,7 +197,13 @@ const DetailConvention = (props) => {
           setDeadlines(res.data.deadlines)
           setCategories(res.data.categories)
           setLoading(false)
-      })
+      },
+      error => {
+        console.log(error)
+        if(error.response && error.response.status === 401)
+        logoutUser()
+      }
+      )
         .then( () => {
           axios.get(`/statustype`).then(
           res => {
@@ -698,7 +707,7 @@ const DetailConvention = (props) => {
                                 fontStyle:'initial'
                                 }}
                             >
-                            Date fin de grace periode : {formatDate(convention.end_date_grace_period)}
+                            Grace periode : {convention.grace_periode} mois
                             </Typography>
                         </Grid>
                         <Grid item xs={4}>
@@ -757,7 +766,7 @@ const DetailConvention = (props) => {
                                 fontStyle:'initial',
                                 }}
                             >
-                                Commission : {pounds.format(convention.costs)}  {currency.label} 
+                                Commission : {pounds.format(convention.costs)}% 
                             </Typography>
                             }
                         </Grid>
@@ -769,7 +778,7 @@ const DetailConvention = (props) => {
                                 fontStyle:'initial'
                                 }}
                             >
-                            Taux d'intéret : {convention.interest_rate}
+                            Taux d'intéret : {convention.interest_rate}%
                             </Typography>
                         </Grid>
 
@@ -916,8 +925,8 @@ const DetailConvention = (props) => {
                             <EnhancedTableHead
                                 rowCount={disbursements.length}
                                 headCells={headCellsDecaissements}
-                                headerBG="#c8d789"
-                                txtColor="#000000"
+                                headerBG="#1A7795"
+                                txtColor="#DCDCDC"
                             />
                             <TableBody>
                                 {disbursements
@@ -970,8 +979,8 @@ const DetailConvention = (props) => {
                         <EnhancedTableHead
                             rowCount={categories.length}
                             headCells={headCellsCategories}
-                            headerBG="#c8d789"
-                            txtColor="#000000"
+                            headerBG="#1A7795"
+                            txtColor="#DCDCDC"
                         />
                         <TableBody>
                             {categories
@@ -1023,8 +1032,8 @@ const DetailConvention = (props) => {
                         <EnhancedTableHead
                             rowCount={deadlines.length}
                             headCells={headCellsDeadlines}
-                            headerBG="#c8d789"
-                            txtColor="#000000"
+                            headerBG="#1A7795"
+                            txtColor="#DCDCDC"
                         />
                         <TableBody>
                             {deadlines

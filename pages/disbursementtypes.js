@@ -292,7 +292,7 @@ export default function EnhancedTable() {
         </Alert>
       </Snackbar>
 
-      <Dialog fullWidth={true} maxWidth={'lg'} open={open} onClose={handleClose}>
+      <Dialog fullWidth={true} maxWidth={'md'} open={open} onClose={handleClose}>
                 <DialogContent>
                 <div style={{display:"flex", justifyContent:"end"}}>
                     <IconButton onClick={handleClose}>
@@ -372,8 +372,8 @@ export default function EnhancedTable() {
                 onRequestSort={handleRequestSort}
                 rowCount={DisbursementTypes.length}
                 headCells={headCells}
-                headerBG="#c8d789"
-                txtColor="#000000"
+                headerBG="#1A7795"
+                txtColor="#DCDCDC"
               />
               <TableBody>
                 {DisbursementTypes.map((row, index) => {
@@ -390,7 +390,7 @@ export default function EnhancedTable() {
 
                         <TableCell padding="checkbox">
                           <Checkbox
-                            color="primary"
+                            color="secondary"
                             checked={isItemSelected}
                             inputProps={{ 
                               'aria-labelledby': labelId,

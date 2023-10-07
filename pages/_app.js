@@ -9,7 +9,6 @@ import createEmotionCache from "../src/createEmotionCache";
 import FullLayout from "../src/layouts/FullLayout";
 import "../styles/style.css";
 import { useRouter } from "next/router";
-import LogoIcon from "../src/layouts/logo/LogoIcon";
 import { AuthProvider } from "../src/context/AuthContext";
 
 // Client-side cache, shared for the whole session of the user in the browser.
@@ -19,11 +18,10 @@ export default function MyApp(props) {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
   const router = useRouter()
   var res = router.route
-  const [authenticated, setAuthenticated] = React.useState(false);
 
   React.useEffect(() => {
-    //if(localStorage.getItem('user'))
-      setAuthenticated(true)
+    if(!localStorage.getItem("authTokens"))
+    router.push("/login")
   }, [])
 
   return (

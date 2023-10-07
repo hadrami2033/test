@@ -14,6 +14,8 @@ import { Close } from "@mui/icons-material";
 import Draggable from "react-draggable";
 import useAxios from "../utils/useAxios";
 import { useRouter } from "next/router";
+import { useContext } from "react";
+import AuthContext from "../context/AuthContext";
 
 const headCellsInvoicelines = [
     {
@@ -115,6 +117,7 @@ const DetailInvoice = (props) => {
     setValue(newValue);
   };
   const router = useRouter()
+  const { logoutUser } = useContext(AuthContext);
 
   useEffect(() => {
     if(id){ 
@@ -123,7 +126,13 @@ const DetailInvoice = (props) => {
         setInvoiceLines(res.data.invoicelines)
         axios.get(`/commitments/${res.data.commitment}`)
         .then(res => setCommitment(res.data))
-      })
+      },
+      error => {
+        console.log(error)
+        if(error.response && error.response.status === 401)
+        logoutUser()
+      }
+      )
     }else{
       router.push("/invoices")
     }
@@ -378,8 +387,8 @@ const DetailInvoice = (props) => {
                 <EnhancedTableHead
                     rowCount={invoicelines.length}
                     headCells={headCellsInvoicelines}
-                    headerBG="#c8d789"
-                    txtColor="#000000"
+                    headerBG="#1A7795"
+                    txtColor="#DCDCDC"
                 />
                 <TableBody>
                     {invoicelines

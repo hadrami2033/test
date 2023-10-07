@@ -5,6 +5,7 @@ import BaseCard from '../src/components/baseCard/BaseCard';
 import { useEffect } from 'react';
 import InvoiceForm from '../src/components/AddInvoice';
 import useAxios from '../src/utils/useAxios';
+import AuthContext from '../src/context/AuthContext';
 
 export default function AddInvoice(){
   const router = useRouter()
@@ -15,6 +16,7 @@ export default function AddInvoice(){
   const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const axios = useAxios();
+  const { logoutUser } = React.useContext(AuthContext);
 
   useEffect(() => {
     if(id){
@@ -22,7 +24,13 @@ export default function AddInvoice(){
       axios.get(`/invoices/${id}`).then(res => {
           setInvoice(res.data)
           setLoading(false)
-      })
+      },
+      error => {
+        console.log(error)
+        if(error.response && error.response.status === 401)
+        logoutUser()
+      }
+      )
     }
   }, [])
 

@@ -48,7 +48,7 @@ const EnhancedTableToolbar = (props) => {
         ) : (
           <Stack spacing={2} direction="row">
             <Tooltip title="Ajouter">
-              <Fab color="primary" aria-label="Ajouter" onClick={openModal}>
+              <Fab color="secondary" aria-label="Ajouter" onClick={openModal}>
                   <Add/>
               </Fab>
             </Tooltip>

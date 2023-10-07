@@ -16,6 +16,8 @@ import Draggable from "react-draggable";
 import InvoiceForm from "./AddInvoice";
 import useAxios from "../utils/useAxios";
 import { useRouter } from "next/router";
+import { useContext } from "react";
+import AuthContext from "../context/AuthContext";
 
 const headCellsAmounts = [
     {
@@ -25,10 +27,10 @@ const headCellsAmounts = [
       label: 'Montant',
     },
     {
-      id: 'spendingtype',
+      id: 'amount_by_ref_currency',
       numeric: false,
       disablePadding: true,
-      label: 'Type de dépence',
+      label: 'Montant en monnaie de référence ',
     },
     {
       id: 'action',
@@ -124,6 +126,9 @@ const DetailCommitment = (props) => {
     setValue(newValue);
   };
 
+  const { logoutUser } = useContext(AuthContext);
+
+
   useEffect(() => {
     if(id){ 
       axios.get(`/commitments/${id}`).then(res => {
@@ -131,7 +136,13 @@ const DetailCommitment = (props) => {
           setContractor(res.data.contractor)
           setInvoices(res.data.invoices)
           setCommitmentamounts(res.data.commitmentamounts)
-      })
+      },
+      error => {
+        console.log(error)
+        if(error.response && error.response.status === 401)
+        logoutUser()
+      }
+      )
     }else{
       router.push("/commitments")
     }
@@ -316,7 +327,7 @@ const DetailCommitment = (props) => {
         </DialogContent>
       </Dialog>
 
-      <Dialog fullWidth={true} maxWidth={'lg'} open={openAmount} onClose={handleCloseAmount}>
+      <Dialog fullWidth={true} maxWidth={'md'} open={openAmount} onClose={handleCloseAmount}>
         <DialogContent>
           <div style={{display:"flex", justifyContent:"end"}}>
             <IconButton onClick={handleCloseAmount}>
@@ -538,8 +549,8 @@ const DetailCommitment = (props) => {
                 <EnhancedTableHead
                     rowCount={invoices.length}
                     headCells={headCells}
-                    headerBG="#c8d789"
-                    txtColor="#000000"
+                    headerBG="#1A7795"
+                    txtColor="#DCDCDC"
                 />
                 <TableBody>
                     {invoices
@@ -581,8 +592,8 @@ const DetailCommitment = (props) => {
                 <EnhancedTableHead
                     rowCount={commitmentamounts.length}
                     headCells={headCellsAmounts}
-                    headerBG="#c8d789"
-                    txtColor="#000000"
+                    headerBG="#1A7795"
+                    txtColor="#DCDCDC"
                 />
                 <TableBody>
                     {commitmentamounts
@@ -596,7 +607,7 @@ const DetailCommitment = (props) => {
                            
                             <TableCell align="left"></TableCell>
                             <TableCell align="left">{pounds.format(parseFloat(row.amount).toFixed(2))} {row.currency.label} </TableCell>
-                            <TableCell align="left">{row.spendingtype.label}</TableCell>
+                            <TableCell align="left">{pounds.format(parseFloat(row.amount_by_ref_currency).toFixed(2))}</TableCell>
                             <TableCell align="left">
                               <Tooltip onClick={() => handleOpenModalDelete(row)} 
                                   title="supprimer">

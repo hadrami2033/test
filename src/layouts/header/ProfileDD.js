@@ -20,6 +20,7 @@ import { useRouter } from "next/router";
 import jwt_decode from "jwt-decode";
 import { useContext } from "react";
 import AuthContext from "../../context/AuthContext";
+import { Logout } from "@mui/icons-material";
 
 const ProfileDD = () => {
   const [anchorEl4, setAnchorEl4] = React.useState(null);
@@ -124,10 +125,13 @@ const ProfileDD = () => {
               sx={{
                 ml: 1,
               }}
+              //color={'secondary'}
+              color={"#F6EEFA"}
+              mx={1}
             >
               {user.username}
             </Typography>
-            <FeatherIcon icon="chevron-down" width="20" height="20" />
+            <FeatherIcon icon="chevron-down" width="20" color={"#F6EEFA"} height="20"/>
           </Box>
         </Box>
       </Button>
@@ -139,7 +143,7 @@ const ProfileDD = () => {
         onClose={handleClose4}
         sx={{
           "& .MuiMenu-paper": {
-            width: "385px",
+            width: "250px",
           },
         }}
       >
@@ -160,7 +164,7 @@ const ProfileDD = () => {
           {/* <Divider /> */}
           <Box p={2}>
               <Button onClick={logoutUser} fullWidth variant="contained" color="secondary" style={{fontSize:"20px"}}>
-                Déconnecter
+                 <Logout fontSize="small" style={{marginInlineEnd : '5px'}} ></Logout>   Déconnecter
               </Button>
           </Box>
         </Box>
