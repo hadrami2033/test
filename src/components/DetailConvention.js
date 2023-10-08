@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Alert, Card, CardContent, Typography, Button, Grid, Tooltip, Stack,Snackbar, Box, Tab ,Tabs, CircularProgress  } from "@mui/material";
+import { Alert, Card, CardContent, Typography, Button, Grid, Tooltip, Stack,Snackbar, Box, Tab ,Tabs, CircularProgress, Fab, Paper  } from "@mui/material";
 import BaseCard from "./baseCard/BaseCard";
 import PropTypes from 'prop-types';
 import Table from '@mui/material/Table';
@@ -14,7 +14,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Draggable from 'react-draggable';
-import { Close, CreateOutlined, InfoOutlined } from '@mui/icons-material';
+import { Add, Close, CreateOutlined, Delete, InfoOutlined } from '@mui/icons-material';
 import IconButton from '@mui/material/IconButton';
 import DisbursementForm from "../../pages/add_disbursement";
 import CategorieForm from "../../pages/add_categorie";
@@ -27,6 +27,7 @@ import useAxios from "../utils/useAxios";
 import { useRouter } from "next/router";
 import { useContext } from "react";
 import AuthContext from "../context/AuthContext";
+import DetailCommitment from "./DetailCommitment";
 
 
 const headCellsDecaissements = [
@@ -111,6 +112,89 @@ const headCellsDeadlines = [
     }
  ]
 
+ const headCellsCommitments = [
+  {
+    id: 'reference',
+    numeric: false,
+    disablePadding: true,
+    label: 'Reférence',
+  },
+  {
+    id: 'status',
+    numeric: false,
+    disablePadding: false,
+    label: 'Status',
+  },
+  {
+    id: 'description',
+    numeric: false,
+    disablePadding: false,
+    label: 'Description',
+  },
+  {
+    id: 'start_date',
+    numeric: false,
+    disablePadding: false,
+    label: 'Date début',
+  },
+  {
+    id: 'end_date',
+    numeric: false,
+    disablePadding: false,
+    label: 'Date fin',
+  },
+  {
+    id: 'close_date',
+    numeric: false,
+    disablePadding: false,
+    label: 'Date de Cloture',
+  },
+  {
+    id: 'action',
+    numeric: false,
+    disablePadding: true,
+    label: 'Action',
+  }
+];
+
+const headCellsInvoices = [
+  {
+    id: 'reference',
+    numeric: false,
+    disablePadding: true,
+    label: 'Reférence',
+  },
+  {
+    id: 'paymentmethod',
+    numeric: false,
+    disablePadding: false,
+    label: 'Mehhode de paiement',
+  },
+  {
+    id: 'paymentreference',
+    numeric: false,
+    disablePadding: false,
+    label: 'Réference de paiement',
+  },
+  {
+    id: 'date',
+    numeric: false,
+    disablePadding: false,
+    label: 'Date',
+  },
+  {
+    id: 'comment',
+    numeric: false,
+    disablePadding: false,
+    label: 'Commentaire',
+  },
+  {
+    id: 'action',
+    numeric: false,
+    disablePadding: true,
+    label: 'Action',
+  }
+];
 
 function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -176,7 +260,15 @@ const DetailConvention = (props) => {
   const [availabeState, setAvailabeState] = React.useState({});
   const [commitments, setCommitments] = React.useState([]);
   const [invoices, setInvoices] = React.useState([]);
+  const [conventionCommitments, setConventionCommitments] = React.useState([]);
+  const [conventionInvoices, setConventionInvoices] = React.useState([]);
   const [disbursementTypes, setDisbursementTypes] = React.useState([]);
+  const [openDeleteComm, setOpenDeleteComm] = React.useState(false);
+  const [openDeleteInv, setOpenDeleteInv] = React.useState(false);
+  const [deleted, setDelete] = React.useState(false);
+  const [commToDelete, setCommToDelete] = React.useState(null);
+  const [invToDelete, setInvToDelete] = React.useState(null);
+
   const axios = useAxios();
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -186,6 +278,8 @@ const DetailConvention = (props) => {
 
   useEffect(() => {
     setLoading(true)
+    let commitementslist = []
+    let invoiceslist = []
     if(id){
       axios.get(`/conventions/${id}`).then(res => {
           setConvention(res.data)
@@ -196,15 +290,26 @@ const DetailConvention = (props) => {
           setDisbursements(res.data.disbursements)
           setDeadlines(res.data.deadlines)
           setCategories(res.data.categories)
-          setLoading(false)
+          res.data.categories.map(c => {
+            commitementslist = commitementslist.concat(c.commitments)
+            c.commitments.map(e => {
+              invoiceslist = invoiceslist.concat(e.invoices)
+            })
+          })
       },
       error => {
         console.log(error)
         if(error.response && error.response.status === 401)
         logoutUser()
       }
-      )
-        .then( () => {
+      ).then(() => {
+        console.log('commitementslist ', commitementslist);
+        console.log('invoiceslist ', invoiceslist);
+        setConventionCommitments(commitementslist)
+        setConventionInvoices(invoiceslist)
+        setLoading(false)
+      })
+        .then(() => {
           axios.get(`/statustype`).then(
           res => {
             console.log(res.data);
@@ -257,6 +362,13 @@ const DetailConvention = (props) => {
   const getDisbursementsAmount = (disbursements) => {
     var sum = disbursements ? disbursements.reduce((accumulator, e) => {
       return accumulator + e.orderamount
+    },0) : 0;
+    return sum;
+  }
+
+  const getDisbursementsAmountByMnyRef = (disbursements) => {
+    var sum = disbursements ? disbursements.reduce((accumulator, e) => {
+      return accumulator + e.amount_by_ref_currency
     },0) : 0;
     return sum;
   }
@@ -464,6 +576,129 @@ const DetailConvention = (props) => {
     return null;
   }
 
+  const CommitmentDetail = (selected) => {
+    //setDetail(true);
+    router.push({
+      pathname: '/commitment_detail',
+      query: { id: selected.id }
+    })
+  }
+
+  const editCommitment = (selected) => {
+    console.log("edit => ", selected);
+    router.push({
+      pathname: '/add_commitment',
+      query: { id: selected.id, convention: convention.id }
+    })
+  }
+
+  const addCommitment = () => {
+    router.push({ 
+      pathname: '/add_commitment',
+      query: { convention: convention.id }
+    })
+  }
+
+  const handleOpenModalDeleteComm = () =>{
+    setOpenDeleteComm(true)
+  }
+
+  const handleOpenModalDeleteInv = () =>{
+    setOpenDeleteInv(true)
+  }
+
+  const deleteClickComm = (row) => {
+    setCommToDelete(row)
+    handleOpenModalDeleteComm()
+  }
+
+  const deleteClickInv = (row) => {
+    setInvToDelete(row)
+    handleOpenModalDeleteInv()
+  }
+
+  const removeCommitment = () =>{
+    if(commToDelete !== null){
+      axios.delete(`/commitments/${commToDelete.id}`).then(
+        res => {
+          console.log(res);
+          const index = conventionCommitments.indexOf(commToDelete);
+          conventionCommitments.splice(index, 1);
+          setDelete(!deleted)
+          handleCloseModalDeleteComm()
+          showSuccessToast()
+        },
+        error => {
+          console.log(error)
+          showFailedToast()
+        }
+      )      
+    }
+  }
+
+
+  const removeInvoice = () =>{
+    if(invToDelete !== null){
+      axios.delete(`/invoices/${invToDelete.id}`).then(
+        res => {
+          console.log(res);
+          const index = conventionInvoices.indexOf(invToDelete);
+          conventionInvoices.splice(index, 1);
+          setDelete(!deleted)
+          handleCloseModalDeleteInv()
+          showSuccessToast()
+        },
+        error => {
+          console.log(error)
+          showFailedToast()
+        }
+      )      
+    }
+  }
+
+  const PaperComponent = (props) => {
+    return (
+      <Draggable
+        handle="#draggable-dialog-title"
+        cancel={'[class*="MuiDialogContent-root"]'}
+      >
+        <Paper {...props} />
+      </Draggable>
+    );
+  } 
+
+  const handleCloseModalDeleteComm = () =>{
+    setOpenDeleteComm(false)
+  }
+
+  const handleCloseModalDeleteInv = () =>{
+    setOpenDeleteInv(false)
+  }
+
+  const editInvoice = (selected) => {
+    console.log("edit => ", selected);
+    router.push({
+      pathname: '/add_invoice',
+      query: { 
+        id: selected.id,
+        convention: convention.id
+       }
+    })
+  }
+
+  const addInvoice = () => {
+    router.push({ pathname: '/add_invoice',
+    query: { convention: convention.id }
+  })
+  }
+
+  const InvoiceDetail = (selected) => {
+    router.push({
+      pathname: '/invoice_detail',
+      query: {id: selected.id}
+    })
+  }
+
   return (
     <BaseCard titleColor={"secondary"} title={ convention ? convention.reference : ""}>
         {loading ?
@@ -480,6 +715,50 @@ const DetailConvention = (props) => {
          </Box>
         :
           <Box style={{width:'100%'}}>
+
+      <Dialog 
+        open={openDeleteComm}
+        onClose={handleCloseModalDeleteComm}
+        PaperComponent={PaperComponent}
+        aria-labelledby="draggable-dialog-title"
+      >
+        <DialogTitle style={{ cursor: 'move', display:"flex" ,justifyContent:"end" , fontSize:"24px",fontWeight:"bold" }} id="draggable-dialog-title">
+          Suppression
+        </DialogTitle>
+        <DialogContent style={{width:300,display:"flex" ,justifyContent:"center" }}>
+          <DialogContentText>
+            Confirmer l'oppération
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button style={{fontSize:"24px",fontWeight:"bold"}} autoFocus onClick={handleCloseModalDeleteComm}>
+            Annuler
+          </Button>
+          <Button style={{fontSize:"24px",fontWeight:"bold"}} onClick={removeCommitment}>Supprimer</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog 
+        open={openDeleteInv}
+        onClose={handleCloseModalDeleteInv}
+        PaperComponent={PaperComponent}
+        aria-labelledby="draggable-dialog-title"
+      >
+        <DialogTitle style={{ cursor: 'move', display:"flex" ,justifyContent:"end" , fontSize:"24px",fontWeight:"bold" }} id="draggable-dialog-title">
+          Suppression
+        </DialogTitle>
+        <DialogContent style={{width:300,display:"flex" ,justifyContent:"center" }}>
+          <DialogContentText>
+            Confirmer l'oppération
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button style={{fontSize:"24px",fontWeight:"bold"}} autoFocus onClick={handleCloseModalDeleteInv}>
+            Annuler
+          </Button>
+          <Button style={{fontSize:"24px",fontWeight:"bold"}} onClick={removeInvoice}>Supprimer</Button>
+        </DialogActions>
+      </Dialog>
 
             <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'center'}} open={openSuccessToast} autoHideDuration={6000} onClose={closeSuccessToast}>
                 <Alert onClose={closeSuccessToast} severity="success" sx={{ width: '100%' }} style={{fontSize:"24px",fontWeight:"bold"}}>
@@ -514,6 +793,7 @@ const DetailConvention = (props) => {
                     showSuccessToast={showSuccessToast}
                     showFailedToast={showFailedToast}
                     availableAmount={(convention.amount-getDisbursementsAmount(convention.disbursements))}
+                    availableAmountByMnyRef={(convention.amount_ref_currency-getDisbursementsAmountByMnyRef(convention.disbursements))}
                 /> 
                 </DialogContent>
             </Dialog>
@@ -561,9 +841,6 @@ const DetailConvention = (props) => {
                 </DialogContent>
             </Dialog>
             }
-
-            
-
 
             {convention &&
             <Dialog 
@@ -696,7 +973,7 @@ const DetailConvention = (props) => {
                                 fontStyle:'initial'
                                 }}
                             >
-                            Date fin : {formatDate(convention.end_date)}
+                            Periode de la convention : {convention.convention_periode}
                             </Typography>
                         </Grid>
                         <Grid item xs={4} sx={{color:"#837B7B", fontWeight: "bold"}} >
@@ -810,7 +1087,7 @@ const DetailConvention = (props) => {
                         
             </Grid>
             }
-            {convention &&
+            {/* {convention &&
             <Grid container 
                             sx={{
                                 mt:"20px",
@@ -904,18 +1181,29 @@ const DetailConvention = (props) => {
                             </Grid>
 
             </Grid>
-            }
+            } */}
             {convention &&
-            <Box sx={{ width: '100%', marginTop:'15px', marginLeft: '15px' }}>
+            <Box sx={{ width: '100%', marginTop:'35px', marginLeft: '15px',
+            whiteSpace: "nowrap", overflowX: 'auto', overflowY: 'hidden'
+            }}>
                     <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                         <Tabs value={value} onChange={handleChange} aria-label="tabs">
                             <Tab style={{fontWeight:'bold', fontSize:'20px'}} label="Décaissements" {...a11yProps(0)} />
-                            <Tab style={{fontWeight:'bold', fontSize:'20px'}} label="Catégories de la convention" {...a11yProps(1)} />
-                            <Tab style={{fontWeight:'bold', fontSize:'20px'}} label="Echéances" {...a11yProps(2)} />
+                            <Tab style={{fontWeight:'bold', fontSize:'20px'}} label="Engagements" {...a11yProps(1)} />
+                            <Tab style={{fontWeight:'bold', fontSize:'20px'}} label="Factures" {...a11yProps(2)} />
+                            <Tab style={{fontWeight:'bold', fontSize:'20px'}} label="Catégories de dépense" {...a11yProps(3)} />
+                            <Tab style={{fontWeight:'bold', fontSize:'20px'}} label="Echéances" {...a11yProps(4)} />
                         </Tabs>
                     </Box>  
 
                     <CustomTabPanel value={value} index={0}>
+                    <Stack spacing={2} direction="row" mb={2} >
+                      <Tooltip title="Ajouter">
+                        <Fab color="secondary" size="medium" aria-label="Ajouter" onClick={openAddDisbursement}>
+                            <Add/>
+                        </Fab>
+                      </Tooltip>
+                    </Stack>
                     {disbursements.length > 0 ?
                         <Table
                         sx={{ minWidth: 750 }}
@@ -970,6 +1258,151 @@ const DetailConvention = (props) => {
                     }
                     </CustomTabPanel>
                     <CustomTabPanel value={value} index={1}>
+                    <Stack spacing={2} direction="row" mb={2} >
+                      <Tooltip title="Ajouter">
+                        <Fab color="secondary" size="medium" aria-label="Ajouter" onClick={addCommitment}>
+                            <Add/>
+                        </Fab>
+                      </Tooltip>
+                    </Stack>
+                    {conventionCommitments.length > 0 ?
+                    <Table
+                        sx={{ minWidth: 750 }}
+                        aria-labelledby="tableTitle"
+                        size={'medium'}
+                        >
+                        <EnhancedTableHead
+                            rowCount={conventionCommitments.length}
+                            headCells={headCellsCommitments}
+                            headerBG="#1A7795"
+                            txtColor="#DCDCDC"
+                        />
+                        <TableBody>
+                            {conventionCommitments
+                            .map((row, index) => {
+                                return (
+                                <TableRow
+                                    hover
+                                    tabIndex={-1}
+                                    key={row.id}
+                                >
+                                    
+                                  <TableCell align="left"></TableCell>
+                                  <TableCell align="left">{row.reference}</TableCell>
+                                  <TableCell align="left">{row.status}</TableCell>
+                                  <TableCell align="left">{row.description}</TableCell>
+                                  <TableCell align="left">{formatDate(row.start_date)} </TableCell>
+                                  <TableCell align="left">{formatDate(row.end_date)} </TableCell>
+                                  <TableCell align="left">{formatDate(row.close_date)} </TableCell>
+
+                                  <TableCell align="left">
+                                     <Tooltip onClick={() => editCommitment(row)} title="Modifier">
+                                         <IconButton>
+                                             <CreateOutlined fontSize='medium' />
+                                         </IconButton>
+                                     </Tooltip>
+                                     <Tooltip onClick={() => CommitmentDetail(row)} title="Detail">
+                                         <IconButton>
+                                             <InfoOutlined color='primary' fontSize='medium' />
+                                         </IconButton>
+                                     </Tooltip>
+                                     <Tooltip onClick={() => deleteClickComm(row)} title="Supprimer">
+                                         <IconButton>
+                                             <Delete color='danger' fontSize='medium' />
+                                         </IconButton>
+                                     </Tooltip>
+                                  </TableCell>
+
+
+                                </TableRow>
+                                );
+                            })}
+                        </TableBody>
+                    </Table>
+                    :
+                    <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "center"}}>
+                        <Box style={{fontSize: '16px'}}>
+                        Liste vide
+                        </Box>
+                    </div>
+                    }
+                    </CustomTabPanel>
+                    <CustomTabPanel value={value} index={2}>
+                      <Stack spacing={2} direction="row" mb={2} >
+                       <Tooltip title="Ajouter">
+                         <Fab color="secondary" size="medium" aria-label="Ajouter" onClick={addInvoice}>
+                             <Add/>
+                         </Fab>
+                       </Tooltip>
+                      </Stack>
+                    {conventionInvoices.length > 0 ?
+                    <Table
+                        sx={{ minWidth: 750 }}
+                        aria-labelledby="tableTitle"
+                        size={'medium'}
+                        >
+                        <EnhancedTableHead
+                            rowCount={conventionInvoices.length}
+                            headCells={headCellsInvoices}
+                            headerBG="#1A7795"
+                            txtColor="#DCDCDC"
+                        />
+                        <TableBody>
+                            {conventionInvoices
+                            .map((row, index) => {
+                                return (
+                                <TableRow
+                                    hover
+                                    tabIndex={-1}
+                                    key={row.id}
+                                >
+                                    <TableCell align="left"></TableCell>
+
+                                    <TableCell align="left">{row.reference}</TableCell>
+                                    <TableCell align="left">{row.paymentmethod}</TableCell>
+                                    <TableCell align="left">{row.paymentreference}</TableCell>
+                                    <TableCell align="left">{formatDate(row.date)} </TableCell>
+                                    <TableCell align="left">{row.comment}</TableCell>
+                                    <TableCell align="left">
+                                        <Tooltip onClick={() => editInvoice(row)} title="Modifier">
+                                            <IconButton>
+                                                <CreateOutlined fontSize='medium' />
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip onClick={() => InvoiceDetail(row)} title="Detail">
+                                            <IconButton>
+                                                <InfoOutlined color='primary' fontSize='medium' />
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip onClick={() => deleteClickInv(row)} title="Supprimer">
+                                          <IconButton>
+                                              <Delete color='danger' fontSize='medium' />
+                                          </IconButton>
+                                        </Tooltip>
+                                    </TableCell>
+
+
+                                </TableRow>
+                                );
+                            })}
+                        </TableBody>
+                    </Table>
+                    :
+                    <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "center"}}>
+                        <Box style={{fontSize: '16px'}}>
+                        Liste vide
+                        </Box>
+                    </div>
+                    }
+                    </CustomTabPanel>
+                    <CustomTabPanel value={value} index={3}>
+                    <Stack spacing={2} direction="row" mb={2} >
+                      <Tooltip title="Ajouter">
+                        <Fab color="secondary" size="medium" aria-label="Ajouter" onClick={openAddCategorie}>
+                            <Add/>
+                        </Fab>
+                      </Tooltip>
+                    </Stack>
                     {categories.length > 0 ?
                     <Table
                         sx={{ minWidth: 750 }}
@@ -1022,7 +1455,14 @@ const DetailConvention = (props) => {
                     </div>
                     }
                     </CustomTabPanel>
-                    <CustomTabPanel value={value} index={2}>
+                    <CustomTabPanel value={value} index={4}>
+                    <Stack spacing={2} direction="row" mb={2} >
+                      <Tooltip title="Ajouter">
+                        <Fab color="secondary" size="medium" aria-label="Ajouter" onClick={openAddDeadline}>
+                            <Add/>
+                        </Fab>
+                      </Tooltip>
+                    </Stack>
                     {deadlines.length > 0 ?
                     <Table
                         sx={{ minWidth: 750 }}

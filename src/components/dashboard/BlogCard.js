@@ -1,19 +1,73 @@
 import React from "react";
-import { Card, CardContent, Typography, Button, Grid, Tooltip, Stack } from "@mui/material";
+import { Card, CardContent, Typography, Button, Grid, Tooltip, Stack, Box } from "@mui/material";
 import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt';
 import Diversity2Icon from '@mui/icons-material/Diversity2';
-import PeopleIcon from '@mui/icons-material/People';
+import CreditScoreSharpIcon from '@mui/icons-material/CreditScoreSharp';
+import { FaHandshake } from 'react-icons/fa';
+import { GiMoneyStack, GiPayMoney } from 'react-icons/gi';
+import useAxios from "../../utils/useAxios";
 
 const BlogCard = (props) => {
   const {clientsCount, numbersCount, selectFile, fileName, handleFile, verifyCompatibility} = props;
   //colors: ['#6ebb4b', '#1a7795',  '#a52e36' , '#079ff0', '#cc7c67' , '#c8d789']
+
+  const [countConv, setCountConv] = React.useState(null);
+  const [countDiss, setCountDiss] = React.useState(null);
+  const [countComm, setCountComm] = React.useState(null);
+  const [amountConv, setAmountConv] = React.useState(null);
+  const [amountDiss, setAmountDiss] = React.useState(null);
+  const [amountComm, setAmountComm] = React.useState(null);
+  const axios = useAxios();
+
+  React.useEffect(() => {
+    axios.get(`/conventions_count_amount`).then(
+      res => {
+        console.log(res.data);
+        setCountConv(res.data.count)
+        setAmountConv(res.data.sum_amount);
+      }, 
+      error => {
+        console.log(error)
+        if(error.response && error.response.status === 401)
+        logoutUser()
+      }
+    ).then(
+      axios.get(`/disbursements_count_amount`).then(
+        res => {
+          console.log(res.data);
+          setCountDiss(res.data.count)
+          setAmountDiss(res.data.sum_amount);
+        }, 
+        error => {
+          console.log(error)
+        }
+      )
+    ).then(
+      axios.get(`/commitments_count_amount`).then(
+        res => {
+          console.log(res.data);
+          setCountComm(res.data.count)
+          setAmountComm(res.data.sum_amount);
+        }, 
+        error => {
+          console.log(error)
+        }
+      )
+    )
+  }, [])
+
+  let pounds = Intl.NumberFormat( {
+    style: 'currency',
+    maximumSignificantDigits: 3,
+    minimumFractionDigits: 2
+  });
 
   return (
     <Grid container>
     
         <Grid
           xs={12}
-          lg={3}
+          lg={4}
           sx={{
             display: "flex",
             alignItems: "stretch",
@@ -32,37 +86,33 @@ const BlogCard = (props) => {
                 paddingRight: "30px",
               }}
             >
-            <SentimentSatisfiedAltIcon 
-                        fontSize='large'
-                        style={{
-                          color: "white",
-                        }}                      
-                      />
+
+              <GiMoneyStack color="white" fontSize='40px' />
+
               <Typography
                 color={"#F6EEFA"}
                 sx={{
-                  fontSize: "h2.fontSize",
-                  fontWeight: "1000",
+                  fontSize: "h3.fontSize",
+                  fontWeight: "600",
                   fontStyle:'initial',
                   display:'flex', 
                   justifyContent: 'center'
                 }}
               >
-                Conventions
+                Budget de conventions
               </Typography>
-              
               <Typography
                 //color="primary"
                 color={"#F6EEFA"}
                 sx={{
-                  fontSize: "h1.fontSize",
+                  fontSize: "h2.fontSize",
                   fontWeight: "1000",
-                  fontStyle:'initial',
+                  marginTop:1,
                   display:'flex', 
-                  justifyContent: 'center'
+                  justifyContent: 'center',
                 }}
               >
-                 25
+                  {pounds.format(amountConv)} 
               </Typography>
             </CardContent>
           </Card>
@@ -72,7 +122,7 @@ const BlogCard = (props) => {
         <Grid
           item
           xs={12}
-          lg={3}
+          lg={4}
           sx={{
             display: "flex",
             alignItems: "stretch",
@@ -91,42 +141,41 @@ const BlogCard = (props) => {
                 paddingRight: "30px",
               }}
             >
-              <PeopleIcon 
-                        fontSize='large'
-                        style={{
-                          color: "white",
-                        }}                      
+
+                  <GiPayMoney 
+                        color="white"                     
+                        fontSize='40px'
                       />
               <Typography
                 color={"#F6EEFA"}
                 sx={{
-                  fontSize: "h2.fontSize",
-                  fontWeight: "1000",
+                  fontSize: "h3.fontSize",
+                  fontWeight: "600",
                   fontStyle:'initial',
                   display:'flex', 
                   justifyContent: 'center'
                 }}
               >
-                Bailleurs
+                Budget décaissé
               </Typography>
               <Typography
                 //color="primary"
                 color={"#F6EEFA"}
                 sx={{
-                  fontSize: "h1.fontSize",
+                  fontSize: "h2.fontSize",
                   fontWeight: "1000",
                   marginTop:1,
                   display:'flex', 
                   justifyContent: 'center',
                 }}
               >
-                 300
+                  {pounds.format(amountDiss)} 
               </Typography>
             </CardContent>
           </Card>
 
         </Grid>
-
+{/* 
         <Grid
           item
           xs={12}
@@ -187,10 +236,11 @@ const BlogCard = (props) => {
           </Card>
 
         </Grid>
+         */}
         <Grid
           item
           xs={12}
-          lg={3}
+          lg={4}
           sx={{
             display: "flex",
             alignItems: "stretch",
@@ -211,36 +261,36 @@ const BlogCard = (props) => {
               }}
             >  
 
-                  <Diversity2Icon 
-                        fontSize='large'
-                        style={{
-                          color: "white",
-                        }}                      
-                      />
+              <FaHandshake
+                    fontSize='40px'
+                    style={{
+                      color: "white",
+                    }}                      
+              />
               <Typography
                 color={"#F6EEFA"}
                 sx={{
-                  fontSize: "h2.fontSize",
-                  fontWeight: "1000",
+                  fontSize: "h3.fontSize",
+                  fontWeight: "600",
                   fontStyle:'initial',
                   display:'flex', 
                   justifyContent: 'center'
                 }}
               >
-                Engagements
+                Budget engagé
               </Typography>
               <Typography
                 //color="primary"
                 color={"#F6EEFA"}
                 sx={{
-                  fontSize: "h1.fontSize",
+                  fontSize: "h2.fontSize",
                   fontWeight: "1000",
                   marginTop:1,
                   display:'flex', 
                   justifyContent: 'center',
                 }}
               >
-                 45
+                {pounds.format(amountComm)}
               </Typography>
             </CardContent>
           </Card>

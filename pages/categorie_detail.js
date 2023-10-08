@@ -23,10 +23,10 @@ const headCellsAmount = [
       label: "Montant d'engagement",
     },
     {
-      id: 'spendingtype',
+      id: 'amount_by_ref_currency',
       numeric: false,
       disablePadding: false,
-      label: 'Type de dépence',
+      label: 'Montant en monnaie de référence',
     }
  ]
 
@@ -203,7 +203,7 @@ const DetailCategorie = (props) => {
                                 
                                     <TableCell align="left">{row.commitment}</TableCell>
                                     <TableCell align="left">{pounds.format(row.amount)} {row.currency.label}</TableCell>
-                                    <TableCell align="left">{row.spendingtype.label}</TableCell>
+                                    <TableCell align="left">{pounds.format(row.amount_by_ref_currency)} </TableCell>
 
                                 </TableRow>
                                 );
