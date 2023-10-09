@@ -70,14 +70,15 @@ const BlogCard = (props) => {
           lg={4}
           sx={{
             display: "flex",
-            alignItems: "stretch",
+            alignItems: "stretch"
           }}
         >
           <Card
             sx={{
               p: 0,
               width: "100%",
-              bgcolor:'#6ebb4b'
+              bgcolor:'#6ebb4b',
+              boxShadow:3
             }}
           >
             <CardContent
@@ -132,7 +133,8 @@ const BlogCard = (props) => {
             sx={{
               p: 0,
               width: "100%",
-              bgcolor:'#cc7c67'
+              boxShadow:3,
+              bgcolor:'#cc7c67',
             }}
           >
             <CardContent
@@ -250,8 +252,8 @@ const BlogCard = (props) => {
             sx={{
               p: 0,
               width: "100%",
+              boxShadow:3,
               bgcolor:'#079ff0'
-
             }}
           >
             <CardContent
