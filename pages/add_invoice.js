@@ -9,7 +9,7 @@ import AuthContext from '../src/context/AuthContext';
 
 export default function AddInvoice(){
   const router = useRouter()
-  const { id } = router.query
+  const { id, convention } = router.query
 
   const [invoice, setInvoice] = React.useState(null);
   const [openFailedToast, setOpenFailedToast] = React.useState(false);
@@ -17,20 +17,43 @@ export default function AddInvoice(){
   const [loading, setLoading] = React.useState(false);
   const axios = useAxios();
   const { logoutUser } = React.useContext(AuthContext);
+  const [conventionCommitments, setConventionCommitments] = React.useState([]);
 
   useEffect(() => {
-    if(id){
-      setLoading(true)
-      axios.get(`/invoices/${id}`).then(res => {
-          setInvoice(res.data)
+    setLoading(true)
+    if(id || convention){
+      if(id){
+        axios.get(`/invoices/${id}`).then(res => {
+            setInvoice(res.data)
+        },
+        error => {
+          console.log(error)
+          if(error.response && error.response.status === 401)
+          logoutUser()
+        }
+        )
+        .then(() => {
+          if(!convention)
           setLoading(false)
-      },
-      error => {
-        console.log(error)
-        if(error.response && error.response.status === 401)
-        logoutUser()
+        })
       }
-      )
+      if(convention) {
+        let commitementslist = []
+        axios.get(`/conventions/${convention}`).then(res => {
+            res.data.categories.map(c => {
+              commitementslist = commitementslist.concat(c.commitments)
+            })
+        },
+        error => {
+          console.log(error)
+          if(error.response && error.response.status === 401)
+          logoutUser()
+        }
+        ).then(() => {
+          setConventionCommitments(commitementslist)
+          setLoading(false)
+        })
+      }
     }
   }, [])
 
@@ -93,11 +116,10 @@ export default function AddInvoice(){
           Invoice ={invoice}
           showSuccessToast={showSuccessToast}
           showFailedToast={showFailedToast}
+          Commitments={conventionCommitments}
+          convention={convention}
         />
       }
-
-      
-
     </>
     )
 }

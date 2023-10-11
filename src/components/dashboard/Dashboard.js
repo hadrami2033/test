@@ -51,28 +51,16 @@ const headCells = [
     label: 'Montant',
   },
   {
-    id: 'cummule_dec',
-    numeric: false,
-    disablePadding: false,
-    label: 'Décaissé',
-  },
-  {
-    id: 'reste',
-    numeric: false,
-    disablePadding: false,
-    label: 'Reste',
-  },
-  {
     id: 'start_date',
     numeric: false,
     disablePadding: false,
     label: 'Date debut',
   },
   {
-    id: 'end_date',
+    id: 'convention_periode',
     numeric: false,
     disablePadding: false,
-    label: 'Date fin',
+    label: 'Periode',
   }/* ,
   {
     id: 'end_date_grace_period',
@@ -102,6 +90,8 @@ const Dashboard = () => {
 
   const handleClick = (event, row) => {
     console.log("select => ", row);
+    console.log(" passed less than 50% and 75% ", getConventionsHasDissLess25pourcentAndDeadlinePassedBetween25and50pourcent()); 
+    console.log(getCategoriesCommitmentsAmounts(row.categories))
     if(!isSelected(row.id)){
       setSelected(row);
     }else{
@@ -144,6 +134,12 @@ const Dashboard = () => {
   const { logoutUser } = useContext(AuthContext);
 
   React.useEffect(() => {
+    const sogemvalue ={
+      code: "001",
+      label: "SOGEM",
+      country: "sogem",
+      description: "sogem"
+    }
     axios.get(`/conventions`).then(
       res => {
         console.log(res.data);
@@ -155,11 +151,245 @@ const Dashboard = () => {
         if(error.response && error.response.status === 401)
         logoutUser()
       }
-    )
+    ).then(() => {
+      axios.get(`/borrowers`).then(
+        res => {
+          const sogem = res.data.filter(e => e.label === "SOGEM" )
+          if(sogem.length === 0){
+            axios.post(`/borrowers`,sogemvalue).then(
+              (res) => {
+                console.log("added => " ,res);
+              },
+              (error) => {
+                console.log(error);
+              } )
+          }
+        }, 
+        error => {
+          console.log(error)
+        }
+      )
+    })
   }, [])
 
 
-  const optionssalesoverview = {
+
+
+  const handleRequestSort = (event, property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+
+  const getDisbursementsAmount = (disbursements) => {
+    var sum = disbursements.reduce((accumulator, e) => {
+      return accumulator + e.amount_by_ref_currency
+    },0);
+    return sum;
+  }
+
+  let pounds = Intl.NumberFormat( {
+    style: 'currency',
+    maximumSignificantDigits: 3,
+    minimumFractionDigits: 2
+  });
+
+
+  /* const getCategorieCommitmentsAmounts = (commitments) => {
+    let commitmentsAmountArray = []
+    //l.reduce
+    var ammounts =  commitments ? commitments.reduce((commitmentsAmountConcatinate, c) => {
+        var  amountObject =  c.commitmentamounts ? c.commitmentamounts.reduce((accumulator, e) => {
+            commitmentsAmountArray.push({...e, commitment: c.reference});
+            
+            return e; //{...e, commitment: c.reference}
+        },{}) : {};
+    },[]) : [];
+
+    var sum = disbursements ? disbursements.reduce((accumulator, e) => {
+      return accumulator + e.orderamount
+    },0) : 0;
+    return sum;
+
+    //console.log(commitmentsAmountArray);       
+    return commitmentsAmountArray;
+  } */
+
+  const getCategoriesCommitmentsAmounts = (categories) => {
+      let amount = 0;
+      categories ? categories.reduce((commitmentsAmount, c) => {
+          c.commitments ? c.commitments.reduce((accumulator, e) => {
+              e.commitmentamounts ? e.commitmentamounts.reduce((accumulator, el) => {
+                //console.log(el.amount_by_ref_currency);
+                amount = amount+el.amount_by_ref_currency;
+                return el; 
+              },0) : 0;
+          },[]) : [];
+      },[]) : []; 
+      //console.log("categories comm amount", amount);
+      return amount;
+  }
+
+  function monthDiff(d1, d2) {
+    var months;
+    months = (d2.getFullYear() - d1.getFullYear()) * 12;
+    months -= d1.getMonth();
+    months += d2.getMonth();
+    return months <= 0 ? 0 : months;
+  }
+
+  const getConventionsHasDissLess25pourcentDeadlinePassedLessThan25pourcent = () => {
+    const res = Conventions.filter(e => ( 
+      ((e.amount_ref_currency*0.25) >= (getDisbursementsAmount(e.disbursements)))
+      && ((e.convention_periode*0.25) >= (monthDiff( new Date(e.start_date), new Date())))
+      )
+    )
+    return res
+  }
+
+  const getConventionsHasDissBetween25and50pourcentAndDeadlinePassedLessThan25pourcent = () => {
+    const res = Conventions.filter(e => ( ( ((e.amount_ref_currency*0.25) < getDisbursementsAmount(e.disbursements)) 
+    && ((getDisbursementsAmount(e.disbursements)) <= (e.amount_ref_currency*0.5) ) ) 
+    && ((e.convention_periode*0.25) >= (monthDiff( new Date(e.start_date), new Date())))
+    ) 
+    
+    )
+    return res
+  }
+
+  const getConventionsHasDissBetween50and75pourcentAndDeadlinePassedLessThan25pourcent = () => {
+    const res = Conventions.filter(e => ( (((e.amount_ref_currency*0.5) < getDisbursementsAmount(e.disbursements)) 
+    && ((getDisbursementsAmount(e.disbursements)) <= (e.amount_ref_currency*0.75) ) ) 
+    && ((e.convention_periode*0.25) >= (monthDiff( new Date(e.start_date), new Date())))
+    ) )
+    return res
+  }
+
+  const getConventionsHasDissBetween75and100pourcentAndDeadlinePassedLessThan25pourcent = () => {
+    const res = Conventions.filter(e => ( ((e.amount_ref_currency*0.75) < getDisbursementsAmount(e.disbursements)) 
+    && ((getDisbursementsAmount(e.disbursements)) <= e.amount_ref_currency )
+    && ((e.convention_periode*0.25) >= (monthDiff( new Date(e.start_date), new Date())))
+    ) )
+    return res
+  }
+
+
+  const getConventionsHasDissLess25pourcentAndDeadlinePassedBetween25and50pourcent = () => {
+    const res = Conventions.filter(e =>  ( 
+        ((e.amount_ref_currency*0.25) >= (getDisbursementsAmount(e.disbursements)))
+        && ( ((e.convention_periode*0.25) < monthDiff( new Date(e.start_date), new Date())) 
+             && (monthDiff( new Date(e.start_date), new Date()) <= (e.convention_periode*0.5)) )
+      )
+    )
+    return res
+  }
+
+  const getConventionsHasDissBetween25and50pourcentAndDeadlinePassedBetween25and50pourcent = () => {
+    const res = Conventions.filter(e => ( ((e.amount_ref_currency*0.25) < getDisbursementsAmount(e.disbursements)) 
+    && ((getDisbursementsAmount(e.disbursements)) <= (e.amount_ref_currency*0.5) ) 
+    && ( ((e.convention_periode*0.25) < monthDiff( new Date(e.start_date), new Date())) 
+      && (monthDiff( new Date(e.start_date), new Date()) <= (e.convention_periode*0.5)) )
+    ) 
+    
+    )
+    return res
+  }
+
+  const getConventionsHasDissBetween50and75pourcentAndDeadlinePassedBetween25and50pourcent = () => {
+    const res = Conventions.filter(e => ( ((e.amount_ref_currency*0.5) < getDisbursementsAmount(e.disbursements)) 
+    && ((getDisbursementsAmount(e.disbursements)) <= (e.amount_ref_currency*0.75) ) 
+    && ( ((e.convention_periode*0.25) < monthDiff( new Date(e.start_date), new Date())) 
+      && (monthDiff( new Date(e.start_date), new Date()) <= (e.convention_periode*0.5)) )
+    ) )
+    return res
+  }
+
+  const getConventionsHasDissBetween75and100pourcentAndDeadlinePassedBetween25and50pourcent = () => {
+    const res = Conventions.filter(e => ( ((e.amount_ref_currency*0.75) < getDisbursementsAmount(e.disbursements)) 
+    && ((getDisbursementsAmount(e.disbursements)) <= e.amount_ref_currency )
+    && ( ((e.convention_periode*0.25) < monthDiff( new Date(e.start_date), new Date())) 
+      && (monthDiff( new Date(e.start_date), new Date()) <= (e.convention_periode*0.5)) )
+    ) )
+    return res
+  }
+
+  const getConventionsHasDissLess25pourcentAndDeadlinePassedBetween50and75pourcent = () => {
+    const res = Conventions.filter(e =>  ( 
+      ((e.amount_ref_currency*0.25) >= (getDisbursementsAmount(e.disbursements)))
+      && ( ((e.convention_periode*0.5) < monthDiff( new Date(e.start_date), new Date())) 
+      && (monthDiff( new Date(e.start_date), new Date()) <= (e.convention_periode*0.75)) )
+      )
+    )
+    return res
+  }
+
+  const getConventionsHasDissBetween25and50pourcentAndDeadlinePassedBetween50and75pourcent = () => {
+    const res = Conventions.filter(e => ( (((e.amount_ref_currency*0.25) < getDisbursementsAmount(e.disbursements)) 
+    && ((getDisbursementsAmount(e.disbursements)) <= (e.amount_ref_currency*0.5) ))
+    && ( ((e.convention_periode*0.5) < monthDiff( new Date(e.start_date), new Date())) 
+    && (monthDiff( new Date(e.start_date), new Date()) <= (e.convention_periode*0.75)) )
+    ) 
+    
+    )
+    return res
+  }
+
+  const getConventionsHasDissBetween50and75pourcentAndDeadlinePassedBetween50and75pourcent = () => {
+    const res = Conventions.filter(e => ( ((e.amount_ref_currency*0.5) < getDisbursementsAmount(e.disbursements)) 
+    && ((getDisbursementsAmount(e.disbursements)) <= (e.amount_ref_currency*0.75) ) 
+    && ( ((e.convention_periode*0.25) < monthDiff( new Date(e.start_date), new Date())) 
+    && (monthDiff( new Date(e.start_date), new Date()) <= (e.convention_periode*0.5)) )
+    ) )
+    return res
+  }
+
+  const getConventionsHasDissBetween75and100pourcentAndDeadlinePassedBetween50and75pourcent = () => {
+    const res = Conventions.filter(e => ( ((e.amount_ref_currency*0.75) < getDisbursementsAmount(e.disbursements)) 
+    && ((getDisbursementsAmount(e.disbursements)) <= e.amount_ref_currency )
+    && ( ((e.convention_periode*0.25) < monthDiff( new Date(e.start_date), new Date())) 
+    && (monthDiff( new Date(e.start_date), new Date()) <= (e.convention_periode*0.5)) )
+    ) )
+    return res
+  }
+
+
+  const getConventionsHasDissLess25pourcentAndDeadlinePassedBetween75and100pourcent = () => {
+    const res = Conventions.filter(e =>  ( 
+      ((e.amount_ref_currency*0.25) >= (getDisbursementsAmount(e.disbursements)))
+      && ((e.convention_periode*0.75) < monthDiff( new Date(e.start_date), new Date()))
+      )
+    )
+    return res
+  }
+
+  const getConventionsHasDissBetween25and50pourcentAndDeadlinePassedBetween75and100pourcent = () => {
+    const res = Conventions.filter(e => ( ((e.amount_ref_currency*0.25) < getDisbursementsAmount(e.disbursements)) 
+    && ((getDisbursementsAmount(e.disbursements)) <= (e.amount_ref_currency*0.5) ) 
+    && ((e.convention_periode*0.75) < monthDiff( new Date(e.start_date), new Date()))
+    ) 
+    
+    )
+    return res
+  }
+
+  const getConventionsHasDissBetween50and75pourcentAndDeadlinePassedBetween75and100pourcent = () => {
+    const res = Conventions.filter(e => ( ((e.amount_ref_currency*0.5) < getDisbursementsAmount(e.disbursements)) 
+    && ((getDisbursementsAmount(e.disbursements)) <= (e.amount_ref_currency*0.75) ) 
+    && ((e.convention_periode*0.75) < monthDiff( new Date(e.start_date), new Date()))
+    ) )
+    return res
+  }
+
+  const getConventionsHasDissBetween75and100pourcentAndDeadlinePassedBetween75and100pourcent = () => {
+    const res = Conventions.filter(e => ( ((e.amount_ref_currency*0.75) < getDisbursementsAmount(e.disbursements)) 
+    && ((getDisbursementsAmount(e.disbursements)) <= e.amount_ref_currency )
+    && ((e.convention_periode*0.75) < monthDiff( new Date(e.start_date), new Date()))
+    ) )
+    return res
+  }
+
+
+  const options = {
     grid: {
       show: true,
       borderColor: "transparent",
@@ -175,11 +405,11 @@ const Dashboard = () => {
         horizontal: false,
         columnWidth: "42%",
         endingShape: "rounded",
-        borderRadius: 2,
+        borderRadius: 5,
       },
     },
 
-    colors: ["#fb9678", "#03c9d7"],
+    colors: ["#6ebb4b", "#079ff0", "#cc7c67", "#1a7795"],
     fill: {
       type: "solid",
       opacity: 1,
@@ -207,18 +437,10 @@ const Dashboard = () => {
     xaxis: {
       type: "category",
       categories: [
-        "ديسمبر",
-        "نوفمبر",
-        "أكتوبر",
-        "سبتمبر",
-        "أغسطس",
-        "يوليو",
-        "يونيو",
-        "مايو",
-        "أبريل",
-        "مارس",
-        "فبراير",
-        "يناير",
+        "Durée passée moins de 25%",
+        "Durée passée entre 25% et 50%",
+        "Durée passée entre 50% et 75%",
+        "Durée passée plus de 75%"
       ],
       labels: {
         style: {
@@ -229,8 +451,8 @@ const Dashboard = () => {
     yaxis: {
       show: true,
       min: 0,
-      max: all,
-      tickAmount: 5,
+      max: Conventions.length,
+      tickAmount: 3,
       labels: {
         style: {
           cssClass: "grey--text lighten-2--text fill-color",
@@ -247,36 +469,44 @@ const Dashboard = () => {
       theme: "dark",
     },
   };
-  const seriessalesoverview = [
+  const seriesdeadlinesdissburssements = [
     {
-      name: " لم يدفعوا  ",
-      data: paidsStatistics[1],
+      name: "Décaissement inferieur de 25%",
+      data: [
+        getConventionsHasDissLess25pourcentDeadlinePassedLessThan25pourcent().length,
+        getConventionsHasDissLess25pourcentAndDeadlinePassedBetween25and50pourcent().length,
+        getConventionsHasDissLess25pourcentAndDeadlinePassedBetween50and75pourcent().length,
+        getConventionsHasDissLess25pourcentAndDeadlinePassedBetween75and100pourcent().length
+      ],
     },
     {
-      name: " دفعوا  ",
-      data: paidsStatistics[0],
+      name: "Décaissement entre 25% et 50%",
+      data: [
+        getConventionsHasDissBetween25and50pourcentAndDeadlinePassedLessThan25pourcent().length,
+        getConventionsHasDissBetween25and50pourcentAndDeadlinePassedBetween25and50pourcent().length,
+        getConventionsHasDissBetween25and50pourcentAndDeadlinePassedBetween50and75pourcent().length,
+        getConventionsHasDissBetween25and50pourcentAndDeadlinePassedBetween75and100pourcent().length
+      ],
+    },
+    {
+      name: "Décaissement entre 50% et 75%",
+      data: [
+        getConventionsHasDissBetween50and75pourcentAndDeadlinePassedLessThan25pourcent().length,
+        getConventionsHasDissBetween50and75pourcentAndDeadlinePassedBetween25and50pourcent().length,
+        getConventionsHasDissBetween50and75pourcentAndDeadlinePassedBetween50and75pourcent().length,
+        getConventionsHasDissBetween50and75pourcentAndDeadlinePassedBetween75and100pourcent().length,
+      ],
+    },
+    {
+      name: "Décaissement superieur de 75%",
+      data: [
+        getConventionsHasDissBetween75and100pourcentAndDeadlinePassedLessThan25pourcent().length,
+        getConventionsHasDissBetween75and100pourcentAndDeadlinePassedBetween25and50pourcent().length,
+        getConventionsHasDissBetween75and100pourcentAndDeadlinePassedBetween50and75pourcent.length,
+        getConventionsHasDissBetween75and100pourcentAndDeadlinePassedBetween75and100pourcent().length
+      ],
     },
   ];
-
-  const handleRequestSort = (event, property) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
-    setOrderBy(property);
-  };
-
-  const getDisbursementsAmount = (disbursements) => {
-    var sum = disbursements.reduce((accumulator, e) => {
-      return accumulator + e.orderamount
-    },0);
-    return sum;
-  }
-
-  let pounds = Intl.NumberFormat( {
-    style: 'currency',
-    maximumSignificantDigits: 3,
-    minimumFractionDigits: 2
-  });
-
 
   const pieParams = { height: 200, margin: { right: 5 } };
   const palette = ['red', 'blue', 'green'];
@@ -316,31 +546,48 @@ const Dashboard = () => {
       </Typography>
 
       <BlogCard />
-    <BaseCard>
 
-    {selected &&
+      <BaseCard titleColor={"secondary"} title="EXECUTION GLOBAL">
+        {Conventions.length > 0 > 0 ?
+          <Chart
+            options={options}
+            series={seriesdeadlinesdissburssements}
+            type="bar"
+            height="295px"
+          />
+          :
+          <div style={{width:'100%', fontSize:'30px', display:'flex', justifyContent:'center'}}>
+            List de conventions vide
+          </div>
+        } 
+      </BaseCard>
+
+
+    <BaseCard titleColor={"secondary"} title={ selected ? selected.object : null}>
+
+    {/* {selected &&
       <Typography align="center" color={"secondary"} fontSize="22px" fontWeight={'600'} variant="h5" mb={1} >
         {selected.object}
       </Typography>
-    }
+    } */}
     {selected &&
       <div style={{width:'100%' , display:'flex' , flexDirection:'row', 
-      justifyContent:'space-between', paddingLeft: 5, marginBottom: 20 , 
+      justifyContent:'space-around', paddingLeft: 5, marginBottom: 20 , marginTop: 10,
       whiteSpace: "nowrap", overflowX: 'auto', overflowY: 'hidden' }} >
         <Chart
           type="pie"
           width={360}
           /* width={1322}
           height={550} */
-          series={[23,43, 50]}
+          series={[(selected.amount_ref_currency-getDisbursementsAmount(selected.disbursements)),(getDisbursementsAmount(selected.disbursements))]}
           options={{
             title:{text:"Décaissements"},
             noData:{text:"Empty Data"},
-            labels:['Décaissé', 'Non Décaissé', 'Available'],
+            labels:['Non décaissé', 'Décaissé'],
             fill: {
               type: "solid",
               opacity: 1,
-              colors: ['#6ebb4b', '#1a7795',  '#a52e36' , '#079ff0', '#cc7c67' , '#c8d789']
+              colors: ['#6ebb4b', '#cc7c67']
             },
             chart : {
               offsetX: -15,
@@ -370,68 +617,23 @@ const Dashboard = () => {
               lineCap: "butt",
               colors: ["transparent"],
             },
-            colors: ['#6ebb4b', '#1a7795',  '#a52e36' , '#079ff0', '#cc7c67' , '#c8d789']
+            colors: ['#6ebb4b', '#cc7c67']
           }}
         />
-        <Chart
-          type="pie"
-          width={360}
-          /* width={1322}
-          height={550} */
-          series={[23, 43, 50]}
-          options={{
-            title:{text:"Echeancies"},
-            noData:{text:"Empty Data"},
-            labels:['Décaissé', 'Non Décaissé', 'Available'],
-            fill: {
-              type: "solid",
-              opacity: 1,
-              colors: ['#6ebb4b', '#1a7795',  '#a52e36' , '#079ff0', '#cc7c67' , '#c8d789']
-            },
-            chart : {
-              offsetX: -15,
-              toolbar: {
-                show: false,
-              },
-              foreColor: "#adb0bb",
-              fontFamily: "'DM Sans',sans-serif",
-              sparkline: {
-                enabled: false,
-              },
-            },
-            yaxis: {
-              show: true,
-              min: 0,
-              max: all,
-              tickAmount: 5,
-              labels: {
-                style: {
-                  cssClass: "grey--text lighten-2--text fill-color",
-                },
-              },
-            },
-            stroke: {
-              show: true,
-              width: 5,
-              lineCap: "butt",
-              colors: ["transparent"],
-            },
-            colors: ['#6ebb4b', '#1a7795',  '#a52e36' , '#079ff0', '#cc7c67' , '#c8d789']
-          }}
-        />
+        
         <Chart
           type="pie"
           width={360}
           //height={550} 
-          series={[23, 43, 50]}
+          series={[(selected.amount_ref_currency-getCategoriesCommitmentsAmounts(selected.categories)),(getCategoriesCommitmentsAmounts(selected.categories))]}
           options={{
-            title:{text:"Catégories"},
+            title:{text:"Engagements"},
             noData:{text:"Empty Data"},
-            labels:['Dispatché', 'Non Dispatché', 'Available'],
+            labels:['Non Engagé','Engagé'],
             fill: {
               type: "solid",
               opacity: 1,
-              colors: ['#6ebb4b', '#1a7795',  '#a52e36' , '#079ff0', '#cc7c67' , '#c8d789']
+              colors: ['#6ebb4b', '#079ff0']
             },
             chart : {
               offsetX: -15,
@@ -461,7 +663,7 @@ const Dashboard = () => {
               lineCap: "butt",
               colors: ["transparent"],
             },
-            colors: ['#6ebb4b', '#1a7795',  '#a52e36' , '#079ff0', '#cc7c67' , '#c8d789']
+            colors: ['#6ebb4b', '#079ff0']
           }}
         />
       </div>
@@ -531,11 +733,9 @@ const Dashboard = () => {
                         </TableCell>
                         <TableCell align="left" style={{fontWeight:"bold"}} >{row.reference}</TableCell>
                         <TableCell align="left">{row.funder.label}</TableCell>
-                        <TableCell align="left"> <Box style={{display:"flex", flexDirection:"row"}} >  {pounds.format(parseFloat(row.amount).toFixed(2))} <Box style={{fontSize:'12px', fontWeight:"bold", marginInlineStart:"5px", paddingTop:"1.7px" }}>  {row.currency.label}</Box> </Box> </TableCell>
-                        <TableCell align="left"> <Box style={{display:"flex", flexDirection:"row"}} >{pounds.format(getDisbursementsAmount(row.disbursements))} <Box style={{fontSize:'12px', fontWeight:"bold", marginInlineStart:"5px" , paddingTop:"1.7px" }}>  {row.currency.label}</Box> </Box> </TableCell>
-                        <TableCell align="left"> <Box style={{display:"flex", flexDirection:"row"}} >{pounds.format(row.amount-getDisbursementsAmount(row.disbursements))} <Box style={{fontSize:'12px', fontWeight:"bold", marginInlineStart:"5px", paddingTop:"1.7px" }}>  {row.currency.label}</Box> </Box> </TableCell>
+                        <TableCell align="left"> <Box style={{display:"flex", flexDirection:"row"}} >  {pounds.format(parseFloat(row.amount_ref_currency).toFixed(2))} </Box> </TableCell>
                         <TableCell align="left">{formatDate(row.start_date)} </TableCell>
-                        <TableCell align="left">{formatDate(row.end_date)} </TableCell>
+                        <TableCell align="left">{row.convention_periode} mois </TableCell>
 
 
                       </TableRow>

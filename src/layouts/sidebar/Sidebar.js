@@ -23,6 +23,7 @@ import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import { useContext } from "react";
 import AuthContext from "../../context/AuthContext";
 import jwt_decode from "jwt-decode";
+import { GiShakingHands } from "react-icons/gi";
 
 const Sidebar = ({ isMobileSidebarOpen, onSidebarClose, isSidebarOpen }) => {
   const [open, setOpen] = React.useState(true);
@@ -76,9 +77,17 @@ const Sidebar = ({ isMobileSidebarOpen, onSidebarClose, isSidebarOpen }) => {
                 >
 
                   <ListItemIcon>
-                    {item.href == "/commitments" ?
+                    { (item.href == "/commitments" || item.href == "/conventions" ) ?
+                      item.href == "/commitments" ? 
                       <Diversity2Icon 
                         fontSize='medium'
+                        style={{
+                          color: `${location === item.href ? "white" : ""} `,
+                        }}                      
+                      />
+                      :
+                      <GiShakingHands
+                        fontSize='30px'
                         style={{
                           color: `${location === item.href ? "white" : ""} `,
                         }}                      

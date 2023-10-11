@@ -10,9 +10,10 @@ import { useContext } from 'react';
 
 export default function AddCommitment(){
   const router = useRouter()
-  const { id } = router.query
+  const { id, convention } = router.query
 
   const [commitment, setCommitment] = React.useState(null);
+  const [Convention, setConvention] = React.useState(null);
   const [openFailedToast, setOpenFailedToast] = React.useState(false);
   const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -20,18 +21,34 @@ export default function AddCommitment(){
   const { logoutUser } = useContext(AuthContext);
 
   useEffect(() => {
-    if(id){
+    if(id || convention){
       setLoading(true)
-      axios.get(`/commitments/${id}`).then(res => {
-          setCommitment(res.data)
+      if(id) {
+        axios.get(`/commitments/${id}`).then(res => {
+            setCommitment(res.data)
+        },
+        error => {
+          console.log(error)
+          if(error.response && error.response.status === 401)
+          logoutUser()
+        }
+        ).then(() => {
           setLoading(false)
-      },
-      error => {
-        console.log(error)
-        if(error.response && error.response.status === 401)
-        logoutUser()
+        })
       }
-      )
+      if(convention) {
+        axios.get(`/conventions/${convention}`).then(res => {
+            setConvention(res.data)
+        },
+        error => {
+          console.log(error)
+          if(error.response && error.response.status === 401)
+          logoutUser()
+        }
+        ).then(() => {
+        setLoading(false)
+        })
+      }
     }
   }, [])
 
@@ -94,6 +111,7 @@ export default function AddCommitment(){
           Commitment={commitment}
           showSuccessToast={showSuccessToast}
           showFailedToast={showFailedToast}
+          convention={Convention}
         />
       }
 

@@ -15,7 +15,7 @@ import AuthContext from "../context/AuthContext";
 
 
 const InvoiceForm = (props) => {
-  const {Invoice, push, update, showSuccessToast, showFailedToast, commitmentId} = props;
+  const {Invoice, push, update, showSuccessToast, showFailedToast, commitmentId, Commitments, convention} = props;
   const formatDate = (date) => {
     var d = new Date(date),
         month = '' + (d.getMonth() + 1),
@@ -63,16 +63,21 @@ const InvoiceForm = (props) => {
 
 
   React.useEffect(() => {
-    axios.get(`/commitments`).then(
-      res => {
-        setCommitments(res.data);
-      },  
-      error => {
-        console.log(error)
-        if(error.response && error.response.status === 401)
-        logoutUser()
-      }
-    ) 
+    if(convention){
+      setCommitments(Commitments);
+      console.log('convention selecteddddd ', Commitments);
+    }else{
+      axios.get(`/commitments`).then(
+        res => {
+          setCommitments(res.data);
+        },  
+        error => {
+          console.log(error)
+          if(error.response && error.response.status === 401)
+          logoutUser()
+        }
+      ) 
+    }
   }, [])
 
   const { values, setValues, errors, setErrors, handleInputChange, resetForm } = Form(formValues, true, validate);

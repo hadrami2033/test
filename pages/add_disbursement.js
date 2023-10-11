@@ -30,7 +30,7 @@ const todayStartOfTheDay = today.startOf('day'); */
 const DibursementForm = (props) => {
   const { conventionId, disbursement, push, update, showSuccessToast, showFailedToast, 
           availableAmount, currency, currenteState, availabeState, categories = [],
-          Invoices, Commitments} = props;
+          Invoices, Commitments, availableAmountByMnyRef} = props;
 
   const defaultValues = !disbursement ? {
     reference: "",
@@ -71,6 +71,25 @@ const DibursementForm = (props) => {
     minimumFractionDigits: 2
   });
 
+
+  const getDisbursementAmount = () => {
+    const res = disbursement ? disbursement.orderamount : 0
+    return res;
+  }
+
+  const getDisbursementAmountByMnyRef = () => {
+    const res = (disbursement && disbursement.amount_by_ref_currency) ? disbursement.amount_by_ref_currency : 0
+    return res;
+  }
+
+  const amountByMnyRefIsValid = (amount_by_ref_currency) => {
+    console.log("amount_by_ref_currency  ", amount_by_ref_currency);
+    const res = (amount_by_ref_currency === null) || (amount_by_ref_currency === "") || 
+    (parseFloat(availableAmountByMnyRef) < parseFloat(parseFloat(amount_by_ref_currency)-parseFloat(getDisbursementAmountByMnyRef())))
+    console.log("amountByMnyRefIsValid res ", res);
+    return res;
+  }
+
   const validate = (fieldValues = values) => {
     let temp = { ...errors };
     if ("reference" in fieldValues)
@@ -82,7 +101,7 @@ const DibursementForm = (props) => {
     if ("date" in fieldValues)
       temp.date = fieldValues.date ? "" : "Date requise";
     if ("orderamount" in fieldValues)
-      temp.orderamount = ( fieldValues.orderamount && parseFloat(availableAmount) >= parseFloat(fieldValues.orderamount) ) ? "" : `Le montant requis et ne déppase pas ${pounds.format(availableAmount)} ${currency}`;
+      temp.orderamount = ( fieldValues.orderamount && parseFloat(availableAmount) >= (parseFloat(fieldValues.orderamount)-parseFloat(getDisbursementAmount()) ) ) ? "" : `Le montant requis et ne déppase pas ${pounds.format(availableAmount)} ${currency}`;
     if ("commitment_id" in fieldValues)
       temp.commitment_id = !(fieldValues.commitment_id == null && getType(fieldValues.type_id) === getTypeByCode(1))   ? "" : "Un engagement requis pour un paiement direct";
     if ("categorie_id" in fieldValues)
@@ -92,10 +111,12 @@ const DibursementForm = (props) => {
    if ("currency_id" in fieldValues)
       temp.currency_id = !(fieldValues.currency_id == null) ? "" : "Dévise de décaissement requis";
     if ("disbursementamount" in fieldValues)
-      temp.disbursementamount = !( fieldValues.disbursementamount == null && getStatus(fieldValues.status_id) === getStatusByCode(3) && disbursement ) ? "" : "Le montant décaissé requis d'un décaissement reçu";
+      temp.disbursementamount = !( (fieldValues.disbursementamount == null || fieldValues.disbursementamount == "") && getStatus(fieldValues.status_id) === getStatusByCode(3) && disbursement ) ? "" : "Le montant décaissé requis d'un décaissement reçu";
     if ("amount_by_ref_currency" in fieldValues)
-      temp.amount_by_ref_currency = !( fieldValues.disbursementamount == null && getStatus(fieldValues.status_id) === getStatusByCode(3) && disbursement ) ? "" : "Le montant en monnaie de référence requis d'un décaissement reçu";
-          
+      temp.amount_by_ref_currency = //!( fieldValues.amount_by_ref_currency == null && getStatus(fieldValues.status_id) === getStatusByCode(3) && disbursement && ( parseFloat(availableAmountByMnyRef) < (parseFloat(fieldValues.amount_by_ref_currency)-parseFloat(getDisbursementAmountByMnyRef()) )))
+       ((getStatus(fieldValues.status_id) === getStatusByCode(3)) && amountByMnyRefIsValid(fieldValues.amount_by_ref_currency))
+       ? `Le montant en monnaie de référence requis d'un décaissement reçu, et ne déppase pas ${pounds.format(availableAmountByMnyRef)}`
+      : "";
       setErrors({
       ...temp,
     });
@@ -420,7 +441,7 @@ const DibursementForm = (props) => {
               label="Montant en monnaie de référence "
               value={values.amount_by_ref_currency}
               onChange={handleInputChange}
-              error={errors.disbursementamount}
+              error={errors.amount_by_ref_currency}
             />
             }
 

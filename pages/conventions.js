@@ -65,10 +65,10 @@ const headCells = [
     label: 'Date debut',
   },
   {
-    id: 'end_date',
+    id: 'convention_periode',
     numeric: false,
     disablePadding: false,
-    label: 'Date fin',
+    label: 'Periode',
   }/* ,
   {
     id: 'end_date_grace_period',
@@ -146,7 +146,8 @@ export default function EnhancedTable() {
               if(error.response && error.response.status === 401)
               logoutUser()
             }
-          ).then(() => {
+          )
+          .then(() => {
             setLoading(false)
           })
        //}
@@ -443,7 +444,7 @@ export default function EnhancedTable() {
                         <TableCell align="left"> <Box style={{display:"flex", flexDirection:"row"}} >{pounds.format(getDisbursementsAmount(row.disbursements))} <Box style={{fontSize:'12px', fontWeight:"bold", marginInlineStart:"5px" , paddingTop:"1.7px" }}>  {row.currency.label}</Box> </Box> </TableCell>
                         <TableCell align="left"> <Box style={{display:"flex", flexDirection:"row"}} >{pounds.format(row.amount-getDisbursementsAmount(row.disbursements))} <Box style={{fontSize:'12px', fontWeight:"bold", marginInlineStart:"5px", paddingTop:"1.7px" }}>  {row.currency.label}</Box> </Box> </TableCell>
                         <TableCell align="left">{formatDate(row.start_date)} </TableCell>
-                        <TableCell align="left">{formatDate(row.end_date)} </TableCell>
+                        <TableCell align="left">{row.convention_periode} mois </TableCell>
 
 
                       </TableRow>

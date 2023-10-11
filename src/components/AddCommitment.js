@@ -16,7 +16,7 @@ import AuthContext from "../context/AuthContext";
 
 
 const CommitmentForm = (props) => {
-  const {Commitment, showSuccessToast, showFailedToast} = props;
+  const {Commitment, showSuccessToast, showFailedToast, convention} = props;
 
   const formatDate = (date) => {
     var d = new Date(date),
@@ -91,6 +91,9 @@ const CommitmentForm = (props) => {
 
 
   React.useEffect(() => {
+    if(convention){
+      setCategories(convention.categories)
+    }
     axios.get(`/contractors`).then(
       res => {
         console.log(res.data);
@@ -208,15 +211,17 @@ const CommitmentForm = (props) => {
           </Stack>
           {!Commitment &&
           <Stack style={styles.stack} spacing={2} direction="row">
+            {!convention &&
             <Controls.Select
               style={{width:'50%'}}
               label="Convention"
               onChange={conventionChange}
               options={conventions}
             />
+            }
             <Controls.Select
               name="categorie"
-              style={{width:'50%'}}
+              style={convention ? {width:'100%'} : {width:'50%'}}
               label="Catégorie"
               value={values.categorie}
               onChange={handleInputChange}

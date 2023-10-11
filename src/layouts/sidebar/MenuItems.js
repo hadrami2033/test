@@ -14,7 +14,7 @@ const Menuitems = [
     icon: "users",
     href: "/users",
   },
-  {
+ /*  {
     title: "Engagements",
     icon: "",
     href: "/commitments",
@@ -23,7 +23,7 @@ const Menuitems = [
     title: "Factures",
     icon: "file-text",
     href: "/invoices",
-  },
+  }, */
   {
     title: "Paramétrage",
     icon: "settings",
