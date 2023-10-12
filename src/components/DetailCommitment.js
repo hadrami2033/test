@@ -108,7 +108,7 @@ function a11yProps(index) {
   }
 
 const DetailCommitment = (props) => {
-  const {id} = props;
+  const {id, convention} = props;
   const axios = useAxios();
   const [commitment, setCommitment] = React.useState({});
   const [contractor, setContractor] = useState({})
@@ -121,6 +121,8 @@ const DetailCommitment = (props) => {
   const [openAmount, setOpenAmount] = React.useState(false);
   const [openDelete, setOpenDelete] = React.useState(false);
   const [line, setLine] = React.useState(null);
+  const [availableCommitsAmount, setAvailableCommitsAmount] = React.useState(0);
+  const [availableCommitsAmount1, setAvailableCommitsAmount1] = React.useState(0);
   const router = useRouter()
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -128,6 +130,35 @@ const DetailCommitment = (props) => {
 
   const { logoutUser } = useContext(AuthContext);
 
+  const getCategoriesCommitmentsAmounts = (categories) => {
+    let amount = 0;
+    categories ? categories.reduce((commitmentsAmount, c) => {
+        c.commitments ? c.commitments.reduce((accumulator, e) => {
+            e.commitmentamounts ? e.commitmentamounts.reduce((accumulator, el) => {
+              //console.log(el.amount_by_ref_currency);
+              amount = amount+el.amount_by_ref_currency;
+              return el; 
+            },0) : 0;
+        },[]) : [];
+    },[]) : []; 
+    //console.log("categories comm amount", amount);
+    return amount;
+  }
+
+  const getCategoriesCommitmentsAmounts1 = (categories) => {
+    let amount = 0;
+    categories ? categories.reduce((commitmentsAmount, c) => {
+        c.commitments ? c.commitments.reduce((accumulator, e) => {
+            e.commitmentamounts ? e.commitmentamounts.reduce((accumulator, el) => {
+              //console.log(el.amount_by_ref_currency);
+              amount = amount+el.amount;
+              return el; 
+            },0) : 0;
+        },[]) : [];
+    },[]) : []; 
+    //console.log("categories comm amount", amount);
+    return amount;
+  }
 
   useEffect(() => {
     if(id){ 
@@ -143,6 +174,10 @@ const DetailCommitment = (props) => {
         logoutUser()
       }
       )
+      if(convention){
+        setAvailableCommitsAmount((convention.amount_ref_currency - getCategoriesCommitmentsAmounts(convention.categories)))
+        setAvailableCommitsAmount1((convention.amount - getCategoriesCommitmentsAmounts1(convention.categories)))
+      }
     }else{
       router.push("/commitments")
     }
@@ -155,8 +190,19 @@ const DetailCommitment = (props) => {
       setContractor(res.data.contractor)
       setInvoices(res.data.invoices)
       setCommitmentamounts(res.data.commitmentamounts)
-    } )
-  }
+    } ).then(() => {
+      if(convention){
+        axios.get(`/conventions/${convention.id}`).then(res => {
+            setAvailableCommitsAmount((res.data.amount_ref_currency - getCategoriesCommitmentsAmounts(res.data.categories)))
+            setAvailableCommitsAmount1((res.data.amount - getCategoriesCommitmentsAmounts1(res.data.categories)))
+          },
+          error => {
+            console.log(error)
+          }
+        )
+      }
+      })
+    }
 
   const update = (e) =>{
     axios.get(`/commitments/${id}`).then(res => {
@@ -165,6 +211,19 @@ const DetailCommitment = (props) => {
       setInvoices(res.data.invoices)
       setCommitmentamounts(res.data.commitmentamounts)
     } )
+    .then(() => {
+      if(convention){
+        axios.get(`/conventions/${convention.id}`).then(res => {
+          setAvailableCommitsAmount((res.data.amount_ref_currency - getCategoriesCommitmentsAmounts(res.data.categories)))
+          setAvailableCommitsAmount1((res.data.amount - getCategoriesCommitmentsAmounts1(res.data.categories)))
+        },
+        error => {
+          console.log(error)
+        }
+        )
+      }
+
+    })
   }
 
   const formatDate = (date) => {
@@ -340,6 +399,8 @@ const DetailCommitment = (props) => {
             showSuccessToast={showSuccessToast}
             showFailedToast={showFailedToast}
             commitmentId = {commitment.id}
+            availableAmount = {availableCommitsAmount}
+            availableAmount1 = {availableCommitsAmount1}
           />
         </DialogContent>
       </Dialog>

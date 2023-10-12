@@ -140,6 +140,7 @@ const Dashboard = () => {
       country: "sogem",
       description: "sogem"
     }
+    setLoading(true)
     axios.get(`/conventions`).then(
       res => {
         console.log(res.data);
@@ -169,6 +170,8 @@ const Dashboard = () => {
           console.log(error)
         }
       )
+    }).then(() => {
+      setLoading(false)
     })
   }, [])
 
@@ -248,10 +251,10 @@ const Dashboard = () => {
   }
 
   const getConventionsHasDissBetween25and50pourcentAndDeadlinePassedLessThan25pourcent = () => {
-    const res = Conventions.filter(e => ( ( ((e.amount_ref_currency*0.25) < getDisbursementsAmount(e.disbursements)) 
-    && ((getDisbursementsAmount(e.disbursements)) <= (e.amount_ref_currency*0.5) ) ) 
-    && ((e.convention_periode*0.25) >= (monthDiff( new Date(e.start_date), new Date())))
-    ) 
+    const res = Conventions.filter(e => ( ((e.amount_ref_currency*0.25) < getDisbursementsAmount(e.disbursements)) 
+      && ((getDisbursementsAmount(e.disbursements)) <= (e.amount_ref_currency*0.5) ) 
+      && ((e.convention_periode*0.25) >= (monthDiff( new Date(e.start_date), new Date())))
+      ) 
     
     )
     return res
@@ -337,8 +340,8 @@ const Dashboard = () => {
   const getConventionsHasDissBetween50and75pourcentAndDeadlinePassedBetween50and75pourcent = () => {
     const res = Conventions.filter(e => ( ((e.amount_ref_currency*0.5) < getDisbursementsAmount(e.disbursements)) 
     && ((getDisbursementsAmount(e.disbursements)) <= (e.amount_ref_currency*0.75) ) 
-    && ( ((e.convention_periode*0.25) < monthDiff( new Date(e.start_date), new Date())) 
-    && (monthDiff( new Date(e.start_date), new Date()) <= (e.convention_periode*0.5)) )
+    && ( ((e.convention_periode*0.5) < monthDiff( new Date(e.start_date), new Date())) 
+    && (monthDiff( new Date(e.start_date), new Date()) <= (e.convention_periode*0.75)) )
     ) )
     return res
   }
@@ -346,8 +349,8 @@ const Dashboard = () => {
   const getConventionsHasDissBetween75and100pourcentAndDeadlinePassedBetween50and75pourcent = () => {
     const res = Conventions.filter(e => ( ((e.amount_ref_currency*0.75) < getDisbursementsAmount(e.disbursements)) 
     && ((getDisbursementsAmount(e.disbursements)) <= e.amount_ref_currency )
-    && ( ((e.convention_periode*0.25) < monthDiff( new Date(e.start_date), new Date())) 
-    && (monthDiff( new Date(e.start_date), new Date()) <= (e.convention_periode*0.5)) )
+    && ( ((e.convention_periode*0.5) < monthDiff( new Date(e.start_date), new Date())) 
+    && (monthDiff( new Date(e.start_date), new Date()) <= (e.convention_periode*0.75)) )
     ) )
     return res
   }
@@ -556,8 +559,8 @@ const Dashboard = () => {
             height="295px"
           />
           :
-          <div style={{width:'100%', fontSize:'30px', display:'flex', justifyContent:'center'}}>
-            List de conventions vide
+          <div style={{width:'100%', fontSize:'20px', display:'flex', justifyContent:'center'}}>
+            List de conventons est vide
           </div>
         } 
       </BaseCard>

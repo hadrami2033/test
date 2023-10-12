@@ -14,7 +14,7 @@ import AuthContext from "../src/context/AuthContext";
 
 
 const AmountForm = (props) => {
-  const {push, update, showSuccessToast, showFailedToast, commitmentId} = props;
+  const {push, update, showSuccessToast, showFailedToast, commitmentId, availableAmount1, availableAmount} = props;
 
   const defaultValues = {
     currency_id: null,
@@ -39,9 +39,9 @@ const AmountForm = (props) => {
     if ("spendingtype_id" in fieldValues)
       temp.spendingtype_id = fieldValues.spendingtype_id ? "" : "Type de dépense requis";
     if ("amount" in fieldValues)
-      temp.amount = fieldValues.amount ? "" : "Le montant requis";
+      temp.amount = ( fieldValues.amount && fieldValues.amount <= availableAmount1 ) ? "" : `Le montant requis et ne dépasse pas ${availableAmount1}`;
     if ("amount_by_ref_currency" in fieldValues)
-      temp.amount_by_ref_currency = fieldValues.amount_by_ref_currency ? "" : "Le montant en monnaie de référence est requis";
+      temp.amount_by_ref_currency = ( fieldValues.amount_by_ref_currency && fieldValues.amount_by_ref_currency <= availableAmount ) ? "" : `Le montant en monnaie de référence est requis et ne dépasse pas ${availableAmount} `;
     setErrors({
       ...temp,
     });
@@ -53,6 +53,8 @@ const AmountForm = (props) => {
   const { logoutUser } = useContext(AuthContext);
 
   React.useEffect(() => {
+    console.log("availableAmount1 ", availableAmount1);
+    console.log("availableAmount ", availableAmount);
     axios.get(`/commitments`).then(
       res => {
         setCommitments(res.data);
