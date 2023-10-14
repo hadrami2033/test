@@ -392,7 +392,7 @@ const Dashboard = () => {
   }
 
 
-  const options = {
+  const options2 = {
     grid: {
       show: true,
       borderColor: "transparent",
@@ -472,6 +472,76 @@ const Dashboard = () => {
       theme: "dark",
     },
   };
+
+
+  const options = {
+    chart: {
+      type: 'bar',
+      height: 350,
+      stacked: true,
+      toolbar: {
+        show: true
+      },
+      zoom: {
+        enabled: true
+      }
+    },
+    colors: ["#6ebb4b", "#079ff0", "#cc7c67", "#1a7795"],
+    responsive: [{
+      breakpoint: 480,
+      options: {
+        legend: {
+          position: 'bottom',
+          offsetX: -10,
+          offsetY: 0
+        }
+      }
+    }],
+    plotOptions: {
+      bar: {
+        horizontal: false,
+        borderRadius: 10,
+        dataLabels: {
+          total: {
+            enabled: true,
+            style: {
+              fontSize: '13px',
+              fontWeight: 900
+            }
+          }
+        }
+      },
+    },
+    xaxis: {
+      //type: 'datetime',
+      categories: [
+        "Durée passée moins de 25%",
+        "Durée passée entre 25% et 50%",
+        "Durée passée entre 50% et 75%",
+        "Durée passée plus de 75%"
+      ],
+    },
+    yaxis: {
+      show: true,
+      min: 0,
+      max: Conventions.length,
+      tickAmount: 3,
+      labels: {
+        style: {
+          cssClass: "grey--text lighten-2--text fill-color",
+        },
+      },
+    },
+    legend: {
+      position: 'right',
+      offsetY: 40
+    },
+    fill: {
+      opacity: 1
+    }
+  }
+
+
   const seriesdeadlinesdissburssements = [
     {
       name: "Décaissement inferieur de 25%",
