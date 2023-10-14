@@ -61,6 +61,7 @@ const ConventionForm = (props) => {
     amount: null,
     amount_ref_currency: null,
     start_date: formatDate(valueDateRange[0]),
+    end_date: formatDate(valueDateRange[0]),
     start_date_refund: formatDate(new Date()),
     end_date_refund: formatDate(new Date()),
     end_date_grace_period: formatDate(new Date()),
@@ -120,8 +121,8 @@ const ConventionForm = (props) => {
       temp.costs = (fieldValues.retrocede === false || ( fieldValues.costs && fieldValues.costs.length <= 2 )) ? "" : "La commission est requise d'une convention rétrocédée et doit être deux chiffres en max";
     if ("start_date" in fieldValues)
       temp.start_date = fieldValues.start_date ? "" : "Date début requise";
-    /* if ("end_date" in fieldValues)
-      temp.end_date = fieldValues.end_date ? "" : "Date fin requise"; */
+    if ("end_date" in fieldValues)
+      temp.end_date = fieldValues.end_date ? "" : "Date fin requise";
     if ("start_date_refund" in fieldValues)
       temp.start_date_refund = fieldValues.start_date_refund ? "" : "Date début de rembourssement requise";
     if ("end_date_refund" in fieldValues)
@@ -129,7 +130,7 @@ const ConventionForm = (props) => {
    /*  if ("end_date_grace_period" in fieldValues)
       temp.end_date_grace_period = fieldValues.end_date_grace_period && 
       compareDates(new Date(fieldValues.end_date_grace_period) , new Date(values.start_date)) ? "" : "Date fin de la grace période doit etre supérieur a la date début";
-     */
+    */
     if ("interest_rate" in fieldValues)
       temp.interest_rate = ( fieldValues.interest_rate && fieldValues.interest_rate.length <= 2 ) ? "" : "Taux d'intéret est requis et doit être deux chiffres en max";
     if ("object" in fieldValues)
@@ -415,7 +416,7 @@ const ConventionForm = (props) => {
 
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.DatePiccker
-              style={{width:'33.33%'}}
+              style={{width:'50%'}}
               id="start_date"
               name="start_date"
               label="Date début"
@@ -424,7 +425,19 @@ const ConventionForm = (props) => {
               error={errors.start_date}
             />
             <Controls.DatePiccker
-              style={{width:'33.33%'}}
+              style={{width:'50%'}}
+              id="end_date"
+              name="end_date"
+              label="Date d'entrée envigueur"
+              value={formatDate(values.end_date)}
+              onChange={handleInputChange}
+              error={errors.end_date}
+            />
+          </Stack>
+
+          <Stack style={styles.stack} spacing={2} direction="row">
+            <Controls.DatePiccker
+              style={{width:'50%'}}
               id="start_date_refund-input"
               name="start_date_refund"
               label="Date début de remboursement"
@@ -433,7 +446,7 @@ const ConventionForm = (props) => {
               error={errors.start_date_refund}
             />
             <Controls.DatePiccker
-              style={{width:'33.33%'}}
+              style={{width:'50%'}}
               id="end_date_refund-input"
               name="end_date_refund"
               label="Date fin de remboursement"

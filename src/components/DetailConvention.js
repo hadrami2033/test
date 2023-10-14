@@ -580,7 +580,7 @@ const DetailConvention = (props) => {
     //setDetail(true);
     router.push({
       pathname: '/commitment_detail',
-      query: { id: selected.id }
+      query: { id: selected.id, convention: convention.id }
     })
   }
 
