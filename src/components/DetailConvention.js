@@ -86,10 +86,16 @@ const headCellsCategories = [
 
 const headCellsDeadlines = [
     {
-        id: 'label',
+      id: 'date',
+      numeric: false,
+      disablePadding: true,
+      label: 'Date',
+    },
+    {
+        id: 'reference',
         numeric: false,
         disablePadding: true,
-        label: 'Label',
+        label: 'Référence',
       },
     {
       id: 'amount',
@@ -103,6 +109,12 @@ const headCellsDeadlines = [
       numeric: false,
       disablePadding: true,
       label: 'Order',
+    },
+    {
+      id: 'state',
+      numeric: false,
+      disablePadding: true,
+      label: 'Etat',
     },
     {
         id: 'action',
@@ -268,6 +280,8 @@ const DetailConvention = (props) => {
   const [deleted, setDelete] = React.useState(false);
   const [commToDelete, setCommToDelete] = React.useState(null);
   const [invToDelete, setInvToDelete] = React.useState(null);
+  const [openDeleteDeadline, setOpenDeleteDeadline] = React.useState(null);
+  const [deadlineToDelete, setDeadlineToDelete] = React.useState(null);
 
   const axios = useAxios();
   const handleChange = (event, newValue) => {
@@ -362,6 +376,20 @@ const DetailConvention = (props) => {
   const getDisbursementsAmount = (disbursements) => {
     var sum = disbursements ? disbursements.reduce((accumulator, e) => {
       return accumulator + e.orderamount
+    },0) : 0;
+    return sum;
+  }
+
+  const getDeadlinesAmount = (deadlines) => {
+    var sum = deadlines ? deadlines.reduce((accumulator, e) => {
+      return accumulator + e.amount
+    },0) : 0;
+    return sum;
+  }
+
+  const getCategoriesAmount = (deadlines) => {
+    var sum = deadlines ? deadlines.reduce((accumulator, e) => {
+      return accumulator + e.amount
     },0) : 0;
     return sum;
   }
@@ -563,10 +591,7 @@ const DetailConvention = (props) => {
         setOpenDeadlineForm(true)
     }
 
-    const detailDeadline = (d) =>{
-        setDeadlineSelected(d)
-        setOpenDetailDeadline(true)
-    }
+
 
   const getStatusByCode = (code) =>{
     if(code){
@@ -596,6 +621,13 @@ const DetailConvention = (props) => {
     router.push({ 
       pathname: '/add_commitment',
       query: { convention: convention.id }
+    })
+  }
+
+  const detailDeadline = (d) => {
+    router.push({ 
+      pathname: '/deadline_detail',
+      query: { id: d.id, currency: convention.currency.label }
     })
   }
 
@@ -666,7 +698,6 @@ const DetailConvention = (props) => {
       </Draggable>
     );
   } 
-
   const handleCloseModalDeleteComm = () =>{
     setOpenDeleteComm(false)
   }
@@ -697,6 +728,58 @@ const DetailConvention = (props) => {
       pathname: '/invoice_detail',
       query: {id: selected.id}
     })
+  }
+
+  const deadlineDatePassed = (d1, d2) => {
+    return formatDate(d1)> formatDate(d2);
+  }
+
+  const deadlineCummulePayments = (deadline) => {
+    var sum = deadline.deadlinespayments ? deadline.deadlinespayments.reduce((accumulator, e) => {
+      return accumulator + e.amount
+    },0) : 0;
+    return sum;
+  }
+
+  const deadlineState = (deadline) => {
+    let now = new Date().toDateString()
+    if(deadlineCummulePayments(deadline) >= deadline.amount)
+      return 1;
+    else if(deadlineDatePassed(now, deadline.date))
+      return 3;
+    else return 2;
+  }
+
+  const handleOpenModalDeleteDeadline = () =>{
+    setOpenDeleteDeadline(true)
+  }
+
+  const handleCloseDeleteDeadline = () =>{
+    setOpenDeleteDeadline(false)
+  }
+
+  const deleteDeadline = (row) => {
+    setDeadlineToDelete(row)
+    handleOpenModalDeleteDeadline()
+  }
+
+  const confirmDeleteDeadline = () => {
+    if(deadlineToDelete !== null){
+      axios.delete(`/deadlines/${deadlineToDelete.id}`).then(
+        res => {
+          console.log(res);
+          const index = deadlines.indexOf(deadlineToDelete);
+          deadlines.splice(index, 1);
+          setDeadlineToDelete(null)
+          handleCloseDeleteDeadline()
+          showSuccessToast()
+        },
+        error => {
+          console.log(error)
+          showFailedToast()
+        }
+      )      
+    }
   }
 
   return (
@@ -735,6 +818,29 @@ const DetailConvention = (props) => {
             Annuler
           </Button>
           <Button style={{fontSize:"24px",fontWeight:"bold"}} onClick={removeCommitment}>Supprimer</Button>
+        </DialogActions>
+      </Dialog>
+
+
+      <Dialog 
+        open={openDeleteDeadline}
+        onClose={handleCloseDeleteDeadline}
+        PaperComponent={PaperComponent}
+        aria-labelledby="draggable-dialog-title"
+      >
+        <DialogTitle style={{ cursor: 'move', display:"flex" ,justifyContent:"end" , fontSize:"24px",fontWeight:"bold" }} id="draggable-dialog-title">
+          Suppression
+        </DialogTitle>
+        <DialogContent style={{width:300,display:"flex" ,justifyContent:"center" }}>
+          <DialogContentText>
+            Confirmer l'oppération
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button style={{fontSize:"24px",fontWeight:"bold"}} autoFocus onClick={handleCloseDeleteDeadline}>
+            Annuler
+          </Button>
+          <Button style={{fontSize:"24px",fontWeight:"bold"}} onClick={confirmDeleteDeadline}>Supprimer</Button>
         </DialogActions>
       </Dialog>
 
@@ -809,13 +915,13 @@ const DetailConvention = (props) => {
                     </IconButton>
                 </div>
                 <CategorieForm
-                    conventionId = {convention.id}
-                    Categorie={categorieSelected} 
-                    push={push} 
-                    update={update}
-                    showSuccessToast={showSuccessToast}
-                    showFailedToast={showFailedToast}
-                    availableAmount={(convention.amount-getDisbursementsAmount(convention.disbursements))}
+                  conventionId = {convention.id}
+                  Categorie={categorieSelected} 
+                  push={push} 
+                  update={update}
+                  showSuccessToast={showSuccessToast}
+                  showFailedToast={showFailedToast}
+                  availableAmount={(convention.amount-getCategoriesAmount(categories))}
                 /> 
                 </DialogContent>
             </Dialog>
@@ -836,7 +942,7 @@ const DetailConvention = (props) => {
                     update={update}
                     showSuccessToast={showSuccessToast}
                     showFailedToast={showFailedToast}
-                    availableAmount={(convention.amount-getDisbursementsAmount(convention.disbursements))}
+                    availableAmount={(convention.amount-getDeadlinesAmount(deadlines))}
                 /> 
                 </DialogContent>
             </Dialog>
@@ -885,14 +991,13 @@ const DetailConvention = (props) => {
                     categoriecommitmentsamounts={categorieSelected ? getCategorieCommitmentsAmounts(categorieSelected.commitments) : []} 
                     categoriecommitmentsinvoices={categorieSelected ? getCategorieCommitmentsInvoices(categorieSelected.commitments) : []} 
                     currency={currency.label}
-
                 /> 
                 </DialogContent>
             </Dialog>
             }
 
 
-            {convention &&
+{/*             {convention &&
             <Dialog 
                 fullWidth={true} 
                 maxWidth={'lg'} 
@@ -912,7 +1017,7 @@ const DetailConvention = (props) => {
                 /> 
                 </DialogContent>
             </Dialog>
-            }
+            } */}
 
             {convention &&
             <Grid container spacing={2} marginLeft={'15px'}>
@@ -973,7 +1078,7 @@ const DetailConvention = (props) => {
                                 fontStyle:'initial'
                                 }}
                             >
-                            Periode de la convention : {convention.convention_periode}
+                            Periode de la convention : {convention.convention_periode} ans
                             </Typography>
                         </Grid>
                         <Grid item xs={4} sx={{color:"#837B7B", fontWeight: "bold"}} >
@@ -1470,10 +1575,10 @@ const DetailConvention = (props) => {
                         size={'medium'}
                         >
                         <EnhancedTableHead
-                            rowCount={deadlines.length}
-                            headCells={headCellsDeadlines}
-                            headerBG="#1A7795"
-                            txtColor="#DCDCDC"
+                          rowCount={deadlines.length}
+                          headCells={headCellsDeadlines}
+                          headerBG="#1A7795"
+                          txtColor="#DCDCDC"
                         />
                         <TableBody>
                             {deadlines
@@ -1486,10 +1591,39 @@ const DetailConvention = (props) => {
                                 >
                                     <TableCell align="left"></TableCell>
 
-                                    <TableCell align="left">{row.label}</TableCell>
+                                    <TableCell align="left">{formatDate(row.date)}</TableCell>
+                                    <TableCell align="left">{row.reference}</TableCell>
                                     <TableCell align="left">{pounds.format(row.amount)} {currency.label}</TableCell>
                                     <TableCell align="left">{row.order} </TableCell>
                                     <TableCell align="left">
+                                       {deadlineState(row) === 1 &&
+                                         <Typography
+                                           color="#1A7795"
+                                         >
+                                           Payée
+                                         </Typography>
+                                       }
+                                       {deadlineState(row) === 2 &&
+                                         <Typography
+                                           color="#837B7B"
+                                         >
+                                           Non payée
+                                         </Typography>
+                                       }
+                                       {deadlineState(row) === 3 &&
+                                         <Typography
+                                           color="#e46a76"
+                                         >
+                                           Date de paiement dépassée
+                                         </Typography>
+                                       }
+                                    </TableCell>
+                                    <TableCell align="left">
+                                        <Tooltip onClick={() => deleteDeadline(row)} title="Supprimer">
+                                            <IconButton>
+                                                <Delete color='danger' fontSize='medium' />
+                                            </IconButton>
+                                        </Tooltip>
                                         <Tooltip onClick={() => editDeadline(row)} title="Modifier">
                                             <IconButton>
                                                 <CreateOutlined fontSize='medium' />
@@ -1508,9 +1642,9 @@ const DetailConvention = (props) => {
                     </Table>
                     :
                     <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "center"}}>
-                    <Box style={{fontSize: '16px'}}>
-                        Liste vide
-                    </Box>
+                      <Box style={{fontSize: '16px'}}>
+                          Liste vide
+                      </Box>
                     </div>
                     }
                     </CustomTabPanel>

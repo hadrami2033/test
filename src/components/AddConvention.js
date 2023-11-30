@@ -483,7 +483,7 @@ const ConventionForm = (props) => {
               id="periode-input"
               name="convention_periode"
               type='number'
-              label="Période de la convention (en mois)"
+              label="Période de la convention (en année)"
               value={values.convention_periode}
               onChange={handleInputChange}
               error={errors.convention_periode}

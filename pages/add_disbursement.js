@@ -339,6 +339,13 @@ const DibursementForm = (props) => {
     handleInputChange(e)
   }
 
+  const typeChange = e =>{
+    values['categorie_id'] = null;
+    values['commitment_id'] = null;
+    values['invoice_id'] = null;
+    handleInputChange(e);
+  }
+
   const commitmentChange = e =>{
     let v = e.target.value;
     let selected = commitments.filter(e => e.id === v );
@@ -369,7 +376,7 @@ const DibursementForm = (props) => {
                 name="type_id"
                 label="Type de décaissement"
                 value={values.type_id}
-                onChange={handleInputChange}
+                onChange={typeChange}
                 options={disbursementTypes}
                 error={errors.type_id}
               />

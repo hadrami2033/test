@@ -11,8 +11,8 @@ import Controls from "../src/components/controls/Controls";
 import useAxios from "../src/utils/useAxios";
 
 
-const DeadlineForm = (props) => {
-  const {conventionId, deadline, push, update, showSuccessToast, showFailedToast, availableAmount} = props;
+const PaymentForm = (props) => {
+  const {deadlineId, push, showSuccessToast, showFailedToast, availableAmount, payment} = props;
   const formatDate = (date) => {
     var d = new Date(date),
         month = '' + (d.getMonth() + 1),
@@ -26,15 +26,15 @@ const DeadlineForm = (props) => {
 
     return [year, month, day].join('-');
   }
-  const defaultValues = deadline === null ? {
+  const defaultValues = payment === null ? {
     reference:"",
-    order: null,
+    comment: null,
     amount: null,
     date: formatDate(new Date()),
-    convention: conventionId
+    deadline: deadlineId
   } : 
   {
-    ...deadline
+    ...payment
   }
 
 
@@ -55,8 +55,8 @@ const DeadlineForm = (props) => {
     if ("amount" in fieldValues)
       temp.amount = (fieldValues.amount && (parseFloat(fieldValues.amount) <= parseFloat(availableAmount))) ? "" : 
       `Le montant est requis, et ne déppase pas ${pounds.format(availableAmount)}`;
-    if ("order" in fieldValues)
-      temp.order = fieldValues.order ? "" : "L'order est requis";
+    if ("comment" in fieldValues)
+      temp.comment = fieldValues.comment ? "" : "L'order est requis";
    
       setErrors({
       ...temp,
@@ -88,8 +88,8 @@ const DeadlineForm = (props) => {
     if (validate()) {
       setLoading(true)
       console.log(values);
-      if(deadline === null){
-        axios.post(`/deadlines`, values).then(
+      if(payment === null){
+        axios.post(`/deadlinepayments`, values).then(
           (res) => {
             console.log("added => " ,res);
             if(res.data){
@@ -108,13 +108,13 @@ const DeadlineForm = (props) => {
           setLoading(false)
         });
       }else{
-        axios.put(`/deadlines/${values.id}`, values).then(
+        axios.put(`/deadlinepayments/${values.id}`, values).then(
           (res) => {
             console.log("updated => ", res);
             if(!res.data){
               showFailedToast()
             }else{
-              update(values)
+              push(values)
               showSuccessToast()
             }
           },
@@ -133,10 +133,10 @@ const DeadlineForm = (props) => {
   };
 
   const titleName = () => {
-    if(deadline == null) 
-      return "Ajouter une écheance" 
+    if(payment == null) 
+      return "Ajouter un paiement" 
     else
-      return "Modifier une écheance"
+      return "Modifier un paiement"
   }
 
   return (
@@ -168,16 +168,6 @@ const DeadlineForm = (props) => {
           </Stack>
 
           <Stack style={styles.stack} spacing={2} direction="row">
-              <Controls.Input
-                style={{width:'50%'}}
-                id="order-input"
-                name="order"
-                label="Order"
-                type="number"
-                value={values.order}
-                onChange={handleInputChange}
-                error={errors.order}
-              />
               <Controls.DatePiccker
                 style={{width:'50%'}}
                 id="date"
@@ -185,6 +175,15 @@ const DeadlineForm = (props) => {
                 label="Date"
                 value={formatDate(values.date)}
                 onChange={handleInputChange}
+              />
+              <Controls.Input
+                style={{width:'50%'}}
+                id="order-input"
+                name="comment"
+                label="Commentaire"
+                value={values.comment}
+                onChange={handleInputChange}
+                error={errors.comment}
               />
           </Stack>
 
@@ -229,4 +228,4 @@ const styles = {
     marginBottom: 10,
   },
 };
-export default DeadlineForm;
+export default PaymentForm;
