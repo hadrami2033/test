@@ -32,16 +32,23 @@ const CategorieForm = (props) => {
   const [categoriesType, setCategoriesType] = React.useState([]);
   const axios = useAxios();
 
+  let pounds = Intl.NumberFormat( {
+    style: 'currency',
+    maximumSignificantDigits: 3,
+    minimumFractionDigits: 2
+  });
+
   const validate = (fieldValues = values) => {
     let temp = { ...errors };
     if ("reference" in fieldValues)
       temp.reference = fieldValues.reference ? "" : "La reférence est requise";
     if ("amount" in fieldValues)
-      temp.amount = fieldValues.amount ? "" : "Le montant est requis";
+      temp.amount = (fieldValues.amount && (parseFloat(fieldValues.amount) <= parseFloat(availableAmount))) ? "" : 
+      `Le montant est requis, et ne déppase pas ${pounds.format(availableAmount)}`  ;
     if ("type_id" in fieldValues)
       temp.type_id = fieldValues.type_id ? "" : "Le type requis";
    
-      setErrors({
+    setErrors({
       ...temp,
     });
 
