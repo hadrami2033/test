@@ -32,23 +32,40 @@ const DibursementForm = (props) => {
           availableAmount, currency, currenteState, availabeState, categories = [],
           Invoices, Commitments, availableAmountByMnyRef} = props;
 
+
+  const formatDate = (date) => {
+    var d = new Date(date),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
+
+    if (month.length < 2) 
+        month = '0' + month;
+    if (day.length < 2) 
+        day = '0' + day;
+
+    return [year, month, day].join('-');
+  }
+
   const defaultValues = !disbursement ? {
-    reference: "",
-    type_id: null,
-    status_id: null,
-    date: "",
-    orderamount: null,
-    disbursementamount: null,
-    amount_by_ref_currency: null,
-    convention: conventionId,
-    currency_id: null,
-    commitment_id: null,
-    categorie_id: null,
-    invoice_id: null
-  } : { ...disbursement, 
+        reference: "",
+        type_id: null,
+        status_id: null,
+        date: formatDate(new Date()),
+        new_state_date: "",
+        orderamount: null,
+        disbursementamount: null,
+        amount_by_ref_currency: null,
+        convention: conventionId,
+        currency_id: null,
+        commitment_id: null,
+        categorie_id: null,
+        invoice_id: null
+      } : { ...disbursement, 
         currency_id : disbursement.currency.id, 
         type_id : disbursement.type.id,
-        status_id: currenteState ? currenteState.id : getStatusByCode(1).id,
+        new_state_date: formatDate(new Date()),
+        status_id: currenteState ? currenteState.id : getStatusId(1),
         categorie_id: disbursement.categorie && disbursement.categorie.id,
         commitment_id: disbursement.commitment && disbursement.commitment.id,
         invoice_id: disbursement.invoice && disbursement.invoice.id
@@ -100,6 +117,8 @@ const DibursementForm = (props) => {
       temp.status_id = fieldValues.status_id ? "" : "Le statut requis"; */
     if ("date" in fieldValues)
       temp.date = fieldValues.date ? "" : "Date requise";
+    if ("new_state_date" in fieldValues)
+      temp.new_state_date = ( fieldValues.new_state_date || !disbursement ) ? "" : "Date de nouvel état requise";
     if ("orderamount" in fieldValues)
       temp.orderamount = ( fieldValues.orderamount && parseFloat(availableAmount) >= (parseFloat(fieldValues.orderamount)-parseFloat(getDisbursementAmount()) ) ) ? "" : `Le montant requis et ne déppase pas ${pounds.format(availableAmount)} ${currency}`;
     if ("commitment_id" in fieldValues)
@@ -128,7 +147,9 @@ const DibursementForm = (props) => {
 
 
   React.useEffect(() => {
+    console.log( "currenteState ", currenteState);
     console.log( "availableAmount ", availableAmount);
+
     if(Commitments.length > 0)
     setCommitments(Commitments)
     if(Invoices.length > 0)
@@ -228,12 +249,11 @@ const DibursementForm = (props) => {
               {
                 type_id: values.status_id,
                 disbursement: disbursement.id,
-                date: formatDate(new Date()),
+                date: values.new_state_date,
                 comment: "test 2"
               }
               console.log(" state ", state);
               if( getStatusCode(values.status_id) > currenteState.code ){
-
                 axios.post(`/states`, state).then(
                   (res) =>{
                     console.log("res  ", res);
@@ -259,21 +279,6 @@ const DibursementForm = (props) => {
     }
     //console.log(formValues);
   };
-
-
-  const formatDate = (date) => {
-    var d = new Date(date),
-        month = '' + (d.getMonth() + 1),
-        day = '' + d.getDate(),
-        year = d.getFullYear();
-
-    if (month.length < 2) 
-        month = '0' + month;
-    if (day.length < 2) 
-        day = '0' + day;
-
-    return [year, month, day].join('-');
-  }
 
   const titleName = () => {
     if(disbursement == null) 
@@ -355,8 +360,7 @@ const DibursementForm = (props) => {
   }
 
   return (
-    
-        <BaseCard titleColor={"secondary"} title={titleName()}>
+      <BaseCard titleColor={"secondary"} title={titleName()}>
         { ( values && disbursementStatus.length > 0 && disbursementTypes.length > 0 && disbursementTypes.filter(e => e.code === 1).length > 0 ) ?
           <form onSubmit={handleSubmit} style={{paddingInline:'5%'}}>
           <br/>
@@ -382,13 +386,24 @@ const DibursementForm = (props) => {
               />
             :
               <Controls.Select
-                style={{width:'50%'}}
+                style={{width:'25%'}}
                 name="status_id"
                 label="Statut de décaissement"
                 value={values.status_id}
                 onChange={handleInputChange}
                 options={availabeState}
                 //error={errors.status_id}
+              />
+            }
+            {disbursement &&
+              <Controls.DatePiccker
+                style={{ width:'25%'}}
+                id="new_state_date"
+                name="new_state_date"
+                label="Date de nouvel état"
+                value={formatDate(values.new_state_date)}
+                onChange={handleInputChange}
+                error={errors.new_state_date}
               />
             }
           </Stack>
@@ -427,6 +442,7 @@ const DibursementForm = (props) => {
               error={errors.date}
             />
             }
+
             {getStatus(values.status_id) === getStatusByCode(3) && disbursement &&
             <Controls.Input
               style={{ width:'30%'}}
@@ -439,6 +455,7 @@ const DibursementForm = (props) => {
               error={errors.disbursementamount}
             />
             }
+
             {getStatus(values.status_id) === getStatusByCode(3) && disbursement &&
             <Controls.Input
               style={{ width:'30%'}}
@@ -625,10 +642,10 @@ const DibursementForm = (props) => {
           </form>
           :
           <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "center"}}>
-          <Box style={{fontSize: '16px'}}>
-            Pas de données de configuration !
-          </Box>
-        </div>
+            <Box style={{fontSize: '16px'}}>
+              Pas de données de configuration !
+            </Box>
+          </div>
         }
         </BaseCard>
       

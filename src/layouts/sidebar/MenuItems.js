@@ -57,8 +57,12 @@ const Menuitems = [
         href: "/spendings_type",
       },
       {
-        title: "Type de statut",
+        title: "Statut de décaissement",
         href: "/status_type",
+      },
+      {
+        title: "Statut de remboursement",
+        href: "/payment_status_type",
       }
     ]
   },

@@ -9,9 +9,10 @@ import TableRow from '@mui/material/TableRow';
 import EnhancedTableHead from "./Table/TableHeader";
 import PropTypes from 'prop-types';
 import useAxios from "../utils/useAxios";
-import { Add, Close, CreateOutlined, Delete } from "@mui/icons-material";
+import { Add, Close, CreateOutlined, Delete, InfoOutlined } from "@mui/icons-material";
 import PaymentForm from "../../pages/add_payment";
 import Draggable from "react-draggable";
+import DetailPayment from "../../pages/payment_detail";
 
 
  const headCellsPayments = [
@@ -32,6 +33,12 @@ import Draggable from "react-draggable";
       numeric: false,
       disablePadding: true,
       label: 'Montant',
+    },
+    {
+      id: 'etat',
+      numeric: false,
+      disablePadding: true,
+      label: 'État',
     },
     {
       id: 'comment',
@@ -91,14 +98,24 @@ const DetailDeadline = (props) => {
   const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
   const [deadlinespayments, setDeadlinespayments] = React.useState([]);
   const [openPaymentForm, setOpenPaymentForm] = React.useState(false);
+  const [openDetailPayment, setOpenDetailPayment] = React.useState(false);
   const [paymentSelected, setPaymentSelected] = React.useState(null);
   const [openDelete, setOpenDelete] = React.useState(false);
   const [toDelete, setToDelete] = React.useState(null);
+  const [availabeState, setAvailabeState] = React.useState([]);
+  const [currenteState, setCurrenteState] = React.useState({});
+  const [paymentStatus, setPaymentStatus] = React.useState([]);
 
   useEffect(() => {
     setLoading(true)
     if(deadline){
         setDeadlinespayments(deadline.deadlinespayments)
+        axios.get(`/paymentstatustype`).then(
+          res => {
+            setPaymentStatus(res.data)
+          },
+          error => console.log(error)
+        )
         setLoading(false)
     }else{
         setLoading(false)
@@ -108,7 +125,9 @@ const DetailDeadline = (props) => {
   const push = (e) =>{
     setLoading(true)
     axios.get(`/deadlines/${deadline.id}`).then(res => {
+      console.log("deadlinespayments  ", res.data.deadlinespayments);
       setDeadlinespayments(res.data.deadlinespayments)
+      handleClose()
     },
     error => {
       console.log(error)
@@ -162,9 +181,23 @@ const DetailDeadline = (props) => {
     return sum;
   }
 
+  const deadlineCummulePaymentsRefCurrency = () => {
+    var sum = deadlinespayments ? deadlinespayments.reduce((accumulator, e) => {
+      return accumulator + e.amount_ref_currency
+    },0) : 0;
+    return sum;
+  }
+
+  const allPaymentsRecieved = () => {
+    var recieveds = deadlinespayments.filter(p => (Math.max(...p.status.map(s => s.type.code)) === Math.max(...paymentStatus.map(t => t.code))) )
+    return recieveds.length === deadlinespayments.length;
+  } 
+
+
+
   const deadlineState = () => {
     let now = new Date().toDateString()
-    if(deadlineCummulePayments() >= deadline.amount)
+    if(deadlineCummulePayments() >= deadline.amount && allPaymentsRecieved())
       return 1;
     else if(deadlineDatePassed(now, deadline.date))
       return 3;
@@ -185,8 +218,33 @@ const DetailDeadline = (props) => {
     setOpenSuccessToast(false);
   };
 
+  const getStatusByCode = (code) =>{
+    if(code){
+      let e = paymentStatus.filter(e => e.code === code );
+      return e[0]
+    }
+    return null;
+  }
+
+  const getCurrenteState = (p) => {
+    let currente_state = p.status.length > 0 ? 
+    getStatusByCode(Math.max(...p.status.map(s => s.type.code)))
+    : getStatusByCode(1);
+
+    return currente_state;
+  }
+
   const editPayment = (p) =>{
     setPaymentSelected(p)
+    console.log(p);
+    let currente_state = getCurrenteState(p);
+    let available_state = paymentStatus.filter(e => ( e.code === (currente_state.code+1) || e.code === currente_state.code ));
+
+    console.log("available_state  ",available_state);
+    console.log("currente_state  ",currente_state)
+    setAvailabeState(available_state)
+    setCurrenteState(currente_state);
+
     setOpenPaymentForm(true)
   }
 
@@ -202,6 +260,22 @@ const DetailDeadline = (props) => {
       setOpenPaymentForm(false);
     }
   };
+
+  const openModalDetailPayment = (p) => {
+    setPaymentSelected(p)
+    console.log(p);
+    setOpenDetailPayment(true);
+  };
+
+  const handleCloseDetailPayment = (event, reason) => {
+    if (reason === "backdropClick") {
+      console.log(reason);
+    } else {
+      setPaymentSelected(null)
+      setOpenDetailPayment(false);
+    }
+  };
+
   const handleOpenModalDelete = () =>{
     setOpenDelete(true)
   }
@@ -251,10 +325,23 @@ const DetailDeadline = (props) => {
   }
 
   return (
-    <BaseCard titleColor={"secondary"} title={ deadline ? deadline.reference : ""}>
+    <BaseCard titleColor={"secondary"} title={ deadline ? "Échéance : " + deadline.reference : ""}>
             {/* <Box display="flex" alignItems="center" justifyContent="center">
                 <Typography color="secondary" fontSize="25px" fontWeight={'1000'} variant="h2" >{disbursement ? disbursement.reference : ""}</Typography>
             </Box> */}
+          {loading ?
+            <Box style={{width:'100%', display:'flex', justifyContent:"center" }}>
+              <CircularProgress
+                size={24}
+                  sx={{
+                  color: 'primary',
+                  position: 'absolute',
+                  marginTop: '-12px',
+                  marginLeft: '-12px',
+                }}
+              />
+            </Box>
+          :
           <Box style={{width:'100%'}}>
             {deadline &&
                 <Grid container spacing={2} marginLeft={'15px'}>
@@ -271,7 +358,31 @@ const DetailDeadline = (props) => {
                            showSuccessToast={showSuccessToast}
                            showFailedToast={showFailedToast}
                            availableAmount={paymentSelected ? (deadline.amount-deadlineCummulePayments()+paymentSelected.amount) : (deadline.amount-deadlineCummulePayments())}
+                           availableAmountRefCurrency={paymentSelected ? (deadline.amount_ref_currency-deadlineCummulePaymentsRefCurrency()+paymentSelected.amount_ref_currency) : (deadline.amount_ref_currency-deadlineCummulePaymentsRefCurrency())}
                            payment= {paymentSelected}
+                           currenteState={currenteState}
+                           availabeState={availabeState}
+                        /> 
+                        </DialogContent>
+                    </Dialog>
+
+                    <Dialog 
+                        fullWidth={true} 
+                        maxWidth={'lg'} 
+                        open={openDetailPayment} 
+                        onClose={handleCloseDetailPayment}
+                        
+                        >
+                        <DialogContent>
+                        <Typography style={{display:"flex", justifyContent:"end"}}>
+                            <IconButton onClick={handleCloseDetailPayment}>
+                            <Close fontSize='medium'/>
+                            </IconButton>
+                        </Typography>
+                        <DetailPayment
+                            payment = {paymentSelected}
+                            paymentStatus={paymentStatus} 
+                            currency={currency}
                         /> 
                         </DialogContent>
                     </Dialog>
@@ -312,7 +423,7 @@ const DetailDeadline = (props) => {
                     </Dialog>
 
 
-                   <Grid item xs={6} sx={{color:"#837B7B", fontWeight: "bold"}} >
+                   <Grid item xs={4} sx={{color:"#837B7B", fontWeight: "bold"}} >
                        <Typography
                            color="#837B7B"
                            sx={{
@@ -320,10 +431,21 @@ const DetailDeadline = (props) => {
                            fontStyle:'initial'
                            }}
                        >
-                           Montant d'échéance : {pounds.format(deadline.amount)}  {currency} 
+                        Montant d'échéance : {pounds.format(deadline.amount)}  {currency} 
                        </Typography>
                    </Grid>
-                   <Grid item xs={6} sx={{color:"#837B7B", fontWeight: "bold"}} >
+                   <Grid item xs={4} sx={{color:"#837B7B", fontWeight: "bold"}} >
+                       <Typography
+                           color="#837B7B"
+                           sx={{
+                           fontSize: "h4.fontSize",
+                           fontStyle:'initial'
+                           }}
+                       >
+                        Montant en monnaie de référence : {pounds.format(deadline.amount_ref_currency)} 
+                       </Typography>
+                   </Grid>
+                   <Grid item xs={4} sx={{color:"#837B7B", fontWeight: "bold"}} >
                        <Typography
                            color="#837B7B"
                            sx={{
@@ -354,7 +476,7 @@ const DetailDeadline = (props) => {
                           marginInlineEnd : 1
                           }}
                         >
-                        Etat : 
+                        État : 
                       </Typography>
 
                       {deadlineState() === 1 &&
@@ -450,9 +572,15 @@ const DetailDeadline = (props) => {
                                       <TableCell align="left">{row.reference} </TableCell>
                                       <TableCell align="left">{formatDate(row.date)} </TableCell>
                                       <TableCell align="left">{pounds.format(row.amount)} {currency}</TableCell>
+                                      <TableCell align="left">{getCurrenteState(row) ? getCurrenteState(row).label : null} </TableCell>
                                       <TableCell align="left">{row.comment} </TableCell>
                                       
                                       <TableCell align="left">
+                                        <Tooltip onClick={() => openModalDetailPayment(row)} title="Modifier">
+                                            <IconButton>
+                                                <InfoOutlined color='primary' fontSize='medium' />
+                                            </IconButton>
+                                        </Tooltip>
                                         <Tooltip onClick={() => editPayment(row)} title="Modifier">
                                             <IconButton>
                                                 <CreateOutlined fontSize='medium' />
@@ -481,7 +609,7 @@ const DetailDeadline = (props) => {
            </Box>
            }
           </Box>
-                        
+          }
         
     </BaseCard>
 
