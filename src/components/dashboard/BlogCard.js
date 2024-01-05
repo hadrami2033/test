@@ -1,15 +1,14 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Card, CardContent, Typography, Button, Grid, Tooltip, Stack, Box } from "@mui/material";
-import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt';
-import Diversity2Icon from '@mui/icons-material/Diversity2';
-import CreditScoreSharpIcon from '@mui/icons-material/CreditScoreSharp';
 import { FaHandshake } from 'react-icons/fa';
-import { GiMoneyStack, GiPayMoney } from 'react-icons/gi';
+import { GiMoneyStack, GiPayMoney, GiReceiveMoney } from 'react-icons/gi';
 import useAxios from "../../utils/useAxios";
+import AuthContext from "../../context/AuthContext";
 
 const BlogCard = (props) => {
-  const {clientsCount, numbersCount, selectFile, fileName, handleFile, verifyCompatibility} = props;
+  const {paymentsRecievedAmount} = props;
   //colors: ['#6ebb4b', '#1a7795',  '#a52e36' , '#079ff0', '#cc7c67' , '#c8d789']
+  const { logoutUser } = useContext(AuthContext);
 
   const [countConv, setCountConv] = React.useState(null);
   const [countDiss, setCountDiss] = React.useState(null);
@@ -17,9 +16,11 @@ const BlogCard = (props) => {
   const [amountConv, setAmountConv] = React.useState(null);
   const [amountDiss, setAmountDiss] = React.useState(null);
   const [amountComm, setAmountComm] = React.useState(null);
+  const [amountDeadlines, setAmountDeadlines] = React.useState(null);
   const axios = useAxios();
 
   React.useEffect(() => {
+    console.log("paymentsRecievedAmount ", paymentsRecievedAmount);
     axios.get(`/conventions_count_amount`).then(
       res => {
         console.log(res.data);
@@ -53,6 +54,15 @@ const BlogCard = (props) => {
           console.log(error)
         }
       )
+    ).then(
+      axios.get(`/deadlines_amount`).then(
+        res => {
+          setAmountDeadlines(res.data.sum_amount);
+        }, 
+        error => {
+          console.log(error)
+        }
+      )
     )
   }, [])
 
@@ -67,7 +77,7 @@ const BlogCard = (props) => {
     
         <Grid
           xs={12}
-          lg={4}
+          lg={3}
           sx={{
             display: "flex",
             alignItems: "stretch"
@@ -100,7 +110,7 @@ const BlogCard = (props) => {
                   justifyContent: 'center'
                 }}
               >
-                Budget de conventions
+                Budget global
               </Typography>
               <Typography
                 //color="primary"
@@ -123,7 +133,7 @@ const BlogCard = (props) => {
         <Grid
           item
           xs={12}
-          lg={4}
+          lg={3}
           sx={{
             display: "flex",
             alignItems: "stretch",
@@ -242,7 +252,7 @@ const BlogCard = (props) => {
         <Grid
           item
           xs={12}
-          lg={4}
+          lg={3}
           sx={{
             display: "flex",
             alignItems: "stretch",
@@ -293,6 +303,65 @@ const BlogCard = (props) => {
                 }}
               >
                 {pounds.format(amountComm)}
+              </Typography>
+            </CardContent>
+          </Card>
+
+        </Grid>
+
+        <Grid
+          item
+          xs={12}
+          lg={3}
+          sx={{
+            display: "flex",
+            alignItems: "stretch",
+          }}
+        >
+          <Card
+            sx={{
+              p: 0,
+              width: "100%",
+              boxShadow:3,
+              bgcolor:'#839192'
+            }}
+          >
+            <CardContent
+              sx={{
+                paddingLeft: "30px",
+                paddingRight: "30px",
+              }}
+            >  
+
+              <GiReceiveMoney 
+                fontSize='40px'
+                color='white'                    
+              />
+              
+              <Typography
+                color={"#F6EEFA"}
+                sx={{
+                  fontSize: "h3.fontSize",
+                  fontWeight: "600",
+                  fontStyle:'initial',
+                  display:'flex', 
+                  justifyContent: 'center'
+                }}
+              >
+                Dettes non payés
+              </Typography>
+              <Typography
+                //color="primary"
+                color={"#F6EEFA"}
+                sx={{
+                  fontSize: "h2.fontSize",
+                  fontWeight: "1000",
+                  marginTop:1,
+                  display:'flex', 
+                  justifyContent: 'center',
+                }}
+              >
+                {pounds.format(amountDeadlines-paymentsRecievedAmount)}
               </Typography>
             </CardContent>
           </Card>

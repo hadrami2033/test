@@ -12,7 +12,7 @@ import useAxios from "../src/utils/useAxios";
 
 
 const DeadlineForm = (props) => {
-  const {conventionId, deadline, push, update, showSuccessToast, showFailedToast, availableAmount} = props;
+  const {conventionId, deadline, push, update, showSuccessToast, showFailedToast, availableAmount, availableAmountRefCurrency} = props;
   const formatDate = (date) => {
     var d = new Date(date),
         month = '' + (d.getMonth() + 1),
@@ -30,6 +30,7 @@ const DeadlineForm = (props) => {
     reference:"",
     order: null,
     amount: null,
+    amount_ref_currency: null,
     date: formatDate(new Date()),
     convention: conventionId
   } : 
@@ -42,7 +43,7 @@ const DeadlineForm = (props) => {
   const [loading, setLoading] = React.useState(false);
   //const [status, setStatus] = React.useState([]);
 
-  let pounds = Intl.NumberFormat( {
+  let pounds = Intl.NumberFormat({
     style: 'currency',
     maximumSignificantDigits: 3,
     minimumFractionDigits: 2
@@ -55,6 +56,9 @@ const DeadlineForm = (props) => {
     if ("amount" in fieldValues)
       temp.amount = (fieldValues.amount && (parseFloat(fieldValues.amount) <= parseFloat(availableAmount))) ? "" : 
       `Le montant est requis, et ne déppase pas ${pounds.format(availableAmount)}`;
+    if ("amount_ref_currency" in fieldValues)
+      temp.amount_ref_currency = (fieldValues.amount_ref_currency && (parseFloat(fieldValues.amount_ref_currency) <= parseFloat(availableAmountRefCurrency))) ? "" : 
+      `Le Montant en monnaie de référence est requis, et ne déppase pas ${pounds.format(availableAmountRefCurrency)}`;
     if ("order" in fieldValues)
       temp.order = fieldValues.order ? "" : "L'order est requis";
    
@@ -146,7 +150,7 @@ const DeadlineForm = (props) => {
           <br/>
           <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
-              style={{width:'50%'}}
+              style={{width:'33.33%'}}
               id="label-input"
               name="reference"
               label="Référence"
@@ -155,7 +159,7 @@ const DeadlineForm = (props) => {
               error={errors.reference}
             />
             <Controls.Input
-              style={{width:'50%'}}
+              style={{width:'33.33%'}}
               id="amount-input"
               name="amount"
               label="Montant"
@@ -163,6 +167,16 @@ const DeadlineForm = (props) => {
               value={values.amount}
               onChange={handleInputChange}
               error={errors.amount}
+            />
+            <Controls.Input
+              style={{width:'33.33%'}}
+              id="amount_ref_currency-input"
+              name="amount_ref_currency"
+              label="Montant en monnaie de référence"
+              type="number"
+              value={values.amount_ref_currency}
+              onChange={handleInputChange}
+              error={errors.amount_ref_currency}
             />
 
           </Stack>

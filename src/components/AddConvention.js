@@ -419,7 +419,7 @@ const ConventionForm = (props) => {
               style={{width:'50%'}}
               id="start_date"
               name="start_date"
-              label="Date début"
+              label="Date de signature"
               value={formatDate(values.start_date)}
               onChange={handleInputChange}
               error={errors.start_date}
@@ -483,7 +483,7 @@ const ConventionForm = (props) => {
               id="periode-input"
               name="convention_periode"
               type='number'
-              label="Période de la convention (en année)"
+              label="Période de la convention (en mois)"
               value={values.convention_periode}
               onChange={handleInputChange}
               error={errors.convention_periode}

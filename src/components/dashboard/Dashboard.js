@@ -87,6 +87,8 @@ const Dashboard = () => {
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('amount');
   const [selected, setSelected] = React.useState(null);
+  const [deadlinespayments, setDeadlinespayments] = React.useState([]);
+  const [paymentStatus, setPaymentStatus] = React.useState([]);
 
   const handleClick = (event, row) => {
     console.log("select => ", row);
@@ -170,7 +172,24 @@ const Dashboard = () => {
           console.log(error)
         }
       )
-    }).then(() => {
+    })
+    .then(() => {
+      axios.get(`/deadlinepayments`).then(res => {
+        console.log("deadlinepayments ++++ ", res.data);
+        setDeadlinespayments(res.data)
+      },
+      error => {
+        console.log(error)
+      })
+    })
+    .then(() => {
+      axios.get(`/paymentstatustype`).then(
+        res => {
+          setPaymentStatus(res.data)
+        },
+        error => console.log(error)
+      )    })    
+    .then(() => {
       setLoading(false)
     })
   }, [])
@@ -190,6 +209,24 @@ const Dashboard = () => {
     },0);
     return sum;
   }
+
+  const getEcheancesAmount = (echeances) => {
+    var sum = echeances.reduce((accumulator, e) => {
+      return accumulator + e.amount_ref_currency
+    },0);
+    return sum;
+  }
+
+  const getEcheancePaymentAmounts = (echeances) => {
+    let amount = 0;
+    echeances ? echeances.reduce((commitmentsAmount, e) => {
+      e.deadlinespayments ? e.deadlinespayments.reduce((accumulator, el) => {
+        amount = amount+el.amount_ref_currency;
+        return el; 
+      },0) : 0;
+    },[]) : []; 
+    return amount;
+}
 
   let pounds = Intl.NumberFormat( {
     style: 'currency',
@@ -584,6 +621,20 @@ const Dashboard = () => {
   const pieParams = { height: 200, margin: { right: 5 } };
   const palette = ['red', 'blue', 'green'];
 
+
+  const deadlineCummulePayments = (payments) => {
+    var sum = payments ? payments.reduce((accumulator, e) => {
+      return accumulator + e.amount_ref_currency
+    },0) : 0;
+    return sum;
+  }
+
+  const paymentsRecievedAmount = () => {
+    console.log("paymentStatus , " , paymentStatus);
+    var recieveds = deadlinespayments.filter(p => (Math.max(...p.status.map(s => s.type.code)) === Math.max(...paymentStatus.map(t => t.code))) )
+    return deadlineCummulePayments(recieveds);
+  } 
+
   return (
     <>
     {loading ? (
@@ -604,7 +655,7 @@ const Dashboard = () => {
     </div>
 
       ) : (<>
-    <BaseCard titleColor={"secondary"} title={"SOCIETE DE GESTION DE MANANTALI"}>
+    <BaseCard titleColor={"secondary"} title={"GESTIONS DES CONVENTIONS DE FINANCEMENT"}>
     {/* {all > 0 ?
       <Chart
         options={optionssalesoverview}
@@ -614,11 +665,11 @@ const Dashboard = () => {
       />
       : */}
         
-      <Typography align="center" color={"primary"} fontSize="24px" fontWeight={'600'} variant="h4" mb={5} >
+     {/*  <Typography align="center" color={"primary"} fontSize="24px" fontWeight={'600'} variant="h4" mb={5} >
         GESTIONS DES CONVENTIONS DE FINANCEMENT
-      </Typography>
+      </Typography> */}
 
-      <BlogCard />
+      <BlogCard paymentsRecievedAmount = {paymentsRecievedAmount()} />
 
       <BaseCard titleColor={"secondary"} title="EXECUTION GLOBAL">
         {Conventions.length > 0 > 0 ?
@@ -739,6 +790,53 @@ const Dashboard = () => {
             colors: ['#6ebb4b', '#079ff0']
           }}
         />
+        {getEcheancesAmount(selected.deadlines) != 0  &&
+        <Chart
+          type="pie"
+          width={360}
+          //height={550} 
+          series={[(getEcheancesAmount(selected.deadlines) -getEcheancePaymentAmounts(selected.deadlines)),(getEcheancePaymentAmounts(selected.deadlines))]}
+          options={{
+            title:{text:"Dettes sur convention"},
+            noData:{text:"Empty Data"},
+            labels:['Non Payé','Payé'],
+            fill: {
+              type: "solid",
+              opacity: 1,
+              colors: ['#839192', '#079ff0']
+            },
+            chart : {
+              offsetX: -15,
+              toolbar: {
+                show: false,
+              },
+              foreColor: "#adb0bb",
+              fontFamily: "'DM Sans',sans-serif",
+              sparkline: {
+                enabled: false,
+              },
+            },
+            yaxis: {
+              show: true,
+              min: 0,
+              max: all,
+              tickAmount: 5,
+              labels: {
+                style: {
+                  cssClass: "grey--text lighten-2--text fill-color",
+                },
+              },
+            },
+            stroke: {
+              show: true,
+              width: 5,
+              lineCap: "butt",
+              colors: ["transparent"],
+            },
+            colors: ['#839192', '#079ff0']
+          }}
+        />
+        }
       </div>
     }
     
