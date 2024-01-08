@@ -695,8 +695,8 @@ const Dashboard = () => {
       </Typography>
     } */}
     {selected &&
-      <div style={{width:'100%' , display:'flex' , flexDirection:'row', 
-      justifyContent:'space-around', paddingLeft: 5, marginBottom: 20 , marginTop: 10,
+      <Box style={{width:'100%' , display:'flex' , flexDirection:'row', 
+      justifyContent:'space-between', paddingLeft: 5, marginBottom: 20 , marginTop: 10,
       whiteSpace: "nowrap", overflowX: 'auto', overflowY: 'hidden' }} >
         <Chart
           type="pie"
@@ -753,7 +753,7 @@ const Dashboard = () => {
           options={{
             title:{text:"Engagements"},
             noData:{text:"Empty Data"},
-            labels:['Non Engagé','Engagé'],
+            labels:['Non engagé','Engagé'],
             fill: {
               type: "solid",
               opacity: 1,
@@ -790,7 +790,7 @@ const Dashboard = () => {
             colors: ['#6ebb4b', '#079ff0']
           }}
         />
-        {getEcheancesAmount(selected.deadlines) != 0  &&
+        {getEcheancesAmount(selected.deadlines) != 0  ?
         <Chart
           type="pie"
           width={360}
@@ -798,8 +798,8 @@ const Dashboard = () => {
           series={[(getEcheancesAmount(selected.deadlines) -getEcheancePaymentAmounts(selected.deadlines)),(getEcheancePaymentAmounts(selected.deadlines))]}
           options={{
             title:{text:"Dettes sur convention"},
-            noData:{text:"Empty Data"},
-            labels:['Non Payé','Payé'],
+            noData:{text:"Pas d'écheances sur la convention"},
+            labels:['Echus non payé','Echus payé'],
             fill: {
               type: "solid",
               opacity: 1,
@@ -836,8 +836,13 @@ const Dashboard = () => {
             colors: ['#839192', '#079ff0']
           }}
         />
-        }
-      </div>
+        :
+        <div style={{width:'100%', height: '80h', fontSize:'16px', display:'flex', justifyContent:'center',
+          alignItems:"center", fontWeight:"bold", color:"gray"}}>
+          Pas d'écheances sur convention
+        </div>
+      }
+      </Box>
     }
     
     {Conventions.length > 0 &&
