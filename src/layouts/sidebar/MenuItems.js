@@ -5,6 +5,10 @@ const Menuitems = [
     href: "/",
   },
   {
+    title: "Dettes",
+    href: "/dettes",
+  },
+  {
     title: "Conventions",
     icon: "users",
     href: "/conventions",
@@ -47,6 +51,10 @@ const Menuitems = [
       {
         title: "Devise",
         href: "/currencies",
+      },
+      {
+        title: "Monnaie de référence",
+        href: "/reference_money",
       },
       {
         title: "Type de décaissement",

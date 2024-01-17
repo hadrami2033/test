@@ -25,7 +25,9 @@ import EnhancedTableToolbar from "../src/components/Table/TableToolbar";
 import useAxios from "../src/utils/useAxios";
 import AuthContext from "../src/context/AuthContext";
 import { useContext } from "react";
+import dynamic from "next/dynamic";
 
+const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 const headCells = [
   {
@@ -330,6 +332,39 @@ export default function EnhancedTable() {
     minimumFractionDigits: 2
   });
 
+  const getEcheancesAmount = (echeances) => {
+    var sum = echeances.reduce((accumulator, e) => {
+      return accumulator + e.amount_ref_currency
+    },0);
+    return sum;
+  }
+
+  const getEcheancePaymentAmounts = (echeances) => {
+    let amount = 0;
+    echeances ? echeances.reduce((commitmentsAmount, e) => {
+      e.deadlinespayments ? e.deadlinespayments.reduce((accumulator, el) => {
+        amount = amount+el.amount_ref_currency;
+        return el; 
+      },0) : 0;
+    },[]) : []; 
+    return amount;
+  }
+
+  const getCategoriesCommitmentsAmounts = (categories) => {
+    let amount = 0;
+    categories ? categories.reduce((commitmentsAmount, c) => {
+        c.commitments ? c.commitments.reduce((accumulator, e) => {
+            e.commitmentamounts ? e.commitmentamounts.reduce((accumulator, el) => {
+              //console.log(el.amount_by_ref_currency);
+              amount = amount+el.amount_by_ref_currency;
+              return el; 
+            },0) : 0;
+        },[]) : [];
+    },[]) : []; 
+    //console.log("categories comm amount", amount);
+    return amount;
+  }
+
   return (<>
     {/* {authenticated &&} */}
     {/* {!detail ? */}
@@ -369,6 +404,156 @@ export default function EnhancedTable() {
         </DialogActions>
       </Dialog>
 
+      {selected &&
+      <Box style={{width:'100%' , display:'flex' , flexDirection:'row', 
+      justifyContent:'space-between', paddingLeft: 5, marginBottom: 20 , marginTop: 10,
+      whiteSpace: "nowrap", overflowX: 'auto', overflowY: 'hidden' }} >
+        <Chart
+          type="pie"
+          width={360}
+          /* width={1322}
+          height={550} */
+          series={[(selected.amount_ref_currency-getDisbursementsAmount(selected.disbursements)),(getDisbursementsAmount(selected.disbursements))]}
+          options={{
+            title:{text:"Décaissements"},
+            noData:{text:"Empty Data"},
+            labels:['Non décaissé', 'Décaissé'],
+            fill: {
+              type: "solid",
+              opacity: 1,
+              colors: ['#6ebb4b', '#cc7c67']
+            },
+            chart : {
+              offsetX: -15,
+              toolbar: {
+                show: false,
+              },
+              foreColor: "#adb0bb",
+              fontFamily: "'DM Sans',sans-serif",
+              sparkline: {
+                enabled: false,
+              },
+            },
+            yaxis: {
+              show: true,
+              min: 0,
+              max: all,
+              tickAmount: 5,
+              labels: {
+                style: {
+                  cssClass: "grey--text lighten-2--text fill-color",
+                },
+              },
+            },
+            stroke: {
+              show: true,
+              width: 5,
+              lineCap: "butt",
+              colors: ["transparent"],
+            },
+            colors: ['#6ebb4b', '#cc7c67']
+          }}
+        />
+        
+        <Chart
+          type="pie"
+          width={360}
+          //height={550} 
+          series={[(selected.amount_ref_currency-getCategoriesCommitmentsAmounts(selected.categories)),(getCategoriesCommitmentsAmounts(selected.categories))]}
+          options={{
+            title:{text:"Engagements"},
+            noData:{text:"Empty Data"},
+            labels:['Non engagé','Engagé'],
+            fill: {
+              type: "solid",
+              opacity: 1,
+              colors: ['#6ebb4b', '#079ff0']
+            },
+            chart : {
+              offsetX: -15,
+              toolbar: {
+                show: false,
+              },
+              foreColor: "#adb0bb",
+              fontFamily: "'DM Sans',sans-serif",
+              sparkline: {
+                enabled: false,
+              },
+            },
+            yaxis: {
+              show: true,
+              min: 0,
+              max: all,
+              tickAmount: 5,
+              labels: {
+                style: {
+                  cssClass: "grey--text lighten-2--text fill-color",
+                },
+              },
+            },
+            stroke: {
+              show: true,
+              width: 5,
+              lineCap: "butt",
+              colors: ["transparent"],
+            },
+            colors: ['#6ebb4b', '#079ff0']
+          }}
+        />
+        {getEcheancesAmount(selected.deadlines) != 0  ?
+        <Chart
+          type="pie"
+          width={360}
+          //height={550} 
+          series={[(getEcheancesAmount(selected.deadlines) -getEcheancePaymentAmounts(selected.deadlines)),(getEcheancePaymentAmounts(selected.deadlines))]}
+          options={{
+            title:{text:"Dettes sur convention"},
+            noData:{text:"Pas d'écheances sur la convention"},
+            labels:['Echus non payé','Echus payé'],
+            fill: {
+              type: "solid",
+              opacity: 1,
+              colors: ['#839192', '#079ff0']
+            },
+            chart : {
+              offsetX: -15,
+              toolbar: {
+                show: false,
+              },
+              foreColor: "#adb0bb",
+              fontFamily: "'DM Sans',sans-serif",
+              sparkline: {
+                enabled: false,
+              },
+            },
+            yaxis: {
+              show: true,
+              min: 0,
+              max: all,
+              tickAmount: 5,
+              labels: {
+                style: {
+                  cssClass: "grey--text lighten-2--text fill-color",
+                },
+              },
+            },
+            stroke: {
+              show: true,
+              width: 5,
+              lineCap: "butt",
+              colors: ["transparent"],
+            },
+            colors: ['#839192', '#079ff0']
+          }}
+        />
+        :
+        <div style={{width:'100%', height: '80h', fontSize:'16px', display:'flex', justifyContent:'center',
+          alignItems:"center", fontWeight:"bold", color:"gray"}}>
+          Pas d'écheances sur convention
+        </div>
+        }
+      </Box>
+    }
       <EnhancedTableToolbar
         detail = {conventionDetail}
         field = {shooseField("object")} 
@@ -455,7 +640,7 @@ export default function EnhancedTable() {
           :
           <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "center"}}>
             <Box style={{fontSize: '16px'}}>
-        Liste vide
+              Liste vide
             </Box>
           </div>
           }

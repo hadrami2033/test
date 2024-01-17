@@ -22,30 +22,30 @@ import Select from '@mui/material/Select';
 import { Box } from "@material-ui/core";
 import EnhancedTableToolbar from "../src/components/Table/TableToolbar";
 import { Close } from "@mui/icons-material";
-import CurrencyForm from "./add_currency";
 import useAxios from "../src/utils/useAxios";
 import { useContext } from "react";
 import AuthContext from "../src/context/AuthContext";
+import ReferenceMoneyForm from "./add_reference_money";
 
 const headCells = [
-  {
-    id: 'code',
-    numeric: false,
-    disablePadding: true,
-    label: 'Code',
-  },
-  {
-    id: 'label',
-    numeric: false,
-    disablePadding: false,
-    label: 'Libelé',
-  },
-  {
-    id: 'description',
-    numeric: false,
-    disablePadding: false,
-    label: 'Description',
-  }
+    {
+        id: 'code',
+        numeric: false,
+        disablePadding: false,
+        label: 'Code',
+    },
+    {
+        id: 'label',
+        numeric: false,
+        disablePadding: false,
+        label: 'Libelé',
+    },
+    {
+        id: 'description',
+        numeric: false,
+        disablePadding: false,
+        label: 'Description',
+    }
 ];
 
 EnhancedTableHead.propTypes = {
@@ -65,7 +65,6 @@ export default function EnhancedTable() {
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('calories');
   const [selected, setSelected] = React.useState(null);
-  const [Currencies, setCurrencies] = React.useState([])
   const [search, setSearch] = React.useState("")
   const [getBy, setGetBy] = React.useState("")
   const [open, setOpen] = React.useState(false);
@@ -80,19 +79,19 @@ export default function EnhancedTable() {
   const [openFailedToast, setOpenFailedToast] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [deleted, setDelete] = React.useState(false);
-  const [authenticated, setAuthenticated] = React.useState(false);
+  const [Currencies, setCurrencies] = React.useState([])
+  const [referenceMoney, setReferenceMoney] = React.useState([])
 
-
-  const router = useRouter()
   const axios = useAxios();
+  const router = useRouter()
   const { logoutUser } = useContext(AuthContext);
 
   React.useEffect(() => {
       setLoading(true)
-          axios.get(`/currencies`).then(
+        axios.get(`/reference_money`).then(
               res => {
                 console.log(res.data);
-                setCurrencies(res.data);
+                setReferenceMoney(res.data);
               }, 
               error => {
                 console.log(error)
@@ -102,8 +101,26 @@ export default function EnhancedTable() {
             )
           .then(() => {
             setLoading(false)
-      })
+          })
   }, [deleted])
+
+  React.useEffect(() => {
+    setLoading(true)
+    axios.get(`/currencies`).then(
+        res => {
+          console.log("currencies", res.data);
+          setCurrencies(res.data);
+        }, 
+        error => {
+          console.log(error)
+          if(error.response && error.response.status === 401)
+          logoutUser()
+        }
+      )
+    .then(() => {
+      setLoading(false)
+    })
+  }, [])
 
   const showFailedToast = () => {
     setOpenFailedToast(true);
@@ -134,35 +151,33 @@ export default function EnhancedTable() {
   };
 
   const push = (e) =>{
-    //Currencies.push(e)
-    axios.get(`/currencies`).then(
+    //ReferenceMoney.push(e)
+    axios.get(`/reference_money`).then(
         res => {
           console.log(res.data);
-          setCurrencies(res.data);
-          //setHasNext(res.data.nextPage);
-          //setHasPrevious(res.data.previousPage);
-          //setTotalPages(res.data.TotalPages);
-          //setAll(res.data.TotalCount);
+          setReferenceMoney(res.data);
         }, 
         error => console.log(error)
     )
   }
 
   const update = (e) =>{
-    var objIndex = Currencies.findIndex((obj => obj.id == e.id));
-    Currencies[objIndex] = e
+    var objIndex = referenceMoney.findIndex((obj => obj.id == e.id));
+    referenceMoney[objIndex] = e
   }
 
   const remove = () =>{
     if(selected !== null){
-      axios.delete(`/currencies/${selected.id}`).then(
+      axios.delete(`/reference_money/${selected.id}`).then(
         res => {
           console.log(res);
-          const index = Currencies.indexOf(selected);
-          Currencies.splice(index, 1);
+          const index = referenceMoney.indexOf(selected);
+          referenceMoney.splice(index, 1);
           setDelete(!deleted)
           handleCloseModalDelete()
           setSelected(null)
+          if(localStorage.getItem("moneyRef"))
+          localStorage.removeItem("moneyRef")
           showSuccessToast()
         },
         error => {
@@ -255,42 +270,36 @@ export default function EnhancedTable() {
           <Paper {...props} />
         </Draggable>
       );
-  }  
-
-  const CurrencyDetail = () => {
-    //setDetail(true);
-    router.push({
-      pathname: '/Currency_detail',
-      query: {id: selected.id}
-    })
   }
+
 
   return (<>
     {/* {authenticated &&} */}
     {/* {!detail ? */}
-    <BaseCard titleColor={"secondary"} title="DEVISES">
+    <BaseCard titleColor={"secondary"} title="Monnaie de référence">
 
       <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'center'}} open={openSuccessToast} autoHideDuration={6000} onClose={closeSuccessToast}>
         <Alert onClose={closeSuccessToast} severity="success" sx={{ width: '100%' }} style={{fontSize:"24px",fontWeight:"bold"}}>
-        L'oppération réussie
+            L'oppération réussie
         </Alert>
       </Snackbar>
 
       <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'center'}} open={openFailedToast} autoHideDuration={6000} onClose={closeFailedToast}>
         <Alert onClose={closeFailedToast} severity="error" sx={{ width: '100%' }} style={{fontSize:"24px",fontWeight:"bold"}}>
-          L'oppération a échoué !
+            L'oppération a échoué !
         </Alert>
       </Snackbar>
 
-      <Dialog fullWidth={true} maxWidth={'lg'} open={open} onClose={handleClose}>
+      <Dialog fullWidth={true} maxWidth={'md'} open={open} onClose={handleClose}>
                 <DialogContent>
                 <div style={{display:"flex", justifyContent:"end"}}>
                     <IconButton onClick={handleClose}>
                     <Close fontSize='medium'/>
                     </IconButton>
                 </div>
-                <CurrencyForm
-                    Currency={selected}
+                <ReferenceMoneyForm
+                    Money={selected}
+                    currencies={Currencies}
                     push={push}
                     update={update}
                     showSuccessToast={showSuccessToast}
@@ -326,10 +335,8 @@ export default function EnhancedTable() {
         field = {shooseField("label")} 
         selected = {selected}
         deleteClick = {deleteClick}
-        editClick = {editClick}
-        onSearch = {onSearch}
         search = {search}
-        openModal = {handleClickOpen}
+        openModal = {referenceMoney.length > 0 ? null : handleClickOpen}
         goSearch = {goSearch}
       />
 
@@ -348,7 +355,7 @@ export default function EnhancedTable() {
          </Box>
         :
           <>
-          {Currencies.length > 0 ?
+          {referenceMoney.length > 0 ?
             <Table
               sx={{ minWidth: 750 }}
               aria-labelledby="tableTitle"
@@ -360,28 +367,22 @@ export default function EnhancedTable() {
                 orderBy={orderBy}
                 onSelectAllClick ={null}
                 onRequestSort={handleRequestSort}
-                rowCount={Currencies.length}
+                rowCount={referenceMoney.length}
                 headCells={headCells}
                 headerBG="#1A7795"
                 txtColor="#DCDCDC"
               />
               <TableBody>
-                {/* if you don't need to support IE11, you can replace the `stableSort` call with:
-                  rows.slice().sort(getComparator(order, orderBy)) */}
-                {Currencies.map((row, index) => {
+                {referenceMoney.map((row, index) => {
                     const isItemSelected = isSelected(row.id);
                     const labelId = `enhanced-table-checkbox-${index}`;
-                    //const bc = row.Deleted ? 'red' : "";
                     return (
                       <TableRow
                         hover
                         onClick={(event) => handleClick(event, row)}
                         role="checkbox"
-                        //aria-checked={isItemSelected}
                         tabIndex={-1}
                         key={row.id}
-                        //selected={isItemSelected}
-                        style={{backgroundColor: row.deleted ? '#e67e5f' : ""}}
                       >
 
                         <TableCell padding="checkbox">
@@ -404,58 +405,13 @@ export default function EnhancedTable() {
           :
           <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "center"}}>
             <Box style={{fontSize: '16px'}}>
-        Liste vide
+            Liste vide
             </Box>
           </div>
           }
           </>
         }
         </TableContainer>
-          {Currencies.length > 0 &&
-          <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "space-between"}}>
-            <div style={{width:"50%", display:'flex', alignItems:'center'}}>
-              <Box style={{display:'flex', alignItems:'center', marginInline:"20px", fontWeight:'bold', color:"GrayText"}} >
-              Total : {all}
-              </Box>
-            </div>
-            <div style={{width:"50%", display:'flex', alignItems:'center', justifyContent:"end"}}>
-              <Box style={{display:'flex', alignItems:'center', marginInline:"20px", fontWeight:'normal', color:"GrayText"}} >
-                {pageNumber}/{totalPages}
-              </Box>
-
-              <Tooltip title="Précédente">
-              <span>
-                <Button disabled={!hasPrevious} onClick={previous}>
-                  <ArrowBack/>
-                </Button>
-                </span>
-              </Tooltip>
-
-              <Select
-                id="page-size-select"
-                value={pageSize}
-                onChange={handleSelectSizeChange }
-                label="pageSize"
-              >
-                <MenuItem value={pageSize}>
-                  <em>{pageSize}</em>
-                </MenuItem>
-                <MenuItem value={5}>5</MenuItem>
-                <MenuItem value={10}>10</MenuItem>
-                <MenuItem value={20}>20</MenuItem>
-              </Select>  
-
-              <Tooltip title="Suivante">
-                <Button disabled={!hasNext} onClick={next} >
-                  <ArrowForward/>
-                </Button>
-              </Tooltip>
-            </div>
-          </div>
-          }
     </BaseCard>
-    {/* :
-    <DetailCurrency clientsCount = {200 } numbersCount = {200 } Currency = {selected} />
-    } */}
   </>);
 }

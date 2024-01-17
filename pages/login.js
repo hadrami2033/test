@@ -25,6 +25,7 @@ import { Close } from '@mui/icons-material';
 import { useRouter } from "next/router";
 import AuthContext from "../src/context/AuthContext";
 import baseURL from "../src/utils/baseURL";
+import useAxios from "../src/utils/useAxios";
 
 const Login = () =>{
     const defaultUser = {
@@ -45,6 +46,8 @@ const Login = () =>{
     const [openFailedToast, setOpenFailedToast] = React.useState(false);
     const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
     const [users, setUsers] = React.useState([]);
+    const axios = useAxios();
+
     const router = useRouter()
     const validate = (fieldValues = values) => {
       let temp = { ...errors };
@@ -63,22 +66,6 @@ const Login = () =>{
     const handleSubmit = async (event) => {
      // event.preventDefault();
       let res = await loginUser(values)
-      
-      /* .then(
-        (res) => {
-          if (res === true) { */
-            //console.log("login res ", res);
-            //save to storage
-            //navigate to home
-            //router.push('/')
-         /*  } else {
-            console.log("login res ",res);
-            setInvalid(true);
-          }
-        },
-      ).then(() => {
-        setLoading(false);
-      }); */
     };
     const handleClickShowPassword = () => {
       setShowPassword(!showPassword)
