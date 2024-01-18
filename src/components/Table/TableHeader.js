@@ -41,7 +41,7 @@ function EnhancedTableHead(props) {
                 direction={orderBy === headCell.id ? order : 'asc'}
                 onClick={createSortHandler(headCell.id)}
               >
-                <Typography variant="h4" color={txtColor}>
+                <Typography variant="h6" color={txtColor}>
                   {headCell.label}
                 </Typography>
               </TableSortLabel>

@@ -1,139 +1,45 @@
 import React from "react";
-import { Card, Button, Typography, Snackbar, Alert, CircularProgress, Box, IconButton, Tooltip, MenuItem, Input, Stack } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import dynamic from "next/dynamic";
 import BaseCard from "../baseCard/BaseCard";
-//import BlogCard from "./BlogCard";
-import * as XLSX from 'xlsx/xlsx.js';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import Paper from '@mui/material/Paper';
-import Draggable from 'react-draggable';
 import { useRouter } from "next/router";
-import Controls from "../controls/Controls";
 import useAxios from "../../utils/useAxios";
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableRow from '@mui/material/TableRow';
-import Checkbox from '@mui/material/Checkbox';
-import EnhancedTableHead from "../Table/TableHeader";
-import Select from '@mui/material/Select';
-import { ArrowBack, ArrowForward } from "@mui/icons-material";
-//import { PieChart } from "@mui/x-charts";
-import SearchDD from "../../layouts/header/SearchDD";
 import BlogCard from "./BlogCard";
 import { useContext } from "react";
 import AuthContext from "../../context/AuthContext";
-//import { PieChart } from "@mui/x-charts";
-//import Chart from 'react-apexcharts'
+import DebtsCard from "./DebtsCard";
+import dayjs from "dayjs";
 
-const headCells = [
-  {
-    id: 'reference',
-    numeric: false,
-    disablePadding: false,
-    label: 'Reférence',
-  },
-  {
-    id: 'funder',
-    numeric: false,
-    disablePadding: false,
-    label: 'Bailleur',
-  },
-  {
-    id: 'amount',
-    numeric: false,
-    disablePadding: false,
-    label: 'Montant',
-  },
-  {
-    id: 'start_date',
-    numeric: false,
-    disablePadding: false,
-    label: 'Date debut',
-  },
-  {
-    id: 'convention_periode',
-    numeric: false,
-    disablePadding: false,
-    label: 'Periode',
-  }/* ,
-  {
-    id: 'end_date_grace_period',
-    numeric: false,
-    disablePadding: false,
-    label: 'Fin du grace période',
-  } */
-  
-];
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
-// const PieChart = require ("@mui/x-charts")
  
 const Dashboard = () => {
   const [loading, setLoading] = React.useState(false);
-  const [all, setAll] = React.useState(0);
-  const [paidsStatistics, setPaidsStatistics] = React.useState([[], []]);
   const [Conventions, setConventions] = React.useState([])
-  const [hasPrevious, setHasPrevious] = React.useState(false);
-  const [hasNext, setHasNext] = React.useState(false);
-  const [pageNumber, setPageNumber] = React.useState(1);
-  const [pageSize, setPageSize] = React.useState(10);
-  const [totalPages, setTotalPages] = React.useState(0);
-  const [order, setOrder] = React.useState('asc');
-  const [orderBy, setOrderBy] = React.useState('amount');
   const [selected, setSelected] = React.useState(null);
   const [deadlinespayments, setDeadlinespayments] = React.useState([]);
   const [paymentStatus, setPaymentStatus] = React.useState([]);
-
-  const handleClick = (event, row) => {
-    console.log("select => ", row);
-    console.log(" passed less than 50% and 75% ", getConventionsHasDissLess25pourcentAndDeadlinePassedBetween25and50pourcent()); 
-    console.log(getCategoriesCommitmentsAmounts(row.categories))
-    if(!isSelected(row.id)){
-      setSelected(row);
-    }else{
-      setSelected(null);
-    }
-  };
-
-  const next = () => {
-    setPageNumber(pageNumber+1)
-  }
-  const previous = () => {
-    setPageNumber(pageNumber-1)
-  }
-
-  const isSelected = (id) => {
-    console.log("idddd ", id);
-    return selected !== null && selected.id === id; //selected.indexOf(id) !== -1;
-  }
-
-  const formatDate = (date) => {
-    var d = new Date(date),
-    month = '' + (d.getMonth() + 1),
-    day = '' + d.getDate(),
-    year = d.getFullYear();
-
-    if (month.length < 2) 
-        month = '0' + month;
-    if (day.length < 2) 
-        day = '0' + day;
-
-    return [year, month, day].join('-');
-  }
-
-  const handleSelectSizeChange = (event) => {
-    setPageSize(event.target.value);
-  };
+  const [deadlinesPassed6a3Months, setDeadlinesPassed6a3Months] = React.useState({deadlines:[], sum_amount:0});
+  const [deadlinesPassed3a0Months, setDeadlinesPassed3a0Months] = React.useState({deadlines:[], sum_amount:0});
+  const [deadlinesAfter0a3Months, setDeadlinesAfter0a3Months] = React.useState({deadlines:[], sum_amount:0});
+  const [deadlinesAfter3a6Months, setDeadlinesAfter3a6Months] = React.useState({deadlines:[], sum_amount:0});
+  const [maxDeadlineAmount, setMaxDeadlineAmount] = React.useState(0);
 
   const router = useRouter()
   const axios = useAxios();
   const { logoutUser } = useContext(AuthContext);
+
+  var sixMonthsPassed = dayjs().subtract(6, "months");
+  var threeMonthsPassed = dayjs().subtract(3, "months");
+
+  var threeMonthsOneDayPassed = dayjs().subtract(3, "months").add(1, "days");
+  var now = dayjs();
+
+  var nowPassedOneDay = dayjs().add(1, "days");
+  var threeMonthsAfter = dayjs().add(3, "months");
+
+  var threeMonthsOneAfter = dayjs().add(3, "months").add(1, "days");
+  var sixMonthsAfter = dayjs().add(6, "months");
 
   React.useEffect(() => {
     const sogemvalue ={
@@ -154,7 +60,83 @@ const Dashboard = () => {
         if(error.response && error.response.status === 401)
         logoutUser()
       }
-    ).then(() => {
+    )
+    .then(() => {
+      axios.get(`/deadlines_by_interval/${sixMonthsPassed.year()}/${(sixMonthsPassed.month()+1)}/${sixMonthsPassed.date()}/${threeMonthsPassed.year()}/${(threeMonthsPassed.month()+1)}/${threeMonthsPassed.date()}`).then(
+        res => {
+          setDeadlinesPassed6a3Months(res.data);
+          //setDeadlines(res.data.deadlines);
+          //setCount(res.data.count);
+          //setAmount(res.data.sum_amount);
+          if(res.data.sum_amount > maxDeadlineAmount)
+          setMaxDeadlineAmount(res.data.sum_amount)
+
+        }, 
+        error => {
+          console.log(error)
+          if(error.response && error.response.status === 401)
+          logoutUser()
+        }
+      )
+    })
+    .then(() => {
+      axios.get(`/deadlines_by_interval/${threeMonthsOneDayPassed.year()}/${(threeMonthsOneDayPassed.month()+1)}/${threeMonthsOneDayPassed.date()}/${now.year()}/${(now.month()+1)}/${now.date()}`).then(
+        res => {
+          setDeadlinesPassed3a0Months(res.data);
+          if(res.data.sum_amount > maxDeadlineAmount)
+          setMaxDeadlineAmount(res.data.sum_amount)
+        }, 
+        error => {
+          console.log(error)
+          if(error.response && error.response.status === 401)
+          logoutUser()
+        }
+      )
+    })
+    .then(() => {
+      axios.get(`/deadlines_by_interval/${nowPassedOneDay.year()}/${(nowPassedOneDay.month()+1)}/${nowPassedOneDay.date()}/${threeMonthsAfter.year()}/${(threeMonthsAfter.month()+1)}/${threeMonthsAfter.date()}`).then(
+        res => {
+          setDeadlinesAfter0a3Months(res.data);
+          if(res.data.sum_amount > maxDeadlineAmount)
+          setMaxDeadlineAmount(res.data.sum_amount)
+        }, 
+        error => {
+          console.log(error)
+          if(error.response && error.response.status === 401)
+          logoutUser()
+        }
+      )
+    })
+    .then(() => {
+      axios.get(`/deadlines_by_interval/${threeMonthsOneAfter.year()}/${(threeMonthsOneAfter.month()+1)}/${threeMonthsOneAfter.date()}/${sixMonthsAfter.year()}/${(sixMonthsAfter.month()+1)}/${sixMonthsAfter.date()}`).then(
+        res => {
+          setDeadlinesAfter3a6Months(res.data);
+          if(res.data.sum_amount > maxDeadlineAmount)
+          setMaxDeadlineAmount(res.data.sum_amount)
+        }, 
+        error => {
+          console.log(error)
+          if(error.response && error.response.status === 401)
+          logoutUser()
+        }
+      )
+    }) 
+    /* .then(() => {
+      setMaxDeadlineAmount(50050)
+    }) */
+    .then(() => {
+      if(!localStorage.getItem("moneyRef"))
+      axios.get(`/reference_money`).then(
+        res => {
+          localStorage.setItem("moneyRef", res.data.length > 0 ? res.data[0].label : null);
+        }, 
+        error => {
+          localStorage.setItem("moneyRef", null);
+          console.log(error)
+        } 
+      )
+    })
+    .then(() => {
       axios.get(`/borrowers`).then(
         res => {
           const sogem = res.data.filter(e => e.label === "SOGEM" )
@@ -175,7 +157,6 @@ const Dashboard = () => {
     })
     .then(() => {
       axios.get(`/deadlinepayments`).then(res => {
-        console.log("deadlinepayments ++++ ", res.data);
         setDeadlinespayments(res.data)
       },
       error => {
@@ -188,7 +169,7 @@ const Dashboard = () => {
           setPaymentStatus(res.data)
         },
         error => console.log(error)
-      )    })    
+    )})    
     .then(() => {
       setLoading(false)
     })
@@ -196,43 +177,13 @@ const Dashboard = () => {
 
 
 
-
-  const handleRequestSort = (event, property) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
-    setOrderBy(property);
-  };
-
   const getDisbursementsAmount = (disbursements) => {
-    var sum = disbursements.reduce((accumulator, e) => {
+    var sum = disbursements ? disbursements.reduce((accumulator, e) => {
       return accumulator + e.amount_by_ref_currency
-    },0);
+    },0) : 0;
     return sum;
   }
 
-  const getEcheancesAmount = (echeances) => {
-    var sum = echeances.reduce((accumulator, e) => {
-      return accumulator + e.amount_ref_currency
-    },0);
-    return sum;
-  }
-
-  const getEcheancePaymentAmounts = (echeances) => {
-    let amount = 0;
-    echeances ? echeances.reduce((commitmentsAmount, e) => {
-      e.deadlinespayments ? e.deadlinespayments.reduce((accumulator, el) => {
-        amount = amount+el.amount_ref_currency;
-        return el; 
-      },0) : 0;
-    },[]) : []; 
-    return amount;
-}
-
-  let pounds = Intl.NumberFormat( {
-    style: 'currency',
-    maximumSignificantDigits: 3,
-    minimumFractionDigits: 2
-  });
 
 
   /* const getCategorieCommitmentsAmounts = (commitments) => {
@@ -255,20 +206,216 @@ const Dashboard = () => {
     return commitmentsAmountArray;
   } */
 
-  const getCategoriesCommitmentsAmounts = (categories) => {
-      let amount = 0;
-      categories ? categories.reduce((commitmentsAmount, c) => {
-          c.commitments ? c.commitments.reduce((accumulator, e) => {
-              e.commitmentamounts ? e.commitmentamounts.reduce((accumulator, el) => {
-                //console.log(el.amount_by_ref_currency);
-                amount = amount+el.amount_by_ref_currency;
-                return el; 
-              },0) : 0;
-          },[]) : [];
-      },[]) : []; 
-      //console.log("categories comm amount", amount);
-      return amount;
+
+  const deadlineCummulPayments = (deadline) => {
+    var sum = ( deadline && deadline.deadlinespayments ) ? deadline.deadlinespayments.reduce((accumulator, e) => {
+      return accumulator + e.amount_ref_currency
+    },0) : 0;
+    return sum;
   }
+
+  const deadlinePaymentsAmount = (deadlines) => {
+    var sum = deadlines ? deadlines.reduce((accumulator, e) => {
+        return accumulator + deadlineCummulPayments(e)
+      },0) : 0;
+    return sum;
+  }
+
+  const deadlineCummulePaymentsRecieved = (deadline) => {
+    var recieveds = (deadline && deadline.deadlinespayments && deadline.deadlinespayments.length > 0) ? deadline.deadlinespayments.filter(p => (Math.max(...p.status.map(s => s.type.code)) === Math.max(...paymentStatus.map(t => t.code))) ) : []
+    var sum = recieveds ? recieveds.reduce((accumulator, e) => {
+        return accumulator + e.amount_ref_currency
+    },0) : 0;
+    return sum;
+  } 
+
+  const deadlinePaymentsRecievedAmount = (deadlines) => {
+    var sum = (deadlines && deadlines.length > 0) ? deadlines.reduce((accumulator, e) => {
+        return accumulator + deadlineCummulePaymentsRecieved(e)
+      },0) : 0;
+    return sum;
+  }
+
+ 
+ /*  const optionsdeadlinespayments2 = {
+    grid: {
+      show: true,
+      borderColor: "transparent",
+      strokeDashArray: 2,
+      padding: {
+        left: 0,
+        right: 0,
+        bottom: 0,
+      },
+    },
+    plotOptions: {
+      bar: {
+        horizontal: false,
+        columnWidth: "42%",
+        endingShape: "rounded",
+        borderRadius: 5,
+      },
+    },
+
+    colors: ["#6ebb4b", "#079ff0", "#cc7c67", "#1a7795"],
+    fill: {
+      type: "solid",
+      opacity: 1,
+    },
+    chart: {
+      offsetX: -15,
+      toolbar: {
+        show: false,
+      },
+      foreColor: "#adb0bb",
+      fontFamily: "'DM Sans',sans-serif",
+      sparkline: {
+        enabled: false,
+      },
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    markers: {
+      size: 0,
+    },
+    legend: {
+      show: false,
+    },
+    xaxis: {
+      type: "category",
+      categories: [
+        "Echus depuis 6 a 3 mois",
+        "Echus depuis 3 a 0 mois",
+        "Echus aprés 0 a 3 mois",
+        "Echus aprés 3 a 6 mois"
+      ],
+      labels: {
+        style: {
+          cssClass: "grey--text lighten-2--text fill-color",
+        },
+      },
+    },
+    yaxis: {
+      show: true,
+      min: 0,
+      max: Math.max(deadlinesPassed6a3Months.sum_amount, deadlinesPassed3a0Months.sum_amount, deadlinesAfter0a3Months.sum_amount, deadlinesAfter3a6Months.sum_amount),
+      tickAmount: 3,
+      labels: {
+        style: {
+          cssClass: "grey--text lighten-2--text fill-color",
+        },
+      },
+    },
+    stroke: {
+      show: true,
+      width: 5,
+      lineCap: "butt",
+      colors: ["transparent"],
+    },
+    tooltip: {
+      theme: "dark",
+    },
+  }; */
+
+  const optionsdeadlinespayments = {
+    chart: {
+      type: 'bar',
+      height: 350,
+      stacked: true,
+      toolbar: {
+        show: false
+      },
+      zoom: {
+        enabled: true
+      }
+    },
+    colors: ["#cc7c67", "#ecac64", "#079ff0"],
+    responsive: [{
+      breakpoint: 480,
+      options: {
+        legend: {
+          position: 'bottom',
+          offsetX: -10,
+          offsetY: 0
+        }
+      }
+    }],
+    plotOptions: {
+      bar: {
+        horizontal: false,
+        borderRadius: 10,
+        dataLabels: {
+          total: {
+            enabled: true,
+            style: {
+              fontSize: '13px',
+              fontWeight: 900
+            }
+          }
+        }
+      },
+    },
+    xaxis: {
+      //type: 'datetime',
+      categories: [
+        "Echus depuis 6 a 3 mois",
+        "Echus depuis 3 a 0 mois",
+        "Echus aprés 0 a 3 mois",
+        "Echus aprés 3 a 6 mois"
+      ],
+    },
+    yaxis: {
+      show: true,
+      min: 0, 
+      max: maxDeadlineAmount, 
+      tickAmount: 3,
+      labels: {
+        style: {
+          cssClass: "grey--text lighten-2--text fill-color",
+        },
+      },
+    },
+    legend: {
+      position: 'right',
+      offsetY: 40
+    },
+    fill: {
+      opacity: 1
+    }
+
+
+  };
+
+  const seriesdeadlinespayments = [
+    {
+      name: "Dettes non engagées",
+      data: [
+         (deadlinesPassed6a3Months.sum_amount-deadlinePaymentsAmount(deadlinesPassed6a3Months.deadlines)),
+         (deadlinesPassed3a0Months.sum_amount-deadlinePaymentsAmount(deadlinesPassed3a0Months.deadlines)),
+         (deadlinesAfter0a3Months.sum_amount-deadlinePaymentsAmount(deadlinesAfter0a3Months.deadlines)),
+         (deadlinesAfter3a6Months.sum_amount-deadlinePaymentsAmount(deadlinesAfter3a6Months.deadlines)),
+      ],
+    },
+    {
+      name: "Dettes engagées",
+      data: [
+         (deadlinePaymentsAmount(deadlinesPassed6a3Months.deadlines)-deadlinePaymentsRecievedAmount(deadlinesPassed6a3Months.deadlines)),
+         (deadlinePaymentsAmount(deadlinesPassed3a0Months.deadlines)-deadlinePaymentsRecievedAmount(deadlinesPassed3a0Months.deadlines)),
+         (deadlinePaymentsAmount(deadlinesAfter0a3Months.deadlines)-deadlinePaymentsRecievedAmount(deadlinesAfter0a3Months.deadlines)),
+         (deadlinePaymentsAmount(deadlinesAfter3a6Months.deadlines)-deadlinePaymentsRecievedAmount(deadlinesAfter3a6Months.deadlines)),
+      ],
+    },
+    {
+      name: "Dettes payées",
+      data: [
+         deadlinePaymentsRecievedAmount(deadlinesPassed6a3Months.deadlines),
+         deadlinePaymentsRecievedAmount(deadlinesPassed3a0Months.deadlines),
+         deadlinePaymentsRecievedAmount(deadlinesAfter0a3Months.deadlines),
+         deadlinePaymentsRecievedAmount(deadlinesAfter3a6Months.deadlines)
+      ],
+    }
+  ];
 
   function monthDiff(d1, d2) {
     var months;
@@ -428,96 +575,13 @@ const Dashboard = () => {
     return res
   }
 
-
-  const options2 = {
-    grid: {
-      show: true,
-      borderColor: "transparent",
-      strokeDashArray: 2,
-      padding: {
-        left: 0,
-        right: 0,
-        bottom: 0,
-      },
-    },
-    plotOptions: {
-      bar: {
-        horizontal: false,
-        columnWidth: "42%",
-        endingShape: "rounded",
-        borderRadius: 5,
-      },
-    },
-
-    colors: ["#6ebb4b", "#079ff0", "#cc7c67", "#1a7795"],
-    fill: {
-      type: "solid",
-      opacity: 1,
-    },
-    chart: {
-      offsetX: -15,
-      toolbar: {
-        show: false,
-      },
-      foreColor: "#adb0bb",
-      fontFamily: "'DM Sans',sans-serif",
-      sparkline: {
-        enabled: false,
-      },
-    },
-    dataLabels: {
-      enabled: false,
-    },
-    markers: {
-      size: 0,
-    },
-    legend: {
-      show: false,
-    },
-    xaxis: {
-      type: "category",
-      categories: [
-        "Durée passée moins de 25%",
-        "Durée passée entre 25% et 50%",
-        "Durée passée entre 50% et 75%",
-        "Durée passée plus de 75%"
-      ],
-      labels: {
-        style: {
-          cssClass: "grey--text lighten-2--text fill-color",
-        },
-      },
-    },
-    yaxis: {
-      show: true,
-      min: 0,
-      max: Conventions.length,
-      tickAmount: 3,
-      labels: {
-        style: {
-          cssClass: "grey--text lighten-2--text fill-color",
-        },
-      },
-    },
-    stroke: {
-      show: true,
-      width: 5,
-      lineCap: "butt",
-      colors: ["transparent"],
-    },
-    tooltip: {
-      theme: "dark",
-    },
-  };
-
-
   const options = {
     chart: {
       type: 'bar',
       height: 350,
       stacked: true,
       toolbar: {
-        show: true
+        show: false
       },
       zoom: {
         enabled: true
@@ -618,10 +682,6 @@ const Dashboard = () => {
     },
   ];
 
-  const pieParams = { height: 200, margin: { right: 5 } };
-  const palette = ['red', 'blue', 'green'];
-
-
   const deadlineCummulePayments = (payments) => {
     var sum = payments ? payments.reduce((accumulator, e) => {
       return accumulator + e.amount_ref_currency
@@ -670,9 +730,10 @@ const Dashboard = () => {
       </Typography> */}
 
       <BlogCard paymentsRecievedAmount = {paymentsRecievedAmount()} />
+      <DebtsCard paymentStatus = {paymentStatus} paymentsRecievedAmount = {paymentsRecievedAmount()} />
 
       <BaseCard titleColor={"secondary"} title="EXECUTION GLOBAL">
-        {Conventions.length > 0 > 0 ?
+        {Conventions.length > 0 ?
           <Chart
             options={options}
             series={seriesdeadlinesdissburssements}
@@ -686,285 +747,21 @@ const Dashboard = () => {
         } 
       </BaseCard>
 
-
-    <BaseCard titleColor={"secondary"} title={ selected ? selected.object : null}>
-
-    {/* {selected &&
-      <Typography align="center" color={"secondary"} fontSize="22px" fontWeight={'600'} variant="h5" mb={1} >
-        {selected.object}
-      </Typography>
-    } */}
-    {selected &&
-      <div style={{width:'100%' , display:'flex' , flexDirection:'row', 
-      justifyContent:'space-around', paddingLeft: 5, marginBottom: 20 , marginTop: 10,
-      whiteSpace: "nowrap", overflowX: 'auto', overflowY: 'hidden' }} >
-        <Chart
-          type="pie"
-          width={360}
-          /* width={1322}
-          height={550} */
-          series={[(selected.amount_ref_currency-getDisbursementsAmount(selected.disbursements)),(getDisbursementsAmount(selected.disbursements))]}
-          options={{
-            title:{text:"Décaissements"},
-            noData:{text:"Empty Data"},
-            labels:['Non décaissé', 'Décaissé'],
-            fill: {
-              type: "solid",
-              opacity: 1,
-              colors: ['#6ebb4b', '#cc7c67']
-            },
-            chart : {
-              offsetX: -15,
-              toolbar: {
-                show: false,
-              },
-              foreColor: "#adb0bb",
-              fontFamily: "'DM Sans',sans-serif",
-              sparkline: {
-                enabled: false,
-              },
-            },
-            yaxis: {
-              show: true,
-              min: 0,
-              max: all,
-              tickAmount: 5,
-              labels: {
-                style: {
-                  cssClass: "grey--text lighten-2--text fill-color",
-                },
-              },
-            },
-            stroke: {
-              show: true,
-              width: 5,
-              lineCap: "butt",
-              colors: ["transparent"],
-            },
-            colors: ['#6ebb4b', '#cc7c67']
-          }}
-        />
-        
-        <Chart
-          type="pie"
-          width={360}
-          //height={550} 
-          series={[(selected.amount_ref_currency-getCategoriesCommitmentsAmounts(selected.categories)),(getCategoriesCommitmentsAmounts(selected.categories))]}
-          options={{
-            title:{text:"Engagements"},
-            noData:{text:"Empty Data"},
-            labels:['Non Engagé','Engagé'],
-            fill: {
-              type: "solid",
-              opacity: 1,
-              colors: ['#6ebb4b', '#079ff0']
-            },
-            chart : {
-              offsetX: -15,
-              toolbar: {
-                show: false,
-              },
-              foreColor: "#adb0bb",
-              fontFamily: "'DM Sans',sans-serif",
-              sparkline: {
-                enabled: false,
-              },
-            },
-            yaxis: {
-              show: true,
-              min: 0,
-              max: all,
-              tickAmount: 5,
-              labels: {
-                style: {
-                  cssClass: "grey--text lighten-2--text fill-color",
-                },
-              },
-            },
-            stroke: {
-              show: true,
-              width: 5,
-              lineCap: "butt",
-              colors: ["transparent"],
-            },
-            colors: ['#6ebb4b', '#079ff0']
-          }}
-        />
-        {getEcheancesAmount(selected.deadlines) != 0  &&
-        <Chart
-          type="pie"
-          width={360}
-          //height={550} 
-          series={[(getEcheancesAmount(selected.deadlines) -getEcheancePaymentAmounts(selected.deadlines)),(getEcheancePaymentAmounts(selected.deadlines))]}
-          options={{
-            title:{text:"Dettes sur convention"},
-            noData:{text:"Empty Data"},
-            labels:['Non Payé','Payé'],
-            fill: {
-              type: "solid",
-              opacity: 1,
-              colors: ['#839192', '#079ff0']
-            },
-            chart : {
-              offsetX: -15,
-              toolbar: {
-                show: false,
-              },
-              foreColor: "#adb0bb",
-              fontFamily: "'DM Sans',sans-serif",
-              sparkline: {
-                enabled: false,
-              },
-            },
-            yaxis: {
-              show: true,
-              min: 0,
-              max: all,
-              tickAmount: 5,
-              labels: {
-                style: {
-                  cssClass: "grey--text lighten-2--text fill-color",
-                },
-              },
-            },
-            stroke: {
-              show: true,
-              width: 5,
-              lineCap: "butt",
-              colors: ["transparent"],
-            },
-            colors: ['#839192', '#079ff0']
-          }}
-        />
-        }
-      </div>
-    }
-    
-    {Conventions.length > 0 &&
-      <Box display="flex" alignItems="center" mb={5} ml={1}>
-          <Input placeholder="Cherche une convention ... " aria-label="description" fullWidth color="secondary" />
-          <Box
-            sx={{
-              ml: "auto",
-            }}
-          >
-            <IconButton
-              color="inherit"
-              sx={{
-                color: (theme) => theme.palette.grey.A200,
-              }}
-              //onClick={handleDrawerClose2}
-            >
-            </IconButton>
-          </Box>
-      </Box>
-    }
-      {Conventions.length > 0 ?
-      <TableContainer>
-        <Table
-              sx={{ minWidth: 750 }}
-              aria-labelledby="tableTitle"
-              size={'medium'}
-            >
-              <EnhancedTableHead
-                selected={selected}
-                order={order}
-                orderBy={orderBy}
-                onSelectAllClick ={null}
-                onRequestSort={handleRequestSort}
-                rowCount={Conventions.length}
-                headCells={headCells}
-                headerBG="#1A7795"
-                txtColor="#DCDCDC" 
-              />
-              <TableBody>
-                {Conventions
-                  .map((row, index) => {
-                    const isItemSelected = isSelected(row.id);
-                    const labelId = `enhanced-table-checkbox-${index}`;
-                    return (
-                      <TableRow
-                        hover
-                        onClick={(event) => handleClick(event, row)}
-                        role="checkbox"
-                        //aria-checked={isItemSelected}
-                        tabIndex={-1}
-                        key={row.id}
-                        //selected={isItemSelected}
-                      >
-                        
-                        <TableCell padding="checkbox">
-                          <Checkbox
-                            color="secondary"
-                            checked={isItemSelected}
-                            inputProps={{ 
-                              'aria-labelledby': labelId,
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell align="left" style={{fontWeight:"bold"}} >{row.reference}</TableCell>
-                        <TableCell align="left">{row.funder.label}</TableCell>
-                        <TableCell align="left"> <Box style={{display:"flex", flexDirection:"row"}} >  {pounds.format(parseFloat(row.amount_ref_currency).toFixed(2))} </Box> </TableCell>
-                        <TableCell align="left">{formatDate(row.start_date)} </TableCell>
-                        <TableCell align="left">{row.convention_periode} mois </TableCell>
-
-
-                      </TableRow>
-                    );
-                  })}
-              </TableBody>
-        </Table>
-      </TableContainer>
-      :
-      <div style={{width:'100%', fontSize:'20px', display:'flex', justifyContent:'center'}}>
-        List de conventons est vide
-      </div>
-      }
-      {Conventions.length > 0 &&
-        <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "space-between"}}>
-          <div style={{width:"50%", display:'flex', alignItems:'center'}}>
-            <Box style={{display:'flex', alignItems:'center', marginInline:"20px", fontWeight:'bold', color:"GrayText"}} >
-            Total : {all}
-            </Box>
+      <BaseCard titleColor={"secondary"} title="REMBOURSSEMENT DES DETTES">
+        {maxDeadlineAmount > 0  ?
+          <Chart
+            options={optionsdeadlinespayments}
+            series={seriesdeadlinespayments}
+            type="bar"
+            height="295px"
+          />
+          :
+          <div style={{width:'100%', fontSize:'20px', display:'flex', justifyContent:'center'}}>
+            List de conventons est vide
           </div>
-          <div style={{width:"50%", display:'flex', alignItems:'center', justifyContent:"end"}}>
-            <Box style={{display:'flex', alignItems:'center', marginInline:"20px", fontWeight:'normal', color:"GrayText"}} >
-              {pageNumber}/{totalPages}
-            </Box>
+        } 
+      </BaseCard>
 
-            <Tooltip title="Précédente">
-             <span>
-              <IconButton disabled={!hasPrevious} onClick={previous}>
-                <ArrowBack/>
-              </IconButton>
-              </span>
-            </Tooltip>
-
-            <Select
-              id="page-size-select"
-              value={pageSize}
-              onChange={handleSelectSizeChange }
-              label="pageSize"
-            >
-              <MenuItem value={pageSize}>
-                <em>{pageSize}</em>
-              </MenuItem>
-              <MenuItem value={5}>5</MenuItem>
-              <MenuItem value={10}>10</MenuItem>
-              <MenuItem value={20}>20</MenuItem>
-            </Select>  
-
-            <Tooltip title="Suivante">
-              <span>
-              <IconButton disabled={!hasNext} onClick={next} >
-                <ArrowForward/>
-              </IconButton>
-              </span>
-            </Tooltip>
-          </div>
-        </div>
-      }
-    </BaseCard>
     </BaseCard>
     </>
     )

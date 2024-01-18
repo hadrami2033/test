@@ -47,11 +47,13 @@ const EnhancedTableToolbar = (props) => {
 
         ) : (
           <Stack spacing={2} direction="row">
+            {openModal &&
             <Tooltip title="Ajouter">
               <Fab color="secondary" aria-label="Ajouter" onClick={openModal}>
                   <Add/>
               </Fab>
             </Tooltip>
+            }
           </Stack>
         )}
 
@@ -71,6 +73,7 @@ const EnhancedTableToolbar = (props) => {
 
         ) : 
         (
+          onSearch ? 
             <Paper
                 component="form"
                 sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 400 }}
@@ -84,7 +87,7 @@ const EnhancedTableToolbar = (props) => {
                 <IconButton onClick={goSearch} type="button" sx={{ p: '10px' }} aria-label="search">
                     <SearchIcon />
                 </IconButton>
-            </Paper>
+            </Paper> : null
         )}
   
         
