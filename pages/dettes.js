@@ -76,7 +76,6 @@ const headCells = [
 ];
 
 EnhancedTableHead.propTypes = {
-  //numSelected: PropTypes.number.isRequired,
   onRequestSort: PropTypes.func.isRequired,
   //onSelectAllClick: PropTypes.func.isRequired,
   order: PropTypes.oneOf(['asc', 'desc']).isRequired,
@@ -85,13 +84,12 @@ EnhancedTableHead.propTypes = {
 };
 
 EnhancedTableToolbar .propTypes = {
-  //selected: PropTypes.number.isRequired,
 };
 
 export default function EnhancedTable() {
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('calories');
-  const [selected, setSelected] = React.useState(null);
+  const [selected, setSelected] = React.useState(false);
   const [amount, setAmount] = React.useState(0);
   const [count, setCount] = React.useState(0);
   const [Deadlines, setDeadlines] = React.useState([])
@@ -119,6 +117,7 @@ export default function EnhancedTable() {
 
   useEffect(() => {
     setLoading(true)
+    if(selected)
     axios.get(`/deadlines_by_interval/${date[0].startDate.getFullYear()}/${(date[0].startDate.getMonth()+1)}/${date[0].startDate.getDate()}/${date[0].endDate.getFullYear()}/${(date[0].endDate.getMonth()+1)}/${date[0].endDate.getDate()}`).then(
       res => {
         console.log(res.data);
@@ -135,6 +134,23 @@ export default function EnhancedTable() {
     .then(() => {
       setLoading(false)
     })
+    else
+    axios.get(`/deadlines`).then(
+        res => {
+          console.log(res.data);
+          setDeadlines(res.data.deadlines);
+          setCount(res.data.count);
+          setAmount(res.data.sum_amount);
+        }, 
+        error => {
+          console.log(error)
+          if(error.response && error.response.status === 401)
+          logoutUser()
+        }
+      )
+      .then(() => {
+        setLoading(false)
+      })
   }, [valid])
   
 
@@ -191,12 +207,17 @@ export default function EnhancedTable() {
     setDate(val)
   }
 
-  const handleDate = () => {
-    setOpenDate(!openDate)
+  const handleCloseDate = () => {
+    setOpenDate(false)
+  }
+
+  const handleOpenDate = () => {
+    setOpenDate(true)
+    setSelected(true)
   }
 
   const validSelect = () => {
-    handleDate()
+    handleCloseDate()
     setValid(!valid)
   }
 
@@ -222,10 +243,10 @@ export default function EnhancedTable() {
     {/* {!detail ? */}
     <BaseCard titleColor={"secondary"} title="GESTION DES DETTES">
 
-        <Dialog maxWidth={'md'} open={openDate} onClose={handleDate}>
+        <Dialog maxWidth={'md'} open={openDate} onClose={handleCloseDate}>
             <DialogContent>
             <div style={{display:"flex", justifyContent:"end"}}>
-                <IconButton onClick={handleDate}>
+                <IconButton onClick={handleCloseDate}>
                 <Close fontSize='medium'/>
                 </IconButton>
             </div>
@@ -323,7 +344,7 @@ export default function EnhancedTable() {
                         disabled={true}
                     />
                 </Stack>
-                <IconButton title="Selectionner un intervalle" onClick={() => setOpenDate(true) }>
+                <IconButton title="Selectionner un intervalle" onClick={() => handleOpenDate() }>
                     <BsCalendar4Range
                         fontSize='30px'
                         color="#1a7795"
@@ -358,7 +379,6 @@ export default function EnhancedTable() {
               size={'medium'}
             >
               <EnhancedTableHead
-                selected={selected}
                 order={order}
                 orderBy={orderBy}
                 onSelectAllClick ={null}
@@ -375,16 +395,14 @@ export default function EnhancedTable() {
                       <TableRow
                         hover
                         role="checkbox"
-                        //aria-checked={isItemSelected}
                         tabIndex={-1}
                         key={row.id}
-                        //selected={isItemSelected}
                       >
                         <TableCell align="left" style={{fontWeight:"bold"}}></TableCell>
                         <TableCell align="left" style={{fontWeight:"bold"}}>{formatDate(row.date)} </TableCell>
                         <TableCell align="left" style={{fontWeight:"bold"}} >{row.reference}</TableCell>
                         <TableCell align="left">{row.convention ? row.convention.reference : null}</TableCell>
-                        <TableCell align="left">{( row.convention && row.convention.funder ) ? row.convention.funder.code : null}</TableCell>
+                        <TableCell align="left">{( row.convention && row.convention.funder ) ? row.convention.funder.label : null}</TableCell>
                         <TableCell align="left"> <Box style={{display:"flex", flexDirection:"row"}} >  {pounds.format(parseFloat(row.amount_ref_currency).toFixed(2))} <Box style={{fontSize:'12px', fontWeight:"bold", marginInlineStart:"5px", paddingTop:"1.7px" }}> {localStorage.getItem("moneyRef")} </Box> </Box> </TableCell>
                         <TableCell align="left"> <Box style={{display:"flex", flexDirection:"row"}} >{pounds.format(deadlineCummulePaymentsRecieved(row))} <Box style={{fontSize:'12px', fontWeight:"bold", marginInlineStart:"5px" , paddingTop:"1.7px" }}>  {localStorage.getItem("moneyRef")} </Box> </Box> </TableCell>
                         <TableCell align="left"> <Box style={{display:"flex", flexDirection:"row"}} >{pounds.format(row.amount_ref_currency-deadlineCummulePaymentsRecieved(row))} <Box style={{fontSize:'12px', fontWeight:"bold", marginInlineStart:"5px", paddingTop:"1.7px" }}> {localStorage.getItem("moneyRef")} </Box> </Box> </TableCell>
