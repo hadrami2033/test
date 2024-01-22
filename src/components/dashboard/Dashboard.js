@@ -62,15 +62,24 @@ const Dashboard = () => {
       }
     )
     .then(() => {
+      axios.get(`/max_intervals_data/${sixMonthsPassed.year()}/${(sixMonthsPassed.month()+1)}/${sixMonthsPassed.date()}/${threeMonthsPassed.year()}/${(threeMonthsPassed.month()+1)}/${threeMonthsPassed.date()}/${threeMonthsOneDayPassed.year()}/${(threeMonthsOneDayPassed.month()+1)}/${threeMonthsOneDayPassed.date()}/${now.year()}/${(now.month()+1)}/${now.date()}/${nowPassedOneDay.year()}/${(nowPassedOneDay.month()+1)}/${nowPassedOneDay.date()}/${threeMonthsAfter.year()}/${(threeMonthsAfter.month()+1)}/${threeMonthsAfter.date()}/${threeMonthsOneAfter.year()}/${(threeMonthsOneAfter.month()+1)}/${threeMonthsOneAfter.date()}/${sixMonthsAfter.year()}/${(sixMonthsAfter.month()+1)}/${sixMonthsAfter.date()}`).then(
+        res => {
+          setMaxDeadlineAmount(res.data.max_amount)
+        }, 
+        error => {
+          console.log(error)
+          if(error.response && error.response.status === 401)
+          logoutUser()
+        }
+      )
+    })
+    .then(() => {
       axios.get(`/deadlines_by_interval/${sixMonthsPassed.year()}/${(sixMonthsPassed.month()+1)}/${sixMonthsPassed.date()}/${threeMonthsPassed.year()}/${(threeMonthsPassed.month()+1)}/${threeMonthsPassed.date()}`).then(
         res => {
           setDeadlinesPassed6a3Months(res.data);
           //setDeadlines(res.data.deadlines);
           //setCount(res.data.count);
           //setAmount(res.data.sum_amount);
-          if(res.data.sum_amount > maxDeadlineAmount)
-          setMaxDeadlineAmount(res.data.sum_amount)
-
         }, 
         error => {
           console.log(error)
@@ -83,8 +92,6 @@ const Dashboard = () => {
       axios.get(`/deadlines_by_interval/${threeMonthsOneDayPassed.year()}/${(threeMonthsOneDayPassed.month()+1)}/${threeMonthsOneDayPassed.date()}/${now.year()}/${(now.month()+1)}/${now.date()}`).then(
         res => {
           setDeadlinesPassed3a0Months(res.data);
-          if(res.data.sum_amount > maxDeadlineAmount)
-          setMaxDeadlineAmount(res.data.sum_amount)
         }, 
         error => {
           console.log(error)
@@ -97,8 +104,6 @@ const Dashboard = () => {
       axios.get(`/deadlines_by_interval/${nowPassedOneDay.year()}/${(nowPassedOneDay.month()+1)}/${nowPassedOneDay.date()}/${threeMonthsAfter.year()}/${(threeMonthsAfter.month()+1)}/${threeMonthsAfter.date()}`).then(
         res => {
           setDeadlinesAfter0a3Months(res.data);
-          if(res.data.sum_amount > maxDeadlineAmount)
-          setMaxDeadlineAmount(res.data.sum_amount)
         }, 
         error => {
           console.log(error)
@@ -111,8 +116,6 @@ const Dashboard = () => {
       axios.get(`/deadlines_by_interval/${threeMonthsOneAfter.year()}/${(threeMonthsOneAfter.month()+1)}/${threeMonthsOneAfter.date()}/${sixMonthsAfter.year()}/${(sixMonthsAfter.month()+1)}/${sixMonthsAfter.date()}`).then(
         res => {
           setDeadlinesAfter3a6Months(res.data);
-          if(res.data.sum_amount > maxDeadlineAmount)
-          setMaxDeadlineAmount(res.data.sum_amount)
         }, 
         error => {
           console.log(error)
