@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Alert, Card, CardContent, Typography, Button, Grid, Tooltip, Stack,Snackbar, Box, Tab ,Tabs, CircularProgress, Fab, Paper  } from "@mui/material";
+import { Alert, Typography, Button, Grid, Tooltip, Stack,Snackbar, Box, Tab ,Tabs, CircularProgress, Fab, Paper  } from "@mui/material";
 import BaseCard from "./baseCard/BaseCard";
 import PropTypes from 'prop-types';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
 import TableRow from '@mui/material/TableRow';
 import EnhancedTableHead from "./Table/TableHeader";
 import Dialog from '@mui/material/Dialog';
@@ -18,16 +17,13 @@ import { Add, Close, CreateOutlined, Delete, InfoOutlined } from '@mui/icons-mat
 import IconButton from '@mui/material/IconButton';
 import DisbursementForm from "../../pages/add_disbursement";
 import CategorieForm from "../../pages/add_categorie";
-import states from "../helper/states";
 import DetailDisbursement from "../../pages/disbursement_detail";
 import DetailCategorie from "../../pages/categorie_detail";
 import DeadlineForm from "../../pages/add_deadline";
-import DetailDeadline from "../../pages/deadline_detail";
 import useAxios from "../utils/useAxios";
 import { useRouter } from "next/router";
 import { useContext } from "react";
 import AuthContext from "../context/AuthContext";
-import DetailCommitment from "./DetailCommitment";
 
 
 const headCellsDecaissements = [
@@ -273,7 +269,6 @@ const DetailConvention = (props) => {
   const [open, setOpen] = React.useState(false);
   const [openDetailDisbursement, setOpenDetailDisbursement] = React.useState(false);
   const [openDetailCategorie, setOpenDetailCategorie] = React.useState(false);
-  const [openDetailDeadline, setOpenDetailDeadline] = React.useState(false);
   const [openCategorieForm, setOpenCategorieForm] = React.useState(false);
   const [openDeadlineForm, setOpenDeadlineForm] = React.useState(false);
   const [disburssementSelected, setDisburssementSelected] = React.useState(null);
@@ -515,15 +510,6 @@ const DetailConvention = (props) => {
     } else {
       setOpenDetailCategorie(false);
       setCategorieSelected(null)
-    }
-  };
-
-  const handleCloseDetailDeadline = (event, reason) => {
-    if (reason === "backdropClick") {
-      console.log(reason);
-    } else {
-      setOpenDetailDeadline(false);
-      setDeadlineSelected(null)
     }
   };
 

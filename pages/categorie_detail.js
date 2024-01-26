@@ -1,6 +1,6 @@
 
-import React, { useEffect, useState } from "react";
-import { Typography, Grid, Box, CircularProgress, Tab ,Tabs, } from "@mui/material";
+import React, { useEffect } from "react";
+import { Typography, Grid, Box, Tab ,Tabs, } from "@mui/material";
 import BaseCard from "../src/components/baseCard/BaseCard";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -92,12 +92,7 @@ function a11yProps(index) {
 
 const DetailCategorie = (props) => {
   const {categorie, categoriecommitmentsamounts= [], categoriecommitmentsinvoices = [], currency} = props;
-  const [loading, setLoading] = React.useState(false);
   const [value, setValue] = React.useState(0);
-
-  useEffect(() => {
-    console.log(currency);
-  }, [])
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -129,19 +124,6 @@ const DetailCategorie = (props) => {
             {/* <Box display="flex" alignItems="center" justifyContent="center">
                 <Typography color="secondary" fontSize="25px" fontWeight={'1000'} variant="h2" >{disbursement ? disbursement.reference : ""}</Typography>
             </Box> */}
-        {loading ?
-          <Box style={{width:'100%', display:'flex', justifyContent:"center" }}>
-            <CircularProgress
-              size={24}
-                sx={{
-                color: 'primary',
-                position: 'absolute',
-                marginTop: '-12px',
-                marginLeft: '-12px',
-              }}
-            />
-         </Box>
-        :
           <Box style={{width:'100%'}}>
             {categorie &&
                 <Grid container spacing={2} marginLeft={'15px'}>
@@ -247,7 +229,6 @@ const DetailCategorie = (props) => {
                </CustomTabPanel>
            </Box>
           </Box>
-        }
     </BaseCard>
 
   );

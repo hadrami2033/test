@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  Grid,
   Stack,
   Button,
   CircularProgress
@@ -8,11 +7,10 @@ import {
 import BaseCard from "../src/components/baseCard/BaseCard";
 import { Form } from "../src/components/Form";
 import Controls from "../src/components/controls/Controls";
-import states from '../src/helper/paymentstatustype'
 import useAxios from "../src/utils/useAxios";
 
 const ReferenceMoneyForm = (props) => {
-  const {Money, push, update, showSuccessToast, showFailedToast, currencies} = props;
+  const {Money, push, showSuccessToast, showFailedToast, currencies} = props;
 
   const defaultValues = Money === null ? {
     label: null,

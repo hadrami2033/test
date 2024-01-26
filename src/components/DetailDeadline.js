@@ -93,7 +93,6 @@ const DetailDeadline = (props) => {
 
   const [loading, setLoading] = React.useState(false);
   const [value, setValue] = React.useState(0);
-  const [status, setStatus] = React.useState([]);
   const [openFailedToast, setOpenFailedToast] = React.useState(false);
   const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
   const [deadlinespayments, setDeadlinespayments] = React.useState([]);

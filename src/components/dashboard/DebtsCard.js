@@ -1,26 +1,18 @@
 import React, { useContext } from "react";
-import { Card, CardContent, Typography, Button, Grid, Tooltip, Stack, Box } from "@mui/material";
-import { FaHandshake } from 'react-icons/fa';
-import { GiMoneyStack, GiPayMoney, GiReceiveMoney } from 'react-icons/gi';
+import { Card, CardContent, Typography, Grid, Box } from "@mui/material";
+import { GiMoneyStack } from 'react-icons/gi';
 import useAxios from "../../utils/useAxios";
 import AuthContext from "../../context/AuthContext";
 import { LuTimerOff } from "react-icons/lu";
-import { RiLoader4Fill } from "react-icons/ri";
 import { TbTimeline } from "react-icons/tb";
 
 
 const DebtsCard = (props) => {
   const {paymentsRecievedAmount, paymentStatus} = props;
-  //colors: ['#6ebb4b', '#1a7795',  '#a52e36' , '#079ff0', '#cc7c67' , '#c8d789']
   const { logoutUser } = useContext(AuthContext);
 
   const [expiredDeadlines, setExpiredDeadlines] = React.useState([]);
   const [expiredDeadlinesAmount, setExpiredDeadlinesAmount] = React.useState(null);
-  const [countDiss, setCountDiss] = React.useState(null);
-  const [countComm, setCountComm] = React.useState(null);
-  const [amountConv, setAmountConv] = React.useState(null);
-  const [amountDiss, setAmountDiss] = React.useState(null);
-  const [amountComm, setAmountComm] = React.useState(null);
   const [amountDeadlines, setAmountDeadlines] = React.useState(null);
   const axios = useAxios();
 

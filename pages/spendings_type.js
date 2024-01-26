@@ -1,4 +1,4 @@
-import { Alert, Button, CircularProgress, IconButton, MenuItem, Snackbar, Tooltip } from "@mui/material";
+import { Alert, Button, CircularProgress, IconButton, Snackbar } from "@mui/material";
 import BaseCard from "../src/components/baseCard/BaseCard";
 import * as React from 'react';
 import PropTypes from 'prop-types';
@@ -16,9 +16,6 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Draggable from 'react-draggable';
-import { useRouter } from "next/router";
-import {ArrowBack, ArrowForward } from "@material-ui/icons";
-import Select from '@mui/material/Select';
 import { Box } from "@material-ui/core";
 import EnhancedTableToolbar from "../src/components/Table/TableToolbar";
 import { Close } from "@mui/icons-material";
@@ -65,19 +62,10 @@ export default function EnhancedTable() {
   const [open, setOpen] = React.useState(false);
   const [openDelete, setOpenDelete] = React.useState(false);
   const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
-  const [hasPrevious, setHasPrevious] = React.useState(false);
-  const [hasNext, setHasNext] = React.useState(false);
-  const [pageNumber, setPageNumber] = React.useState(1);
-  const [pageSize, setPageSize] = React.useState(10);
-  const [totalPages, setTotalPages] = React.useState(0);
-  const [all, setAll] = React.useState(0);
   const [openFailedToast, setOpenFailedToast] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [deleted, setDelete] = React.useState(false);
-  const [authenticated, setAuthenticated] = React.useState(false);
 
-
-  const router = useRouter()
   const axios = useAxios();
   const { logoutUser } = useContext(AuthContext);
 
@@ -117,17 +105,7 @@ export default function EnhancedTable() {
       
     
 
-  }, [pageNumber, pageSize, getBy, deleted])
-
-  React.useEffect(() => {
-   /*  if(!localStorage.getItem('user')){
-      console.log("no user in loc storage :", localStorage.getItem('user'));
-      router.push('/login')
-    }else{
-      console.log("user in loc storage :", localStorage.getItem('user'))
-      setAuthenticated(true)
-    } */
-  }, [])
+  }, [deleted])
 
   const showFailedToast = () => {
     setOpenFailedToast(true);
@@ -206,13 +184,6 @@ export default function EnhancedTable() {
     }
   };
 
-  const next = () => {
-    setPageNumber(pageNumber+1)
-  }
-  const previous = () => {
-    setPageNumber(pageNumber-1)
-  }
-
   const editClick = () => {
     setOpen(true);
   }
@@ -265,10 +236,6 @@ export default function EnhancedTable() {
   const handleOpenModalDelete = () =>{
     setOpenDelete(true)
   }
-
-  const handleSelectSizeChange = (event) => {
-    setPageSize(event.target.value);
-  };
 
   const PaperComponent = (props) => {
       return (
@@ -421,53 +388,6 @@ export default function EnhancedTable() {
           </>
         }
         </TableContainer>
-          {SpendingTypes.length > 0 &&
-          <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "space-between"}}>
-            <div style={{width:"50%", display:'flex', alignItems:'center'}}>
-              <Box style={{display:'flex', alignItems:'center', marginInline:"20px", fontWeight:'bold', color:"GrayText"}} >
-              Total : {all}
-              </Box>
-            </div>
-            <div style={{width:"50%", display:'flex', alignItems:'center', justifyContent:"end"}}>
-              <Box style={{display:'flex', alignItems:'center', marginInline:"20px", fontWeight:'normal', color:"GrayText"}} >
-                {pageNumber}/{totalPages}
-              </Box>
-
-              <Tooltip title="Précédente">
-                <span>
-                <Button disabled={!hasPrevious} onClick={previous}>
-                  <ArrowBack/>
-                </Button>
-                </span>
-              </Tooltip>
-
-              <Select
-                id="page-size-select"
-                value={pageSize}
-                onChange={handleSelectSizeChange }
-                label="pageSize"
-              >
-                <MenuItem value={pageSize}>
-                  <em>{pageSize}</em>
-                </MenuItem>
-                <MenuItem value={5}>5</MenuItem>
-                <MenuItem value={10}>10</MenuItem>
-                <MenuItem value={20}>20</MenuItem>
-              </Select>  
-
-              <Tooltip title="Suivante">
-                <span>
-                <Button disabled={!hasNext} onClick={next} >
-                  <ArrowForward/>
-                </Button>
-                </span>
-              </Tooltip>
-            </div>
-          </div>
-          }
     </BaseCard>
-    {/* :
-    <DetailSpendingType clientsCount = {200 } numbersCount = {200 } SpendingType = {selected} />
-    } */}
   </>);
 }

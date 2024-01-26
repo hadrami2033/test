@@ -26,34 +26,6 @@ import { useContext } from "react";
 import AuthContext from "../src/context/AuthContext";
 
 
-function descendingComparator(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
-  return 0;
-}
-
-function getComparator(order, orderBy) {
-  return order === 'desc'
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
-}
-
-function stableSort(array, comparator) {
-  const stabilizedThis = array.map((el, index) => [el, index]);
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) {
-      return order;
-    }
-    return a[1] - b[1];
-  });
-  return stabilizedThis.map((el) => el[0]);
-}
-
 const headCells = [
   {
     id: 'reference',
@@ -94,12 +66,6 @@ const headCells = [
 ];
 
 EnhancedTableHead.propTypes = {
-  //numSelected: PropTypes.number.isRequired,
-  onRequestSort: PropTypes.func.isRequired,
-  //onSelectAllClick: PropTypes.func.isRequired,
-  order: PropTypes.oneOf(['asc', 'desc']).isRequired,
-  orderBy: PropTypes.string.isRequired,
-  rowCount: PropTypes.number.isRequired,
 };
 
 EnhancedTableToolbar .propTypes = {
@@ -113,7 +79,6 @@ export default function EnhancedTable() {
   const [Commitments, setCommitments] = React.useState([])
   const [search, setSearch] = React.useState("")
   const [getBy, setGetBy] = React.useState("")
-  const [open, setOpen] = React.useState(false);
   const [openDelete, setOpenDelete] = React.useState(false);
   const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
   const [hasPrevious, setHasPrevious] = React.useState(false);
@@ -125,7 +90,6 @@ export default function EnhancedTable() {
   const [openFailedToast, setOpenFailedToast] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [deleted, setDelete] = React.useState(false);
-  const [authenticated, setAuthenticated] = React.useState(false);
 
 
   const router = useRouter()
@@ -289,18 +253,6 @@ export default function EnhancedTable() {
     const dateFormat = new Date(date).getDate()+"/"+(new Date(date).getMonth()+1)+"/"+new Date(date).getFullYear();
     return dateFormat;
   }
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = (event, reason) => {
-    if (reason === "backdropClick") {
-      console.log(reason);
-    } else {
-      setOpen(false);
-    }
-  };
 
   const handleCloseModalDelete = () =>{
     setOpenDelete(false)

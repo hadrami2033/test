@@ -1,7 +1,6 @@
 import { Alert, Button, CircularProgress, IconButton, MenuItem, Snackbar, Tooltip } from "@mui/material";
 import BaseCard from "../src/components/baseCard/BaseCard";
 import * as React from 'react';
-import PropTypes from 'prop-types';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -55,12 +54,6 @@ const headCells = [
 ];
 
 EnhancedTableHead.propTypes = {
-  //numSelected: PropTypes.number.isRequired,
-  onRequestSort: PropTypes.func.isRequired,
-  //onSelectAllClick: PropTypes.func.isRequired,
-  order: PropTypes.oneOf(['asc', 'desc']).isRequired,
-  orderBy: PropTypes.string.isRequired,
-  rowCount: PropTypes.number.isRequired,
 };
 
 EnhancedTableToolbar .propTypes = {
@@ -86,7 +79,6 @@ export default function EnhancedTable() {
   const [openFailedToast, setOpenFailedToast] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [deleted, setDelete] = React.useState(false);
-  const [authenticated, setAuthenticated] = React.useState(false);
   const { logoutUser } = useContext(AuthContext);
 
 
@@ -292,14 +284,6 @@ export default function EnhancedTable() {
         </Draggable>
       );
   }  
-
-  const BorrowerDetail = () => {
-    //setDetail(true);
-    router.push({
-      pathname: '/Borrower_detail',
-      query: {id: selected.id}
-    })
-  }
 
   return (<>
     {/* {authenticated &&} */}

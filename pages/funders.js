@@ -16,7 +16,6 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Draggable from 'react-draggable';
-import { useRouter } from "next/router";
 import {ArrowBack, ArrowForward } from "@material-ui/icons";
 import Select from '@mui/material/Select';
 import { Box } from "@material-ui/core";
@@ -79,10 +78,8 @@ export default function EnhancedTable() {
   const [openFailedToast, setOpenFailedToast] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [deleted, setDelete] = React.useState(false);
-  const [authenticated, setAuthenticated] = React.useState(false);
 
 
-  const router = useRouter()
   const axios = useAxios();
   const { logoutUser } = React.useContext(AuthContext);
 
@@ -123,16 +120,6 @@ export default function EnhancedTable() {
     
 
   }, [pageNumber, pageSize, getBy, deleted])
-
-  React.useEffect(() => {
-   /*  if(!localStorage.getItem('user')){
-      console.log("no user in loc storage :", localStorage.getItem('user'));
-      router.push('/login')
-    }else{
-      console.log("user in loc storage :", localStorage.getItem('user'))
-      setAuthenticated(true)
-    } */
-  }, [])
 
   const showFailedToast = () => {
     setOpenFailedToast(true);
@@ -285,14 +272,6 @@ export default function EnhancedTable() {
         </Draggable>
       );
   }  
-
-  const FunderDetail = () => {
-    //setDetail(true);
-    router.push({
-      pathname: '/Funder_detail',
-      query: {id: selected.id}
-    })
-  }
 
   return (<>
     {/* {authenticated &&} */}

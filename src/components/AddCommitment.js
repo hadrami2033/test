@@ -1,10 +1,8 @@
 import React, { useState } from "react";
 import {
-  Grid,
   Stack,
   Button,
-  CircularProgress,
-  Box
+  CircularProgress
 } from "@mui/material";
 import BaseCard from "./baseCard/BaseCard";
 import { Form } from "./Form";

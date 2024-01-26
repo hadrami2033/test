@@ -16,9 +16,6 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Draggable from 'react-draggable';
-import { useRouter } from "next/router";
-import {ArrowBack, ArrowForward } from "@material-ui/icons";
-import Select from '@mui/material/Select';
 import { Box } from "@material-ui/core";
 import EnhancedTableToolbar from "../src/components/Table/TableToolbar";
 import { Close } from "@mui/icons-material";
@@ -65,17 +62,9 @@ export default function EnhancedTable() {
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('calories');
   const [selected, setSelected] = React.useState(null);
-  const [search, setSearch] = React.useState("")
-  const [getBy, setGetBy] = React.useState("")
   const [open, setOpen] = React.useState(false);
   const [openDelete, setOpenDelete] = React.useState(false);
   const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
-  const [hasPrevious, setHasPrevious] = React.useState(false);
-  const [hasNext, setHasNext] = React.useState(false);
-  const [pageNumber, setPageNumber] = React.useState(1);
-  const [pageSize, setPageSize] = React.useState(10);
-  const [totalPages, setTotalPages] = React.useState(0);
-  const [all, setAll] = React.useState(0);
   const [openFailedToast, setOpenFailedToast] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [deleted, setDelete] = React.useState(false);
@@ -83,7 +72,6 @@ export default function EnhancedTable() {
   const [referenceMoney, setReferenceMoney] = React.useState([])
 
   const axios = useAxios();
-  const router = useRouter()
   const { logoutUser } = useContext(AuthContext);
 
   React.useEffect(() => {
@@ -197,17 +185,6 @@ export default function EnhancedTable() {
     }
   };
 
-  const next = () => {
-    setPageNumber(pageNumber+1)
-  }
-  const previous = () => {
-    setPageNumber(pageNumber-1)
-  }
-
-  const editClick = () => {
-    setOpen(true);
-  }
-
   const deleteClick = () => {
     console.log("delete => ", selected);
     handleOpenModalDelete()
@@ -217,19 +194,6 @@ export default function EnhancedTable() {
     if(selected !== null)
       return selected[field]
     return ""
-  }
-
-  const onSearch = e => {
-    const { value } = e.target
-    setSearch(value)
-    if(value === ""){
-      setGetBy("")
-    }
-  }
-
-  const goSearch = () => {
-    console.log(search);
-    setGetBy(search)
   }
 
   const isSelected = (id) => {
@@ -256,10 +220,6 @@ export default function EnhancedTable() {
   const handleOpenModalDelete = () =>{
     setOpenDelete(true)
   }
-
-  const handleSelectSizeChange = (event) => {
-    setPageSize(event.target.value);
-  };
 
   const PaperComponent = (props) => {
       return (
@@ -335,9 +295,7 @@ export default function EnhancedTable() {
         field = {shooseField("label")} 
         selected = {selected}
         deleteClick = {deleteClick}
-        search = {search}
         openModal = {referenceMoney.length > 0 ? null : handleClickOpen}
-        goSearch = {goSearch}
       />
 
        <TableContainer>
