@@ -22,10 +22,8 @@ import { Form } from "../src/components/Form";
 import { Visibility, VisibilityOff } from "@material-ui/icons";
 import UserForm from "./user_form";
 import { Close } from '@mui/icons-material';
-import { useRouter } from "next/router";
 import AuthContext from "../src/context/AuthContext";
 import baseURL from "../src/utils/baseURL";
-import useAxios from "../src/utils/useAxios";
 
 const Login = () =>{
     const defaultUser = {
@@ -45,10 +43,7 @@ const Login = () =>{
     const [openModal, setOpenModal] = React.useState(false);
     const [openFailedToast, setOpenFailedToast] = React.useState(false);
     const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
-    const [users, setUsers] = React.useState([]);
-    const axios = useAxios();
 
-    const router = useRouter()
     const validate = (fieldValues = values) => {
       let temp = { ...errors };
       if ("username" in fieldValues)
@@ -244,11 +239,9 @@ const Login = () =>{
             <Box style={{fontSize:'20px', color:'red'}} color="danger"> Authentification invalide </Box>
           </Stack>
           }
-          {users.length === 0 &&
           <Stack spacing={2} direction="row" style={{marginTop:10}}>
             <Button style={{fontSize:'20px'}} color="primary" onClick={handleOpenModal} > Inscription </Button>
           </Stack>
-          }
         </BaseCard>
       </Grid>
     </form>

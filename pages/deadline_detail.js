@@ -1,28 +1,16 @@
 
 import React, { useEffect, useState } from "react";
-import { Typography, Grid, Box, CircularProgress, Tab ,Tabs, Stack, Tooltip, Fab, } from "@mui/material";
-import BaseCard from "../src/components/baseCard/BaseCard";
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableRow from '@mui/material/TableRow';
-import EnhancedTableHead from "../src/components/Table/TableHeader";
-import PropTypes from 'prop-types';
+import {Box, CircularProgress } from "@mui/material";
 import useAxios from "../src/utils/useAxios";
-import { Add } from "@mui/icons-material";
 import { useRouter } from "next/router";
 import AuthContext from "../src/context/AuthContext";
 import DetailDeadline from "../src/components/DetailDeadline";
 
-
-
-const detailDeadline = () => {
+export default function detailDeadline () {
   const router = useRouter()
   const {id, currency} = router.query
   const axios = useAxios();
-
   const [loading, setLoading] = React.useState(false);
-  const [value, setValue] = React.useState(0);
   const [deadline, setDeadline] = React.useState(null);
 
   const { logoutUser } = React.useContext(AuthContext);
@@ -68,5 +56,3 @@ const detailDeadline = () => {
 </> 
   );
 };
-
-export default detailDeadline;

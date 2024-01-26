@@ -78,7 +78,6 @@ export default function EnhancedTable() {
   const [Invoices, setInvoices] = React.useState([])
   const [search, setSearch] = React.useState("")
   const [getBy, setGetBy] = React.useState("")
-  const [open, setOpen] = React.useState(false);
   const [openDelete, setOpenDelete] = React.useState(false);
   const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
   const [hasPrevious, setHasPrevious] = React.useState(false);
@@ -90,7 +89,6 @@ export default function EnhancedTable() {
   const [openFailedToast, setOpenFailedToast] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [deleted, setDelete] = React.useState(false);
-  const [authenticated, setAuthenticated] = React.useState(false);
 
   const { logoutUser } = useContext(AuthContext);
 
@@ -135,16 +133,6 @@ export default function EnhancedTable() {
 
   }, [pageNumber, pageSize, getBy, deleted])
 
-  React.useEffect(() => {
-   /*  if(!localStorage.getItem('user')){
-      console.log("no user in loc storage :", localStorage.getItem('user'));
-      router.push('/login')
-    }else{
-      console.log("user in loc storage :", localStorage.getItem('user'))
-      setAuthenticated(true)
-    } */
-  }, [])
-
   const showFailedToast = () => {
     setOpenFailedToast(true);
   };
@@ -172,26 +160,6 @@ export default function EnhancedTable() {
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
   };
-
-  const push = (e) =>{
-    //Invoices.push(e)
-    axios.get(`/invoices`).then(
-        res => {
-          console.log(res.data);
-          setInvoices(res.data);
-          //setHasNext(res.data.nextPage);
-          //setHasPrevious(res.data.previousPage);
-          //setTotalPages(res.data.TotalPages);
-          //setAll(res.data.TotalCount);
-        }, 
-        error => console.log(error)
-    )
-  }
-
-  const update = (e) =>{
-    var objIndex = Invoices.findIndex((obj => obj.id == e.id));
-    Invoices[objIndex] = e
-  }
 
   const remove = () =>{
     if(selected !== null){
@@ -274,18 +242,6 @@ export default function EnhancedTable() {
     const dateFormat = new Date(date).getDate()+"/"+(new Date(date).getMonth()+1)+"/"+new Date(date).getFullYear();
     return dateFormat;
   }
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = (event, reason) => {
-    if (reason === "backdropClick") {
-      console.log(reason);
-    } else {
-      setOpen(false);
-    }
-  };
 
   const handleCloseModalDelete = () =>{
     setOpenDelete(false)

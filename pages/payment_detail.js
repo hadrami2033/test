@@ -1,15 +1,11 @@
 
-import React, { useEffect, useState } from "react";
-import { Typography, Grid, Box, CircularProgress  } from "@mui/material";
+import React, { useEffect } from "react";
+import { Typography, Grid, Box } from "@mui/material";
 import BaseCard from "../src/components/baseCard/BaseCard";
 
 
 const DetailPayment = (props) => {
   const {payment, paymentStatus, currency} = props;
-
-  const [loading, setLoading] = React.useState(false);
-
- 
 
   useEffect(() => {
     console.log(payment);
@@ -76,23 +72,7 @@ const DetailPayment = (props) => {
 
   return (
     <BaseCard titleColor={"secondary"} title={ payment ? "Paiement : " + payment.reference : ""}>
-            {/* <Box display="flex" alignItems="center" justifyContent="center">
-                <Typography color="secondary" fontSize="25px" fontWeight={'1000'} variant="h2" >{payment ? payment.reference : ""}</Typography>
-            </Box> */}
-        {loading ?
-          <Box style={{width:'100%', display:'flex', justifyContent:"center" }}>
-            <CircularProgress
-              size={24}
-                sx={{
-                color: 'primary',
-                position: 'absolute',
-                marginTop: '-12px',
-                marginLeft: '-12px',
-              }}
-            />
-         </Box>
-        :
-          <Box style={{width:'100%'}}>
+      <Box style={{width:'100%'}}>
             {payment && paymentStatus.length > 0 &&
                 <Grid container spacing={2} marginLeft={'15px'}>
 
@@ -231,10 +211,8 @@ const DetailPayment = (props) => {
                         }                     
                     </Grid>
                 }
-          </Box>
-        }
+      </Box>
     </BaseCard>
-
   );
 };
 

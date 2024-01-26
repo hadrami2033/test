@@ -1,6 +1,5 @@
 import React, { useContext, useState } from "react";
 import {
-  Grid,
   Stack,
   Button,
   CircularProgress,
@@ -189,29 +188,11 @@ const PaymentForm = (props) => {
     else
       return "Modifier un paiement"
   }
-
-
-
-  const getStatus = (id) => {
-    if(id && disbursementStatus.length > 0){
-      let e = disbursementStatus.filter(e => e.id === id );
-      return e[0].label
-    }
-    return null;
-  }
   
   const getStatusId = (code) =>{
     if(code && paymentStatus.length > 0){
       let e = paymentStatus.filter(e => e.code === code );
       return e[0].id
-    }
-    return null;
-  }
-
-  const getStatusByCode = (code) => {
-    if(code){
-      let e = paymentStatus.filter(e => e.code === code );
-      return e[0].label
     }
     return null;
   }

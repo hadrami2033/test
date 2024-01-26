@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  Grid,
   Stack,
   Button,
   CircularProgress
@@ -49,10 +48,10 @@ const ConventionForm = (props) => {
     dayjs(new Date()),
   ]);
 
-  const [valueRefundDateRange, setValueRefundDateRange] = useState([
+  /* const [valueRefundDateRange, setValueRefundDateRange] = useState([
     dayjs(new Date()),
     dayjs(new Date()),
-  ]);
+  ]); */
 
   const defaultValues = convention === null ? {
     reference: "",
@@ -93,11 +92,11 @@ const ConventionForm = (props) => {
   ]
 
 
-  const compareDates = (d1, d2) => {
+  /* const compareDates = (d1, d2) => {
     console.log(formatDate(d1), formatDate(d2));
     console.log(d1>d2);
     return d1>d2;
-  }
+  } */
 
 
 
@@ -259,7 +258,7 @@ const ConventionForm = (props) => {
       return "Modifier une convention"
   }
 
-  const changeRangeDate = (val) =>{
+ /*  const changeRangeDate = (val) =>{
     console.log(val);
     values["start_date"] = formatDate(val[0])
     values["end_date"] = formatDate(val[1])
@@ -271,7 +270,7 @@ const ConventionForm = (props) => {
     values["start_date_refund"] = formatDate(val[0])
     values["end_date_refund"] = formatDate(val[1])
     setValueRefundDateRange(val)
-  }
+  } */
 
   const getBorrower = (id) => {
     let b = id ? borrowers.find((e) => e.id === id) : null ;

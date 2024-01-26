@@ -101,7 +101,6 @@ export default function EnhancedTable() {
   const [Conventions, setConventions] = React.useState([])
   const [search, setSearch] = React.useState("")
   const [getBy, setGetBy] = React.useState("")
-  const [open, setOpen] = React.useState(false);
   const [openDelete, setOpenDelete] = React.useState(false);
   const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
   const [hasPrevious, setHasPrevious] = React.useState(false);

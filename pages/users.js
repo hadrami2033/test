@@ -9,7 +9,6 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import Checkbox from '@mui/material/Checkbox';
 import EnhancedTableHead from "../src/components/Table/TableHeader";
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -79,12 +78,10 @@ EnhancedTableToolbar .propTypes = {
 export default function EnhancedTable() {
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('username');
-  const [selected, setSelected] = React.useState(null);
   const [user, setUser] = React.useState({});
   const [Users, setUsers] = React.useState([])
   const [search, setSearch] = React.useState("")
   const [getBy, setGetBy] = React.useState("")
-  const [open, setOpen] = React.useState(false);
   const [openDelete, setOpenDelete] = React.useState(false);
   const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
   const [hasPrevious, setHasPrevious] = React.useState(false);
@@ -191,25 +188,6 @@ export default function EnhancedTable() {
     setPageNumber(pageNumber-1)
   }
 
-  const editClick = () => {
-    console.log("edit => ", selected);
-    router.push({
-      pathname: '/add_User',
-      query: { id: selected.id }
-    })
-  }
-
-  const deleteClick = () => {
-    console.log("delete => ", selected);
-    handleOpenModalDelete()
-  }
-
-  const shooseField = (field)=> {
-    if(selected !== null)
-      return selected[field]
-    return ""
-  }
-
   const onSearch = e => {
     const { value } = e.target
     setSearch(value)
@@ -221,11 +199,6 @@ export default function EnhancedTable() {
   const goSearch = () => {
     console.log(search);
     setGetBy(search)
-  }
-
-  const isSelected = (id) => {
-    console.log("idddd ", id);
-    return selected !== null && selected.id === id; //selected.indexOf(id) !== -1;
   }
 
   const formatDate = (date) => {
@@ -284,14 +257,6 @@ export default function EnhancedTable() {
         </Draggable>
       );
   }  
-
-  const UserDetail = () => {
-    //setDetail(true);
-    router.push({
-      pathname: '/User_detail',
-      query: { id: selected.id }
-    })
-  }
 
   const userState = () => {
     if(user.is_active)

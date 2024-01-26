@@ -14,7 +14,6 @@ import {
 import BaseCard from "../src/components/baseCard/BaseCard";
 import { Form } from "../src/components/Form";
 import Controls from "../src/components/controls/Controls";
-import { useRouter } from "next/router";
 import { Visibility, VisibilityOff } from "@material-ui/icons";
 import baseURL from "../src/utils/baseURL";
 import { useContext } from "react";
@@ -64,7 +63,6 @@ const UserForm = (props) => {
 
   const [formValues, setFormValues] = useState(defaultValues);
   const [loading, setLoading] = React.useState(false);
-  const router = useRouter()
 
   const validate = (fieldValues = values) => {
     let temp = { ...errors };

@@ -11,7 +11,7 @@ import TableRow from '@mui/material/TableRow';
 import EnhancedTableHead from "../src/components/Table/TableHeader";
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
-import {ArrowBack, ArrowForward, Info } from "@material-ui/icons";
+import {ArrowBack, ArrowForward } from "@material-ui/icons";
 import Select from '@mui/material/Select';
 import { Box } from "@material-ui/core";
 import EnhancedTableToolbar from "../src/components/Table/TableToolbar";
