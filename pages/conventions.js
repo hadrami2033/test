@@ -90,9 +90,9 @@ EnhancedTableHead.propTypes = {
   rowCount: PropTypes.number.isRequired,
 };
 
-EnhancedTableToolbar .propTypes = {
+/* EnhancedTableToolbar .propTypes = {
   //selected: PropTypes.number.isRequired,
-};
+}; */
 
 export default function EnhancedTable() {
   const [order, setOrder] = React.useState('asc');
@@ -296,7 +296,7 @@ export default function EnhancedTable() {
   }
 
   const handleSelectSizeChange = (event) => {
-    setPageSize(event.target.value);
+    return setPageSize(event.target.value);
   };
 
   const PaperComponent = (props) => {
@@ -312,7 +312,7 @@ export default function EnhancedTable() {
 
   const conventionDetail = () => {
     //setDetail(true);
-    router.push({
+    return router.push({
       pathname: '/convention_detail',
       query: { id: selected.id }
     })
@@ -341,7 +341,7 @@ export default function EnhancedTable() {
   const getEcheancePaymentAmounts = (echeances) => {
     let amount = 0;
     echeances ? echeances.reduce((commitmentsAmount, e) => {
-      e.deadlinespayments ? e.deadlinespayments.reduce((accumulator, el) => {
+      return e.deadlinespayments ? e.deadlinespayments.reduce((accumulator, el) => {
         amount = amount+el.amount_ref_currency;
         return el; 
       },0) : 0;
@@ -352,8 +352,8 @@ export default function EnhancedTable() {
   const getCategoriesCommitmentsAmounts = (categories) => {
     let amount = 0;
     categories ? categories.reduce((commitmentsAmount, c) => {
-        c.commitments ? c.commitments.reduce((accumulator, e) => {
-            e.commitmentamounts ? e.commitmentamounts.reduce((accumulator, el) => {
+        return c.commitments ? c.commitments.reduce((accumulator, e) => {
+          return  e.commitmentamounts ? e.commitmentamounts.reduce((accumulator, el) => {
               //console.log(el.amount_by_ref_currency);
               amount = amount+el.amount_by_ref_currency;
               return el; 
@@ -564,7 +564,7 @@ export default function EnhancedTable() {
         openModal = {addConvention}
         goSearch = {goSearch}
       />
-       <TableContainer>
+      <TableContainer>
        
        {loading ?
           <Box style={{width:'100%', display:'flex', justifyContent:"center" }}>
@@ -645,9 +645,9 @@ export default function EnhancedTable() {
           }
           </>
         }
-        </TableContainer>
-          {Conventions.length > 0 &&
-          <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "space-between"}}>
+      </TableContainer>
+      {Conventions.length > 0 &&
+       <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "space-between"}}>
             <div style={{width:"50%", display:'flex', alignItems:'center'}}>
               <Box style={{display:'flex', alignItems:'center', marginInline:"20px", fontWeight:'bold', color:"GrayText"}} >
               Total : {all}
@@ -688,8 +688,8 @@ export default function EnhancedTable() {
                 </span>
               </Tooltip>
             </div>
-          </div>
-          }
+       </div>
+      }
     </BaseCard>
     {/* :
     <DetailConvention clientsCount = {200 } numbersCount = {200 } convention = {selected} />

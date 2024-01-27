@@ -120,7 +120,7 @@ const DebtsCard = (props) => {
                   marginInlineStart: "10px"
                 }}
               >
-                Dette global
+                Dette globale
               </Typography>
               </Box>
               <Box style={{width:'100%', display:'flex', flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
@@ -197,7 +197,7 @@ const DebtsCard = (props) => {
                   marginInlineStart: "10px"
                 }}
               >
-                Dette échus non engagé
+                Dette échue non engagée
               </Typography>
             </Box>
             <Box style={{width:'100%', display:'flex', flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
@@ -276,7 +276,7 @@ const DebtsCard = (props) => {
                   marginInlineStart: "10px"
                 }}
               >
-                Dette échus engagé
+                Dette échue engagée
               </Typography>
             </Box>
             <Box style={{width:'100%', display:'flex', flexDirection:'row', alignItems:'center', justifyContent:'center'}}>

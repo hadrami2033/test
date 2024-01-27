@@ -6,12 +6,14 @@ import { useRouter } from "next/router";
 import AuthContext from "../src/context/AuthContext";
 import DetailDeadline from "../src/components/DetailDeadline";
 
-export default function detailDeadline () {
-  const router = useRouter()
-  const {id, currency} = router.query
+export default function DetailDeadlines () {
+  const [loading, setLoading] = useState(false);
+  const [deadline, setDeadline] = useState(null);
+
+  const router = useRouter();
   const axios = useAxios();
-  const [loading, setLoading] = React.useState(false);
-  const [deadline, setDeadline] = React.useState(null);
+
+  const {id, currency} = router.query
 
   const { logoutUser } = React.useContext(AuthContext);
 

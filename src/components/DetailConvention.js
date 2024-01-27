@@ -1670,7 +1670,7 @@ const DetailConvention = (props) => {
                                     <TableCell align="left">{formatDate(row.date)}</TableCell>
                                     <TableCell align="left">{row.reference}</TableCell>
                                     <TableCell align="left">{pounds.format(row.amount)} {currency.label}</TableCell>
-                                    <TableCell align="left">{pounds.format(row.amount_ref_currency)} </TableCell>
+                                    <TableCell align="left">{pounds.format(row.amount_ref_currency)} {localStorage.getItem("moneyRef")} </TableCell>
                                     <TableCell align="left">{row.order} </TableCell>
                                     <TableCell align="left">
                                        {deadlineState(row) === 1 &&

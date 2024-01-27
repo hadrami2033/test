@@ -735,7 +735,7 @@ const Dashboard = () => {
       <BlogCard paymentsRecievedAmount = {paymentsRecievedAmount()} />
       <DebtsCard paymentStatus = {paymentStatus} paymentsRecievedAmount = {paymentsRecievedAmount()} />
 
-      <BaseCard titleColor={"secondary"} title="EXECUTION GLOBAL">
+      <BaseCard titleColor={"secondary"} title="EXECUTION GLOBALE DES CONVENTIONS">
         {Conventions.length > 0 ?
           <Chart
             options={options}
@@ -750,7 +750,7 @@ const Dashboard = () => {
         } 
       </BaseCard>
 
-      <BaseCard titleColor={"secondary"} title="REMBOURSSEMENT DES DETTES">
+      <BaseCard titleColor={"secondary"} title="REMBOURSEMENT DE LA DETTE">
         {maxDeadlineAmount > 0  ?
           <Chart
             options={optionsdeadlinespayments}

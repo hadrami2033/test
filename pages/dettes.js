@@ -26,9 +26,10 @@ import { alpha } from '@mui/material/styles';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { Stack, } from '@mui/material';
-import { Close } from '@mui/icons-material';
+import { Close, InfoOutlined } from '@mui/icons-material';
 import { BsCalendar4Range } from "react-icons/bs";
 import Controls from "../src/components/controls/Controls";
+import { useRouter } from "next/router";
 
 const headCells = [
   {
@@ -72,7 +73,19 @@ const headCells = [
     numeric: false,
     disablePadding: false,
     label: 'Montant restant',
-  }  
+  },
+  {
+    id: 'state',
+    numeric: false,
+    disablePadding: true,
+    label: 'État',
+  },
+  {
+    id: 'detail',
+    numeric: false,
+    disablePadding: false,
+    label: 'Detail',
+  }
 ];
 
 EnhancedTableHead.propTypes = {
@@ -113,6 +126,8 @@ export default function EnhancedTable() {
 
 
   const axios = useAxios();
+  const router = useRouter()
+
   const { logoutUser } = useContext(AuthContext);
 
   useEffect(() => {
@@ -238,6 +253,39 @@ export default function EnhancedTable() {
     return sum;
   }
 
+  const deadlineCummulePayments = (deadline) => {
+    var sum = deadline.deadlinespayments ? deadline.deadlinespayments.reduce((accumulator, e) => {
+      return accumulator + e.amount
+    },0) : 0;
+    return sum;
+  }
+
+  const deadlineDatePassed = (d1, d2) => {
+    return formatDate(d1)> formatDate(d2);
+  }
+
+  const allPaymentsRecieved = (deadline) => {
+    var recieveds = deadline.deadlinespayments.filter(p => (Math.max(...p.status.map(s => s.type.code)) === Math.max(...paymentStatus.map(t => t.code))) )
+    return recieveds.length === deadline.deadlinespayments.length;
+  } 
+
+  const deadlineState = (deadline) => {
+    let now = new Date().toDateString()
+    if( deadlineCummulePayments(deadline) >= deadline.amount && allPaymentsRecieved(deadline) )
+      return 1;
+    else if(deadlineDatePassed(now, deadline.date))
+      return 3;
+    else return 2;
+  }
+
+
+  const detailDeadline = (d) => {
+    router.push({ 
+      pathname: '/deadline_detail',
+      query: { id: d.id, currency: d.convention.currency.label }
+    })
+  }
+
   return (<>
     {/* {authenticated &&} */}
     {/* {!detail ? */}
@@ -298,7 +346,7 @@ export default function EnhancedTable() {
                     fontWeight={'bold'}
                     marginRight="10px"
                     >
-                    Montant a payer : {pounds.format(parseFloat(amount-deadlinesPaymentsRecievedAmount()).toFixed(2))} 
+                    Montant echus : {pounds.format(parseFloat(amount-deadlinesPaymentsRecievedAmount()).toFixed(2))} 
                 </Typography>
                 <Typography
                     align="right"
@@ -406,6 +454,37 @@ export default function EnhancedTable() {
                         <TableCell align="left"> <Box style={{display:"flex", flexDirection:"row"}} >  {pounds.format(parseFloat(row.amount_ref_currency).toFixed(2))} <Box style={{fontSize:'12px', fontWeight:"bold", marginInlineStart:"5px", paddingTop:"1.7px" }}> {localStorage.getItem("moneyRef")} </Box> </Box> </TableCell>
                         <TableCell align="left"> <Box style={{display:"flex", flexDirection:"row"}} >{pounds.format(deadlineCummulePaymentsRecieved(row))} <Box style={{fontSize:'12px', fontWeight:"bold", marginInlineStart:"5px" , paddingTop:"1.7px" }}>  {localStorage.getItem("moneyRef")} </Box> </Box> </TableCell>
                         <TableCell align="left"> <Box style={{display:"flex", flexDirection:"row"}} >{pounds.format(row.amount_ref_currency-deadlineCummulePaymentsRecieved(row))} <Box style={{fontSize:'12px', fontWeight:"bold", marginInlineStart:"5px", paddingTop:"1.7px" }}> {localStorage.getItem("moneyRef")} </Box> </Box> </TableCell>
+                        <TableCell align="left">
+                          {deadlineState(row) === 1 &&
+                            <Typography
+                              color="#1A7795"
+                            >
+                              Payée
+                            </Typography>
+                          }
+                          {deadlineState(row) === 2 &&
+                            <Typography
+                              color="#837B7B"
+                            >
+                              Non payée
+                            </Typography>
+                          }
+                          {deadlineState(row) === 3 &&
+                            <Typography
+                              color="#e46a76"
+                            >
+                              Date de paiement dépassée
+                            </Typography>
+                          }
+                        </TableCell>                  
+                        <TableCell align="left" style={{fontWeight:"bold"}} >
+                          <Tooltip onClick={() => detailDeadline(row)} title="Detail">
+                            <IconButton>
+                                <InfoOutlined color='primary' fontSize='medium'/>
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                      
                       </TableRow>
                     );
                   })}
