@@ -441,7 +441,7 @@ const DetailDeadline = (props) => {
                            fontStyle:'initial'
                            }}
                        >
-                        Montant en monnaie de référence : {pounds.format(deadline.amount_ref_currency)} 
+                        Montant en {localStorage.getItem("moneyRef")} : {pounds.format(deadline.amount_ref_currency)} 
                        </Typography>
                    </Grid>
                    <Grid item xs={4} sx={{color:"#837B7B", fontWeight: "bold"}} >

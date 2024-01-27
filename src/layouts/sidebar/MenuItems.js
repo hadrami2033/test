@@ -41,7 +41,7 @@ const Menuitems = [
         href: "/borrowers",
       },
       {
-        title: "Prestateurs",
+        title: "Prestataires",
         href: "/contractors",
       },
       {
