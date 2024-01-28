@@ -340,7 +340,7 @@ export default function EnhancedTable() {
 
   const getEcheancePaymentAmounts = (echeances) => {
     let amount = 0;
-    echeances ? echeances.reduce((commitmentsAmount, e) => {
+    const res = echeances ? echeances.reduce((commitmentsAmount, e) => {
       return e.deadlinespayments ? e.deadlinespayments.reduce((accumulator, el) => {
         amount = amount+el.amount_ref_currency;
         return el; 
@@ -351,7 +351,7 @@ export default function EnhancedTable() {
 
   const getCategoriesCommitmentsAmounts = (categories) => {
     let amount = 0;
-    categories ? categories.reduce((commitmentsAmount, c) => {
+    const res = categories ? categories.reduce((commitmentsAmount, c) => {
         return c.commitments ? c.commitments.reduce((accumulator, e) => {
           return  e.commitmentamounts ? e.commitmentamounts.reduce((accumulator, el) => {
               //console.log(el.amount_by_ref_currency);

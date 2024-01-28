@@ -132,7 +132,7 @@ const DetailCommitment = (props) => {
 
   const getCategoriesCommitmentsAmounts = (categories) => {
     let amount = 0;
-    categories ? categories.reduce((commitmentsAmount, c) => {
+    const res = categories ? categories.reduce((commitmentsAmount, c) => {
       return  c.commitments ? c.commitments.reduce((accumulator, e) => {
           return  e.commitmentamounts ? e.commitmentamounts.reduce((accumulator, el) => {
               //console.log(el.amount_by_ref_currency);
@@ -147,7 +147,7 @@ const DetailCommitment = (props) => {
 
   const getCategoriesCommitmentsAmounts1 = (categories) => {
     let amount = 0;
-    categories ? categories.reduce((commitmentsAmount, c) => {
+    const res = categories ? categories.reduce((commitmentsAmount, c) => {
       return  c.commitments ? c.commitments.reduce((accumulator, e) => {
           return  e.commitmentamounts ? e.commitmentamounts.reduce((accumulator, el) => {
               //console.log(el.amount_by_ref_currency);
