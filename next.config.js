@@ -4,6 +4,10 @@ module.exports = {
   },
 }
 
+const nextCofig = {
+  output: 'standalone', // mine worked fine without this line
+  // ... other config
+}
 //module.exports = nextConfig
 
 //const withExportImages = require('next-export-optimize-images')

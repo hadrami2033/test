@@ -10,7 +10,7 @@ const Header = ({ sx, customClass, toggleMobileSidebar, position }) => {
   return (
     <AppBar sx={sx} position={position} elevation={0} 
             className={customClass} 
-            style={{backgroundColor:'#6ebb4b'}} 
+            style={{backgroundColor:'#21275f'}} 
     >
       <Toolbar>
         
@@ -39,14 +39,14 @@ const Header = ({ sx, customClass, toggleMobileSidebar, position }) => {
            <Typography
               color={"#F6EEFA"} //2596be
 
-              fontSize="25px" fontWeight={'600'} variant="h3"
+              fontSize="20px" fontWeight={'600'} variant="h4"
               sx={{
                 ml: 1,
               }}
               display={'flex'}
               justifyContent={'center'}
             >
-              SOCIÉTÉ DE GESTION DE L'ENERGIE DE MANANTALI
+              ETABLISSEMENT PORTUAIRE DE LA BAIE DU REPOS
             </Typography>
           </Box>
 

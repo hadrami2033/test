@@ -5,7 +5,7 @@ import { Link } from "@mui/material";
 const LogoIcon = () => {
   return (
     <Link href="/">
-      <img src='/static/images/SOGEM.jpg' alt="Logo"/>
+      <img src='/static/images/repos2.png' alt="Logo"/>
     </Link>
   );
 };

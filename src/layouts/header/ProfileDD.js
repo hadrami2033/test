@@ -15,12 +15,7 @@ import {
   Alert
 } from "@mui/material";
 import { Close } from "@material-ui/icons";
-import UserForm from "../../../pages/user_form";
 import { useRouter } from "next/router";
-import jwt_decode from "jwt-decode";
-import { useContext } from "react";
-import AuthContext from "../../context/AuthContext";
-import { Logout } from "@mui/icons-material";
 
 const ProfileDD = () => {
   const [anchorEl4, setAnchorEl4] = React.useState(null);
@@ -28,8 +23,9 @@ const ProfileDD = () => {
   const [openFailedToast, setOpenFailedToast] = React.useState(false);
   const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
   const router = useRouter()
-  const { authTokens, logoutUser } = useContext(AuthContext);
-  const user = authTokens ? jwt_decode(authTokens.access) : {};
+  //const { authTokens, logoutUser } = useContext(AuthContext);
+  const user = //authTokens ? jwt_decode(authTokens.access) : 
+  {};
 
   const handleClick4 = (event) => {
     setAnchorEl4(event.currentTarget);
@@ -87,19 +83,6 @@ const ProfileDD = () => {
           Vous avez rencontré un probléme !
         </Alert>
       </Snackbar>
-      <Dialog fullWidth={true} open={openModal} onClose={handleCloseModal}>
-        <DialogContent>
-          <div style={{display:"flex", justifyContent:"end"}}>
-            <IconButton onClick={handleCloseModal}>
-              <Close fontSize='large'/>
-            </IconButton>
-          </div>
-          <UserForm
-            showSuccessToast={showSuccessToast}
-            showFailedToast={showFailedToast}
-          />
-        </DialogContent>
-      </Dialog>
       <Button
         aria-label="menu"
         color="inherit"
@@ -163,9 +146,9 @@ const ProfileDD = () => {
           </Box> */}
           {/* <Divider /> */}
           <Box p={2}>
-              <Button onClick={logoutUser} fullWidth variant="contained" color="secondary" style={{fontSize:"20px"}}>
+              {/* <Button onClick={logoutUser} fullWidth variant="contained" color="secondary" style={{fontSize:"20px"}}>
                  <Logout fontSize="small" style={{marginInlineEnd : '5px'}} ></Logout>   Déconnecter
-              </Button>
+              </Button> */}
           </Box>
         </Box>
       </Menu>

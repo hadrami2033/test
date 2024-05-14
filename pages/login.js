@@ -20,29 +20,23 @@ import {
 import BaseCard from "../src/components/baseCard/BaseCard"
 import { Form } from "../src/components/Form";
 import { Visibility, VisibilityOff } from "@material-ui/icons";
-import UserForm from "./user_form";
-import { Close } from '@mui/icons-material';
-import AuthContext from "../src/context/AuthContext";
-import baseURL from "../src/utils/baseURL";
+//import UserForm from "./user_form";
+import LogoIcon from "../src/layouts/logo/LogoIcon";
+import { useRouter } from "next/router";
 
 const Login = () =>{
-    const defaultUser = {
-      username: "Binor",
-      password: "ronib2023",
-      password2: "ronib2023",
-      role: "Admin",
-      is_active: 1,
-    }
     const user = {
       username: "",
       password: ""
     };
-    const { loginUser, invalid, loging } = useContext(AuthContext);
     const [formValues, setFormValues] = useState(user);
+    const [invalid, setInvalid] = useState(false);
+    const [loging, setLoging] = useState(false);
     const [showPassword, setShowPassword] = React.useState(false);
     const [openModal, setOpenModal] = React.useState(false);
     const [openFailedToast, setOpenFailedToast] = React.useState(false);
     const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
+    const router = useRouter()
 
     const validate = (fieldValues = values) => {
       let temp = { ...errors };
@@ -58,9 +52,19 @@ const Login = () =>{
     };
       
     const { values, setValues, errors, setErrors, handleInputChange, resetForm } = Form(formValues, true, validate);
+
+      
     const handleSubmit = async (event) => {
-     // event.preventDefault();
-      let res = await loginUser(values)
+      //event.preventDefault();
+      //let res = await loginUser(values)
+      console.log(values);
+
+      if(values.username === "Administrator" && values.password === "binor2024"){
+        localStorage.setItem('user', values);
+        router.push('/proprietes');
+      }
+      else setInvalid(true);
+        
     };
     const handleClickShowPassword = () => {
       setShowPassword(!showPassword)
@@ -98,27 +102,6 @@ const Login = () =>{
       }
       setOpenSuccessToast(false);
     };
-    React.useEffect( async () => {
-      const ronib = await fetch(`${baseURL}/profile/Binor`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      })
-
-      if (ronib.status != 200) {
-        const response = await fetch(`${baseURL}/register/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(defaultUser)
-        })
-        if (response.status === 201) 
-        console.log("default user has been created");
-      }
-
-    }, [])
 
     return (
     <Container>
@@ -134,47 +117,18 @@ const Login = () =>{
         Vous avez rencontré un probléme !
         </Alert>
       </Snackbar>
-      
-      <Dialog fullWidth={true} open={openModal} onClose={handleCloseModal}>
-        <DialogContent>
-          <div style={{display:"flex", justifyContent:"end"}}>
-            <IconButton onClick={handleCloseModal}>
-              <Close fontSize='large'/>
-            </IconButton>
-          </div>
-          <UserForm
-            showSuccessToast={showSuccessToast}
-            showFailedToast={showFailedToast}
-          />
-        </DialogContent>
-      </Dialog>
 
       <form style={{height:'100vh' , display:'flex', justifyContent:'center', alignItems:'center'}} >
       <Grid item xs={12} lg={12} alignItems="center" justify="center" 
             style={{
                 maxWidth:500, 
                 borderRadius:20,
-                backgroundColor:'#90d791',
+                //backgroundColor:'#90d791',
                 }} >
         <BaseCard title="Authentification" titleColor={"secondary"}>
         <Stack style={{...styles.stack, marginBottom:30 }}  spacing={10} direction="row">
-                <img src='/static/images/SOGEM.jpg' alt="" />         
-
-          {/* <Image
-            src={userimg}
-            alt={userimg}
-            className="roundedCircle"
-            fill
-            sizes="(max-width: 768px) 100vw,
-                  (max-width: 1200px) 50vw,
-                  33vw"
-          ></Image>  */}
-          
-         {/*  <img 
-          loader={imageLoader}
-          src= {require('../assets/images/users/8.jpg')}
-          /> */}
- 
+          {/* <img src='/static/images/repos2' alt="" />   */}       
+          <LogoIcon />
         </Stack> 
 
 
@@ -196,10 +150,10 @@ const Login = () =>{
                     endAdornment={
                     <InputAdornment position="end">
                         <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={handleClickShowPassword}
-                        onMouseDown={handleMouseDownPassword}
-                        edge="end"
+                          aria-label="toggle password visibility"
+                          onClick={handleClickShowPassword}
+                          onMouseDown={handleMouseDownPassword}
+                          edge="end"
                         >
                         {showPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
@@ -214,7 +168,7 @@ const Login = () =>{
                 onClick={handleSubmit}
                 style={{ fontSize: "20px" }}
                 variant="contained"
-                disabled={loging || !values.username || !values.password }
+                disabled={!values.username || !values.password }
                 mt={4}
                 fullWidth
             >
@@ -239,9 +193,9 @@ const Login = () =>{
             <Box style={{fontSize:'20px', color:'red'}} color="danger"> Authentification invalide </Box>
           </Stack>
           }
-          <Stack spacing={2} direction="row" style={{marginTop:10}}>
+          {/* <Stack spacing={2} direction="row" style={{marginTop:10}}>
             <Button style={{fontSize:'20px'}} color="primary" onClick={handleOpenModal} > Inscription </Button>
-          </Stack>
+          </Stack> */}
         </BaseCard>
       </Grid>
     </form>

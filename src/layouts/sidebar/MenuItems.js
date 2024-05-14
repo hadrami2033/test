@@ -5,18 +5,19 @@ const Menuitems = [
     href: "/",
   },
   {
-    title: "Dettes",
-    href: "/dettes",
+    title: "Proprietés",
+    icon: "file-text",
+    href: "/proprietes",
   },
   {
-    title: "Conventions",
-    icon: "users",
-    href: "/conventions",
+    title: "Locaux",
+    icon: "file-text",
+    href: "/locaux",
   },
   {
-    title: "Utilisateurs",
+    title: "Propriétaires",
     icon: "users",
-    href: "/users",
+    href: "/proprietaires",
   },
  /*  {
     title: "Engagements",
@@ -28,7 +29,7 @@ const Menuitems = [
     icon: "file-text",
     href: "/invoices",
   }, */
-  {
+  /* {
     title: "Paramétrage",
     icon: "settings",
     items: [
@@ -73,7 +74,7 @@ const Menuitems = [
         href: "/payment_status_type",
       }
     ]
-  },
+  }, */
   
 ];
 

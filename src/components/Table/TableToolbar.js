@@ -3,12 +3,12 @@ import { alpha } from '@mui/material/styles';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Fab, IconButton, InputBase, Paper, Stack, Tooltip } from '@mui/material';
+import { Fab, FormControl, IconButton, InputBase, InputLabel, MenuItem, Paper, Select, Stack, Tooltip } from '@mui/material';
 import { CreateOutlined, InfoOutlined, Add } from '@mui/icons-material';
 import SearchIcon from '@mui/icons-material/Search';
 
 const EnhancedTableToolbar = (props) => {
-    const { detail, selected, field, editClick, deleteClick, onSearch, search, openModal, goSearch } = props;
+    const { onSearch, search, openModal, type="propriete", byLot, lot } = props;
   
     return (
       <Toolbar
@@ -22,73 +22,128 @@ const EnhancedTableToolbar = (props) => {
           }),
         }}
       >
-        {selected ? (
-            <Stack spacing={2} direction="row">
-                <Tooltip onClick={deleteClick} title="Supprimer">
-                    <IconButton>
-                        <DeleteIcon color='danger' fontSize='large'/>
-                    </IconButton>
-                </Tooltip>
-                {editClick &&
-                <Tooltip onClick={editClick} title="Modifier">
-                    <IconButton>
-                        <CreateOutlined fontSize='large' />
-                    </IconButton>
-                </Tooltip>
-                }
-                {detail &&
-                <Tooltip onClick={detail} title="Detail">
-                    <IconButton>
-                        <InfoOutlined color='primary' fontSize='large' />
-                    </IconButton>
-                </Tooltip>
-                }
-            </Stack>
-
-        ) : (
           <Stack spacing={2} direction="row">
-            {openModal &&
+            {openModal && type=="propriete" &&
             <Tooltip title="Ajouter">
-              <Fab color="secondary" aria-label="Ajouter" onClick={openModal}>
+              <Fab color="secondary" size='medium' aria-label="Ajouter" onClick={openModal}>
                   <Add/>
               </Fab>
             </Tooltip>
             }
           </Stack>
-        )}
 
-        {selected !== null ? (
-          <Stack spacing={2} direction="row" style={{ width:"50%",display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-            <Typography
-              align="right"
-              color="inherit"
-              variant="subtitle1"
-              component="div"
-              fontSize={20}
-              marginRight="30px"
-            >
-              {field}
-            </Typography>
-          </Stack>
+      
+            <Paper component="form" sx={{ p: '2px 4px', display:"flex", flexDirection:"row"}} >
+                {type=="propriete" &&
+                  <InputBase
+                    sx={{ 
+                      textAlign: "center",
+                      display: "flex",
+                      justifyContent: "center",
+                      width:"200px",
+                      mr: 5, 
+                      borderRadius:2, 
+                      ...({
+                      bgcolor: (theme) =>
+                        alpha(theme.palette.grey.A100, theme.palette.action.disabledOpacity),
+                    }),
+                    }}
+                    placeholder="      Lot"
+                    value={lot} 
+                    onChange={byLot}
+                  />
+                }
 
-        ) : 
-        (
-          onSearch ? 
-            <Paper
-                component="form"
-                sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 400 }}
-                >
-                <InputBase
-                    sx={{ ml: 1, flex: 1 }}
-                    placeholder="Chercher ..."
-                    value={search}
+                {type=="proprietaire" &&
+                  <InputBase
+                    sx={{ 
+                      textAlign: "center",
+                      display: "flex",
+                      justifyContent: "center",
+                      width:"200px",
+                      mr: 5, 
+                      borderRadius:2, 
+                      ...({
+                      bgcolor: (theme) =>
+                        alpha(theme.palette.grey.A100, theme.palette.action.disabledOpacity),
+                    }),
+                    }}
+                    placeholder="      Recherche"
+                    value={search} 
                     onChange={onSearch}
-                />
-                <IconButton onClick={goSearch} type="button" sx={{ p: '10px' }} aria-label="search">
-                    <SearchIcon />
-                </IconButton>
-            </Paper> : null
-        )}
+                  />
+                }    
+                {type!="proprietaire" &&
+
+                <FormControl style={{marginInline:15}} >
+                  <InputLabel id="demo-simple-select-label">Filtrer ... </InputLabel>
+                  {type=="propriete" &&
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    value={search}
+                    label="Par zone"
+                    onChange={onSearch}
+                    style={{ width:200}}
+                    sx={{
+                      ...({
+                        bgcolor: (theme) =>
+                          alpha(theme.palette.grey.A100, theme.palette.action.disabledOpacity),
+                      }),
+                    }}
+                  >
+                    <MenuItem value={""}></MenuItem>
+                    <MenuItem value={"Administrative"}>Administrative</MenuItem>
+                    <MenuItem value={"Commerciale"}>Commerciale</MenuItem>
+                    <MenuItem value={"Pêche"}>Pêche</MenuItem>
+                    <MenuItem value={"Extension"}>Extension</MenuItem>
+                  </Select>
+                  }
+                  {type=="proprietaire" &&
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    value={search}
+                    label="Par zone"
+                    onChange={onSearch}
+                    style={{ width:200}}
+                    sx={{
+                      ...({
+                        bgcolor: (theme) =>
+                          alpha(theme.palette.grey.A100, theme.palette.action.disabledOpacity),
+                      }),
+                    }}
+                  >
+                    <MenuItem value={""}></MenuItem>
+                    <MenuItem value={"Administrative"}>Administrative</MenuItem>
+                    <MenuItem value={"Commerciale"}>Commerciale</MenuItem>
+                    <MenuItem value={"Pêche"}>Pêche</MenuItem>
+                    <MenuItem value={"Extension"}>Extension</MenuItem>
+                  </Select>
+                  }
+                  {type=="local" &&
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    value={search}
+                    label="Par zone"
+                    onChange={onSearch}
+                    style={{ width:200}}
+                    sx={{
+                      ...({
+                        bgcolor: (theme) =>
+                          alpha(theme.palette.grey.A100, theme.palette.action.disabledOpacity),
+                      }),
+                    }}
+                  >
+                  <MenuItem value={""}></MenuItem>
+                  <MenuItem value={"Habitation"}>Habitation</MenuItem>
+                  <MenuItem value={"Activité Commerçiale"}>Activité Commerçiale</MenuItem>
+                  </Select>
+                  }
+                </FormControl>
+                }
+            </Paper> 
   
         
       </Toolbar>

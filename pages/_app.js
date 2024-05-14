@@ -10,6 +10,7 @@ import FullLayout from "../src/layouts/FullLayout";
 import "../styles/style.css";
 import { useRouter } from "next/router";
 import { AuthProvider } from "../src/context/AuthContext";
+//import { initializeBucketAndCollection } from "../utils/initializeCbServer";
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
@@ -20,15 +21,15 @@ export default function MyApp(props) {
   var res = router.route
 
   React.useEffect(() => {
-    if(!localStorage.getItem("authTokens"))
+    //initializeBucketAndCollection()
+    if(!localStorage.getItem("user"))
     router.push("/login")
   }, [])
 
   return (
-    <AuthProvider>
     <CacheProvider value={emotionCache}>
       <Head>
-        <title>SOGEM</title>
+        <title>CENSUS APP</title>
         <meta name="viewport" content="initial-scale=1, width=device-width" />
       </Head>
 
@@ -38,13 +39,12 @@ export default function MyApp(props) {
             <CssBaseline /> 
             <Component {...pageProps} />
           </FullLayout>
-          :
-          <Component {...pageProps} />
+           :
+          <Component {...pageProps} /> 
         }
       </ThemeProvider>
 
     </CacheProvider>
-    </AuthProvider>
   );
 }
 

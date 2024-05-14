@@ -9,7 +9,7 @@ import { TbTimeline } from "react-icons/tb";
 
 const DebtsCard = (props) => {
   const {paymentsRecievedAmount, paymentStatus} = props;
-  const { logoutUser } = useContext(AuthContext);
+  //const { logoutUser } = useContext(AuthContext);
 
   const [expiredDeadlines, setExpiredDeadlines] = React.useState([]);
   const [expiredDeadlinesAmount, setExpiredDeadlinesAmount] = React.useState(null);
@@ -27,8 +27,8 @@ const DebtsCard = (props) => {
       }, 
       error => {
         console.log(error)
-        if(error.response && error.response.status === 401)
-        logoutUser()
+        //if(error.response && error.response.status === 401)
+        //logoutUser()
       }
     ).then(
       axios.get(`/deadlines_amount`).then(

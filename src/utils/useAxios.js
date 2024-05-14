@@ -17,8 +17,8 @@ const useAxios = () => {
   });
 
   useEffect(() => {
-    if(!authTokens)
-    router.push("/login")
+    //if(!authTokens)
+    //router.push("/login")
   }, [])
 
 

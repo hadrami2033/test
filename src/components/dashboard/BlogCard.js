@@ -8,7 +8,7 @@ import AuthContext from "../../context/AuthContext";
 const BlogCard = (props) => {
   const {paymentsRecievedAmount} = props;
   //colors: ['#6ebb4b', '#1a7795',  '#a52e36' , '#079ff0', '#cc7c67' , '#c8d789']
-  const { logoutUser } = useContext(AuthContext);
+  //const { logoutUser } = useContext(AuthContext);
 
   const [countConv, setCountConv] = React.useState(null);
   const [countDiss, setCountDiss] = React.useState(null);
@@ -29,8 +29,8 @@ const BlogCard = (props) => {
       }, 
       error => {
         console.log(error)
-        if(error.response && error.response.status === 401)
-        logoutUser()
+        //if(error.response && error.response.status === 401)
+       // logoutUser()
       }
     ).then(
       axios.get(`/disbursements_count_amount`).then(
